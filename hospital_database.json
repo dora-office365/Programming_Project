@@ -1,0 +1,41 @@
+{
+    "users": [
+        {
+            "username": "admin",
+            "password": "admin123"
+        }
+    ],
+    "patients": [],
+    "beds": [
+        {
+            "bed_id": "Bed 101",
+            "status": "Available",
+            "patient_id": ""
+        },
+        {
+            "bed_id": "Bed 102",
+            "status": "Available",
+            "patient_id": ""
+        },
+        {
+            "bed_id": "Bed 103",
+            "status": "Available",
+            "patient_id": ""
+        },
+        {
+            "bed_id": "Bed 104",
+            "status": "Available",
+            "patient_id": ""
+        },
+        {
+            "bed_id": "Bed 105",
+            "status": "Available",
+            "patient_id": ""
+        },
+        {
+            "bed_id": "Bed 106",
+            "status": "Available",
+            "patient_id": ""
+        }
+    ]
+}
