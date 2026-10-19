@@ -1,7 +1,28 @@
 import tkinter as tk
+import json
+import os
 from tkinter import ttk, messagebox
 from datetime import date
 
+#Refer to the data file
+DB_FILE = "hospital_database.json" 
+
+def load_database():
+    """Reads your existing JSON database file directly."""
+    if not os.path.exists(DB_FILE):
+        # Safety alert in case the file name is misspelled or in the wrong folder
+        messagebox.showerror("Error", f"Database file '{DB_FILE}' not found!\nMake sure it is in the same folder as this script.")
+        return {"users": [], "patients": [], "beds": []}
+        
+    with open(DB_FILE, "r") as file:
+        return json.load(file)
+
+def save_database(data):
+    """Overwrites your JSON file with your updated patient/bed statuses."""
+    with open(DB_FILE, "w") as file:
+        json.dump(data, file, indent=4)
+
+#Discharge Function
 def show_discharge(self): 
     frame= self.replace_page("Discharge Management") 
     ttk.Label(
@@ -24,7 +45,7 @@ def show_discharge(self):
         for item in tree.get_children(): 
             tree.delete(item) 
     
-        for patient in self.patients: 
+        for patient in self.db_data["patients"]: 
             if patient["status"] == "Admitted": 
                 tree.insert("", "end", values=( 
                     patient["patient_id"], 
@@ -70,6 +91,7 @@ def show_discharge(self):
                 refresh_table() 
             
                 messagebox.showinfo(  
+                    "Success",
                     "Patient discharged successfully." 
                 ) 
                 return 
@@ -87,4 +109,34 @@ def show_discharge(self):
         command=refresh_table 
     ).pack(side="left", padx=5, pady=10) 
     
-    refresh_table() 
+    refresh_table()
+
+
+#Application Engine Class
+class HospitalApp:
+    def __init__(self, root):
+        self.root = root
+        self.root.title("Hospital Management System")
+        self.root.geometry("700x500")
+        
+        # Base container canvas
+        self.container = ttk.Frame(self.root)
+        self.container.pack(fill="both", expand=True)
+        
+        self.db_data=load_database()
+        show_discharge(self)
+
+    def replace_page(self, title):
+        for widget in self.container.winfo_children():
+            widget.destroy()
+        
+        page_frame = ttk.Frame(self.container, padding=20)
+        page_frame.pack(fill="both", expand=True)
+        
+        ttk.Label(page_frame, text=title, font=("Arial", 16, "bold")).pack(anchor="w")
+        return page_frame
+
+if __name__ == "__main__":
+    root = tk.Tk()
+    app = HospitalApp(root) 
+    root.mainloop()
