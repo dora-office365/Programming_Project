@@ -3,7 +3,7 @@ import json
 import os
 from tkinter import ttk, messagebox
 from datetime import date
-from data import save_data
+from data import save_database
 
 #Refer to the data file
 DB_FILE = "hospital_database.json" 
@@ -67,7 +67,7 @@ def show_discharge(self):
             return 
     
         patient_id = tree.item(selected[0], "values")[0] 
-        for patient in self.patients: 
+        for patient in self.db_data["patients"]: 
             if (patient["patient_id"] == patient_id and patient["status"] == "Admitted"): 
                 payment = messagebox.askyesno( 
                     "Payment Confirmation", 
@@ -76,7 +76,7 @@ def show_discharge(self):
 
                 if not payment: 
                     patient["payment_confirmed"] = "No" 
-                    save_data(self.patients, self.beds) 
+                    save_database(self.db_data) 
                     messagebox.showwarning(
                         "Discharge Restricted",
                         "Patient remains admitted." 
@@ -88,7 +88,7 @@ def show_discharge(self):
                 patient["discharge_date"] = date.today().isoformat() 
                 patient["bed_id"] = "" 
             
-                save_data(self.patients, self.beds) 
+                save_database(self.db_data) 
                 refresh_table() 
             
                 messagebox.showinfo(  
