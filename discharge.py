@@ -3,6 +3,7 @@ import json
 import os
 from tkinter import ttk, messagebox
 from datetime import date
+from data import save_data
 
 #Refer to the data file
 DB_FILE = "hospital_database.json" 
