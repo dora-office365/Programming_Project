@@ -3,28 +3,16 @@ import json
 import os
 from tkinter import ttk, messagebox
 from datetime import date
-from data import PATIENT_FIELDS
+from data import patients
 from data import save_database
 def show_patients(self): 
     frame = self.replace_page("Patient Management") 
 
     # Patient information form 
     form = ttk.LabelFrame(frame, text="Patient Information", padding=10) 
-
     form.pack(side="left", fill="y", padx=10) 
-
-    fields = [ 
-        ("Patient ID", "patient_id"), 
-        ("Full Name", "name"), 
-        ("Date of Birth", "dob"), 
-        ("Phone", "phone"), 
-        ("Address", "address"), 
-        ("Emergency Contact", "emergency_contact"), 
-        ("Diagnosis", "diagnosis") 
-    ] 
-
     entries = {} 
-    for row, (label, key) in enumerate(fields): 
+    for row, (label, key) in enumerate(patients): 
      
         ttk.Label(form, text=label).grid(row=row, column=0, pady=5) 
         entry = ttk.Entry(form, width=25) 
@@ -32,7 +20,7 @@ def show_patients(self):
         entries[key] = entry 
     # Gender selection 
 
-    row = len(fields) 
+    row = len(patients) + 1
     ttk.Label(form, text="Gender").grid(row=row, column=0, pady=5) 
 
     gender = ttk.Combobox( 
@@ -174,11 +162,9 @@ def show_patients(self):
         patient["discharge_date"] = "" 
         patient["payment_confirmed"] = "" 
 
-        for field in PATIENT_FIELDS: 
-
-            if field not in patient: 
-
-                patient[field] = "" 
+        for key in entries.keys(): 
+            if key not in patient: 
+                patient[key] = ""
  
         self.patients.append(patient) 
 
