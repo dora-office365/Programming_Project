@@ -4,7 +4,7 @@ import os
 from tkinter import ttk, messagebox
 from datetime import date
 from data import PATIENT_FIELDS
-from data import save_data
+from data import save_database
 def show_patients(self): 
     frame = self.replace_page("Patient Management") 
 
@@ -182,7 +182,7 @@ def show_patients(self):
  
         self.patients.append(patient) 
 
-        save_data(self.patients, self.beds) 
+        save_database(self.db_data) 
 
  
         display_patients() 
@@ -225,7 +225,7 @@ def show_patients(self):
                  "Admitted" if patient["bed_id"] else "Registered" 
                 ) 
 
-                save_data(self.patients, self.beds) 
+                save_database(self.db_data) 
                 display_patients() 
                 update_beds() 
 

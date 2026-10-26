@@ -7,7 +7,12 @@ DEFAULT_DATA = {
     "users": [
         {"username": "admin", "password": "admin123"}
     ],
-    "patients": [],
+    "patients": [
+        {"patient_id": "", "name": "", "dob": "", "gender": "", "phone": "", 
+         "address": "", "emergency_contact": "", "diagnosis": "", 
+         "bed_id": "", "admission_date": "", "status": "", 
+         "discharge_date": "", "payment_confirmed": ""}
+    ],
     "beds": [
         {"bed_id": f"Bed {num}", "status": "Available", "patient_id": ""} 
         for num in range(101, 107)
