@@ -1,143 +1,185 @@
+
 import tkinter as tk
-import json
-import os
 from tkinter import ttk, messagebox
 from datetime import date
-from data import save_database
-
-#Refer to the data file
-DB_FILE = "hospital_database.json" 
-
-def load_database():
-    """Reads your existing JSON database file directly."""
-    if not os.path.exists(DB_FILE):
-        # Safety alert in case the file name is misspelled or in the wrong folder
-        messagebox.showerror("Error", f"Database file '{DB_FILE}' not found!\nMake sure it is in the same folder as this script.")
-        return {"users": [], "patients": [], "beds": []}
-        
-    with open(DB_FILE, "r") as file:
-        return json.load(file)
-
-def save_database(data):
-    """Overwrites your JSON file with your updated patient/bed statuses."""
-    with open(DB_FILE, "w") as file:
-        json.dump(data, file, indent=4)
-
-#Discharge Function
-def show_discharge(self): 
-    frame= self.replace_page("Discharge Management") 
-    ttk.Label(
-        frame,
-        text="Select a patient to discharge."
-    ).pack(anchor="w", pady=10) 
+from data import load_database, save_database
 
 
-    # Display admitted patients 
-    columns = ["ID", "Name", "Bed", "Admission Date"]
-    tree = ttk.Treeview(frame, columns=columns, show="headings") 
-    for col in columns: 
-        tree.heading(col, text=col) 
-        tree.column(col, width=150) 
-    tree.pack(fill="both", expand=True) 
+def show_discharge(root):
+    data = load_database()
+    patients = data["patients"]
+    beds = data["beds"]
 
+    # Clear the current page
+    for widget in root.winfo_children():
+        widget.destroy()
 
-    # Refresh patient list 
-    def refresh_table(): 
-        for item in tree.get_children(): 
-            tree.delete(item) 
-    
-        for patient in self.db_data["patients"]: 
-            if patient["status"] == "Admitted": 
-                tree.insert("", "end", values=( 
-                    patient["patient_id"], 
-                    patient["name"], 
-                    patient["bed_id"], 
-                    patient["admission_date"]
-              )) 
+    root.title("Careflow - Discharge Management")
 
+    # Page title
+    tk.Label(
+        root,
+        text="Discharge Management",
+        font=("Arial", 20, "bold")
+    ).pack(pady=15)
 
-    # Process discharge 
-    def discharge_patient(): 
-        selected = tree.selection() 
-    
-        if not selected: 
-            messagebox.showwarning( 
-                "Warning", "Please select a patient." 
-            ) 
-            return 
-    
-        patient_id = tree.item(selected[0], "values")[0] 
-        for patient in self.db_data["patients"]: 
-            if (patient["patient_id"] == patient_id and patient["status"] == "Admitted"): 
-                payment = messagebox.askyesno( 
-                    "Payment Confirmation", 
-                    "Patient's payment completed?" 
-                ) 
+    tk.Label(
+        root,
+        text="Select a patient and confirm payment before discharge."
+    ).pack(pady=5)
 
-                if not payment: 
-                    patient["payment_confirmed"] = "No" 
-                    save_database(self.db_data) 
-                    messagebox.showwarning(
-                        "Discharge Restricted",
-                        "Patient remains admitted." 
-                    ) 
-                    return 
-            
-                patient["payment_confirmed"] = "Yes" 
-                patient["status"] = "Discharged" 
-                patient["discharge_date"] = date.today().isoformat() 
-                patient["bed_id"] = "" 
-            
-                save_database(self.db_data) 
-                refresh_table() 
-            
-                messagebox.showinfo(  
-                    "Success",
-                    "Patient discharged successfully." 
-                ) 
-                return 
-        messagebox.showerror("Error", "Patient not found.") 
+    # Patient table
+    table_frame = ttk.Frame(root)
+    table_frame.pack(fill="both", expand=True, padx=20, pady=10)
 
+    columns = ("patient_id", "name", "bed_id", "status")
 
-    # Buttons 
-    ttk.Button( 
-        frame, text="Discharge", 
-        command=discharge_patient 
-    ).pack(side="left", padx=5, pady=10) 
+    tree = ttk.Treeview(
+        table_frame,
+        columns=columns,
+        show="headings"
+    )
 
-    ttk.Button( 
-        frame, text="Refresh List", 
-        command=refresh_table 
-    ).pack(side="left", padx=5, pady=10) 
-    
-    refresh_table()
+    tree.heading("patient_id", text="Patient ID")
+    tree.heading("name", text="Patient Name")
+    tree.heading("bed_id", text="Bed ID")
+    tree.heading("status", text="Status")
 
+    tree.column("patient_id", width=130, anchor="center")
+    tree.column("name", width=220, anchor="center")
+    tree.column("bed_id", width=120, anchor="center")
+    tree.column("status", width=130, anchor="center")
 
-#Application Engine Class
-class HospitalApp:
-    def __init__(self, root):
-        self.root = root
-        self.root.title("Hospital Management System")
-        self.root.geometry("700x500")
-        
-        # Base container canvas
-        self.container = ttk.Frame(self.root)
-        self.container.pack(fill="both", expand=True)
-        
-        self.db_data=load_database()
-        show_discharge(self)
+    scrollbar = ttk.Scrollbar(
+        table_frame,
+        orient="vertical",
+        command=tree.yview
+    )
+    tree.configure(yscrollcommand=scrollbar.set)
 
-    def replace_page(self, title):
-        for widget in self.container.winfo_children():
-            widget.destroy()
-        
-        page_frame = ttk.Frame(self.container, padding=20)
-        page_frame.pack(fill="both", expand=True)
-        
-        ttk.Label(page_frame, text=title, font=("Arial", 16, "bold")).pack(anchor="w")
-        return page_frame
+    tree.pack(side="left", fill="both", expand=True)
+    scrollbar.pack(side="right", fill="y")
 
-if __name__ == "__main__":
-    root = tk.Tk()
-    app = HospitalApp(root) 
-    root.mainloop()
+    def display_patients():
+        for item in tree.get_children():
+            tree.delete(item)
+
+        for patient in patients:
+            if (
+                patient.get("status", "Registered") != "Discharged"
+                and patient.get("bed_id", "")
+            ):
+                tree.insert(
+                    "",
+                    "end",
+                    values=(
+                        patient.get("patient_id", ""),
+                        patient.get("name", ""),
+                        patient.get("bed_id", ""),
+                        patient.get("status", "Registered")
+                    )
+                )
+
+    def discharge_patient():
+        selected = tree.selection()
+
+        if not selected:
+            messagebox.showwarning(
+                "Warning",
+                "Please select a patient to discharge."
+            )
+            return
+
+        values = tree.item(selected[0], "values")
+        patient_id = values[0]
+
+        selected_patient = None
+
+        for patient in patients:
+            if patient.get("patient_id", "") == patient_id:
+                selected_patient = patient
+                break
+
+        if selected_patient is None:
+            messagebox.showerror(
+                "Error",
+                "Patient record could not be found."
+            )
+            return
+
+        if selected_patient.get("status", "") == "Discharged":
+            messagebox.showwarning(
+                "Warning",
+                "This patient has already been discharged."
+            )
+            return
+
+        bed_id = selected_patient.get("bed_id", "")
+
+        if not bed_id:
+            messagebox.showerror(
+                "Error",
+                "This patient does not have an assigned bed."
+            )
+            return
+
+        payment_complete = messagebox.askyesno(
+            "Payment Confirmation",
+            "Has the patient's payment been checked and completed?"
+        )
+
+        if not payment_complete:
+            messagebox.showwarning(
+                "Discharge Cancelled",
+                "Please complete the payment before discharging the patient."
+            )
+            return
+
+        # Update the patient record
+        selected_patient["status"] = "Discharged"
+        selected_patient["discharge_date"] = date.today().isoformat()
+        selected_patient["payment_confirmed"] = "Yes"
+        selected_patient["bed_id"] = ""
+
+        # Make the bed available again
+        for bed in beds:
+            if (
+                bed.get("bed_id", "") == bed_id
+                and bed.get("patient_id", "") == patient_id
+            ):
+                bed["status"] = "Available"
+                bed["patient_id"] = ""
+                break
+
+        # Save changes to the shared database
+        save_database(data)
+
+        display_patients()
+
+        messagebox.showinfo(
+            "Success",
+            "Patient discharged successfully.\nThe bed is now available."
+        )
+
+    def back_to_dashboard():
+        from dashboard import show_dashboard
+        show_dashboard("admin")
+
+    # Buttons
+    button_frame = ttk.Frame(root)
+    button_frame.pack(pady=10)
+
+    ttk.Button(
+        button_frame,
+        text="Confirm Discharge",
+        command=discharge_patient
+    ).pack(side="left", padx=10)
+
+    ttk.Button(
+        button_frame,
+        text="Back to Dashboard",
+        command=back_to_dashboard
+    ).pack(side="left", padx=10)
+
+    # Show patients who can be discharged
+    display_patients()
