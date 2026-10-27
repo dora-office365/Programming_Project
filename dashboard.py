@@ -1,56 +1,45 @@
+
 import tkinter as tk
 from tkinter import messagebox
 from datetime import date
 from data import load_database, save_database
 
-
 # ---------- MAIN WINDOW ----------
-
 root = tk.Tk()
 root.title("Careflow - Hospital Inpatient Management System")
 root.geometry("900x600")
 
-
-# ---------- LOAD DATABASE ----------
-
 data = load_database()
-
 users = data["users"]
 patients = data["patients"]
 beds = data["beds"]
 
 
 # ---------- CLEAR WINDOW ----------
-
 def clear_window():
     for widget in root.winfo_children():
         widget.destroy()
 
 
 # ---------- REFRESH DATABASE ----------
-
 def refresh_data():
     global data, users, patients, beds
 
     data = load_database()
-
     users = data["users"]
     patients = data["patients"]
     beds = data["beds"]
 
 
 # ---------- SAVE DATABASE ----------
-
 def save_data():
     data["users"] = users
     data["patients"] = patients
     data["beds"] = beds
-
     save_database(data)
 
 
 # ---------- LOGIN PAGE ----------
-
 def show_login():
     refresh_data()
     clear_window()
@@ -65,12 +54,10 @@ def show_login():
     ).pack(pady=10)
 
     tk.Label(frame, text="Username").pack()
-
     username_entry = tk.Entry(frame)
     username_entry.pack(pady=5)
 
     tk.Label(frame, text="Password").pack()
-
     password_entry = tk.Entry(frame, show="*")
     password_entry.pack(pady=5)
 
@@ -81,9 +68,10 @@ def show_login():
         refresh_data()
 
         for user in users:
-            if (user["username"] == username
-                    and user["password"] == password):
-
+            if (
+                user["username"] == username
+                and user["password"] == password
+            ):
                 show_dashboard(username)
                 return
 
@@ -109,59 +97,49 @@ def show_login():
     )
 
 
-# ---------- PATIENT MANAGEMENT ----------
-
+# ---------- OPEN PATIENT MANAGEMENT ----------
 def open_patient_management():
     refresh_data()
 
     try:
         from patient import show_patients
         show_patients(root)
-
     except Exception as error:
         messagebox.showerror(
             "Error",
-            "Unable to open Patient Management.\n"
-            + str(error)
+            "Unable to open Patient Management.\n" + str(error)
         )
 
 
-# ---------- BED MANAGEMENT ----------
-
+# ---------- OPEN BED MANAGEMENT ----------
 def open_bed_management():
     refresh_data()
 
     try:
         from bed_management import show_bed_management
         show_bed_management(root)
-
     except Exception as error:
         messagebox.showerror(
             "Error",
-            "Unable to open Bed Management.\n"
-            + str(error)
+            "Unable to open Bed Management.\n" + str(error)
         )
 
 
-# ---------- DISCHARGE ----------
-
+# ---------- OPEN DISCHARGE ----------
 def open_discharge():
     refresh_data()
 
     try:
         from discharge import show_discharge
         show_discharge(root)
-
     except Exception as error:
         messagebox.showerror(
             "Error",
-            "Unable to open Discharge.\n"
-            + str(error)
+            "Unable to open Discharge.\n" + str(error)
         )
 
 
-# ---------- DASHBOARD ----------
-
+# ---------- DASHBOARD PAGE ----------
 def show_dashboard(username):
     refresh_data()
     clear_window()
@@ -177,7 +155,7 @@ def show_dashboard(username):
         text=f"Welcome, {username}"
     ).pack()
 
-    # Calculate dashboard statistics.
+    # Calculate dashboard statistics
     total_patients = len(patients)
     current_patients = 0
     available_beds = 0
@@ -185,19 +163,23 @@ def show_dashboard(username):
     discharged_today = 0
 
     for patient in patients:
-        if patient["status"] == "Admitted":
+        # A current inpatient must have a bed and not be discharged
+        if (
+            patient.get("bed_id", "")
+            and patient.get("status", "") != "Discharged"
+        ):
             current_patients += 1
 
-        if patient["discharge_date"] == date.today().isoformat():
+        if patient.get("discharge_date", "") == date.today().isoformat():
             discharged_today += 1
 
     for bed in beds:
-        if bed["status"] == "Available":
+        if bed.get("status", "") == "Available":
             available_beds += 1
-        elif bed["status"] == "Occupied":
+        elif bed.get("status", "") == "Occupied":
             occupied_beds += 1
 
-    # Display statistics.
+    # Display dashboard statistics
     tk.Label(
         root,
         text=f"Registered Patients: {total_patients}"
@@ -223,7 +205,7 @@ def show_dashboard(username):
         text=f"Discharges Today: {discharged_today}"
     ).pack(pady=5)
 
-    # Navigation buttons.
+    # Navigation buttons
     tk.Label(
         root,
         text="Navigation",
@@ -248,7 +230,7 @@ def show_dashboard(username):
         command=open_discharge
     ).pack(pady=3)
 
-    # Daily patient report.
+    # Patient report
     tk.Label(
         root,
         text="Patient Report",
@@ -256,7 +238,11 @@ def show_dashboard(username):
     ).pack(pady=10)
 
     report_frame = tk.Frame(root)
-    report_frame.pack(fill="both", expand=True, padx=20)
+    report_frame.pack(
+        fill="both",
+        expand=True,
+        padx=20
+    )
 
     scrollbar = tk.Scrollbar(report_frame)
     scrollbar.pack(side="right", fill="y")
@@ -266,23 +252,31 @@ def show_dashboard(username):
         height=5,
         yscrollcommand=scrollbar.set
     )
-    report_list.pack(side="left", fill="both", expand=True)
+    report_list.pack(
+        side="left",
+        fill="both",
+        expand=True
+    )
 
     scrollbar.config(command=report_list.yview)
 
     if len(patients) == 0:
-        report_list.insert("end", "No patient records available.")
-
+        report_list.insert(
+            "end",
+            "No patient records available."
+        )
     else:
         for patient in patients:
             report_list.insert(
                 "end",
-                patient["patient_id"] + " - "
-                + patient["name"] + " - "
-                + patient["status"]
+                patient.get("patient_id", "")
+                + " - "
+                + patient.get("name", "")
+                + " - "
+                + patient.get("status", "Registered")
             )
 
-    # Logout button.
+    # Logout button
     tk.Button(
         root,
         text="Logout",
@@ -291,6 +285,5 @@ def show_dashboard(username):
 
 
 # ---------- START PROGRAM ----------
-
 show_login()
 root.mainloop()
