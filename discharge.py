@@ -4,92 +4,133 @@ from datetime import date
 from data import load_database, save_database
 
 
+# Pink theme colours
+PINK_DARK = "#7D3458"
+PINK_ACTIVE = "#AD5B82"
+PINK_LIGHT = "#FFF4F8"
+PINK_PALE = "#FCE7F0"
+TEXT_DARK = "#49323D"
+WHITE = "#FFFFFF"
+
+
 def show_discharge(root):
     data = load_database()
     patients = data["patients"]
     beds = data["beds"]
 
-    # Clear the current page
     for widget in root.winfo_children():
         widget.destroy()
 
     root.title("Careflow - Discharge Management")
+    root.geometry("1100x700")
+    root.configure(bg=PINK_LIGHT)
 
-    # Page title
+    # Page heading
     tk.Label(
         root,
         text="Discharge Management",
-        font=("Arial", 20, "bold")
-    ).pack(pady=15)
+        font=("Arial", 24, "bold"),
+        bg=PINK_LIGHT,
+        fg=PINK_DARK
+    ).pack(anchor="w", padx=25, pady=(20, 5))
 
     tk.Label(
         root,
-        text="Select a patient and confirm payment before discharge."
-    ).pack(pady=5)
+        text="Confirm payment before discharging a patient",
+        font=("Arial", 11),
+        bg=PINK_LIGHT,
+        fg=TEXT_DARK
+    ).pack(anchor="w", padx=25, pady=(0, 20))
+
+    # Search section
+    search_frame = tk.Frame(root, bg=WHITE, padx=15, pady=15)
+    search_frame.pack(fill="x", padx=25, pady=(0, 15))
+
+    tk.Label(
+        search_frame,
+        text="Search Patient ID or Name:",
+        bg=WHITE,
+        fg=TEXT_DARK,
+        font=("Arial", 10)
+    ).pack(side="left")
+
+    search_entry = tk.Entry(search_frame, width=30, font=("Arial", 10))
+    search_entry.pack(side="left", padx=10)
 
     # Patient table
-    table_frame = ttk.Frame(root)
-    table_frame.pack(fill="both", expand=True, padx=20, pady=10)
+    table_frame = tk.Frame(root, bg=WHITE)
+    table_frame.pack(fill="both", expand=True, padx=25, pady=(0, 15))
 
     columns = ("patient_id", "name", "bed_id", "status")
 
-    tree = ttk.Treeview(
+    table = ttk.Treeview(
         table_frame,
         columns=columns,
-        show="headings"
+        show="headings",
+        height=15
     )
 
-    tree.heading("patient_id", text="Patient ID")
-    tree.heading("name", text="Patient Name")
-    tree.heading("bed_id", text="Bed ID")
-    tree.heading("status", text="Status")
+    table.heading("patient_id", text="Patient ID")
+    table.heading("name", text="Patient Name")
+    table.heading("bed_id", text="Bed ID")
+    table.heading("status", text="Status")
 
-    tree.column("patient_id", width=130, anchor="center")
-    tree.column("name", width=220, anchor="center")
-    tree.column("bed_id", width=120, anchor="center")
-    tree.column("status", width=130, anchor="center")
+    table.column("patient_id", width=150, anchor="center")
+    table.column("name", width=250, anchor="center")
+    table.column("bed_id", width=150, anchor="center")
+    table.column("status", width=150, anchor="center")
 
     scrollbar = ttk.Scrollbar(
         table_frame,
         orient="vertical",
-        command=tree.yview
+        command=table.yview
     )
-    tree.configure(yscrollcommand=scrollbar.set)
 
-    tree.pack(side="left", fill="both", expand=True)
-    scrollbar.pack(side="right", fill="y")
+    table.configure(yscrollcommand=scrollbar.set)
 
+    table.pack(side="left", fill="both", expand=True, padx=10, pady=10)
+    scrollbar.pack(side="right", fill="y", pady=10)
+
+    # Display patients who have an assigned bed
     def display_patients():
-        for item in tree.get_children():
-            tree.delete(item)
+        for item in table.get_children():
+            table.delete(item)
+
+        keyword = search_entry.get().strip().lower()
 
         for patient in patients:
-            if (
-                patient.get("status", "Registered") != "Discharged"
-                and patient.get("bed_id", "")
-            ):
-                tree.insert(
-                    "",
-                    "end",
-                    values=(
-                        patient.get("patient_id", ""),
-                        patient.get("name", ""),
-                        patient.get("bed_id", ""),
-                        patient.get("status", "Registered")
-                    )
-                )
+            patient_id = patient.get("patient_id", "")
+            patient_name = patient.get("name", "")
+            bed_id = patient.get("bed_id", "")
+            status = patient.get("status", "Registered")
 
+            if status != "Discharged" and bed_id:
+                search_text = (patient_id + " " + patient_name).lower()
+
+                if keyword in search_text:
+                    table.insert(
+                        "",
+                        "end",
+                        values=(
+                            patient_id,
+                            patient_name,
+                            bed_id,
+                            status
+                        )
+                    )
+
+    # Discharge the selected patient
     def discharge_patient():
-        selected = tree.selection()
+        selected = table.selection()
 
         if not selected:
             messagebox.showwarning(
-                "Warning",
+                "Select Patient",
                 "Please select a patient to discharge."
             )
             return
 
-        values = tree.item(selected[0], "values")
+        values = table.item(selected[0], "values")
         patient_id = values[0]
 
         selected_patient = None
@@ -108,7 +149,7 @@ def show_discharge(root):
 
         if selected_patient.get("status", "") == "Discharged":
             messagebox.showwarning(
-                "Warning",
+                "Already Discharged",
                 "This patient has already been discharged."
             )
             return
@@ -116,12 +157,13 @@ def show_discharge(root):
         bed_id = selected_patient.get("bed_id", "")
 
         if not bed_id:
-            messagebox.showerror(
-                "Error",
+            messagebox.showwarning(
+                "No Bed Assigned",
                 "This patient does not have an assigned bed."
             )
             return
 
+        # Ask staff to confirm payment
         payment_complete = messagebox.askyesno(
             "Payment Confirmation",
             "Has the patient's payment been checked and completed?"
@@ -134,7 +176,7 @@ def show_discharge(root):
             )
             return
 
-        # Update the patient record
+        # Update patient information
         selected_patient["status"] = "Discharged"
         selected_patient["discharge_date"] = date.today().isoformat()
         selected_patient["payment_confirmed"] = "Yes"
@@ -142,15 +184,11 @@ def show_discharge(root):
 
         # Make the bed available again
         for bed in beds:
-            if (
-                bed.get("bed_id", "") == bed_id
-                and bed.get("patient_id", "") == patient_id
-            ):
+            if bed.get("bed_id", "") == bed_id:
                 bed["status"] = "Available"
                 bed["patient_id"] = ""
-                break
 
-        # Save changes to the shared database
+        # Save changes to the JSON database
         save_database(data)
 
         display_patients()
@@ -160,25 +198,47 @@ def show_discharge(root):
             "Patient discharged successfully.\nThe bed is now available."
         )
 
+    # Clear search
+    def clear_search():
+        search_entry.delete(0, tk.END)
+        display_patients()
+
+    # Return to dashboard
     def back_to_dashboard():
         from dashboard import show_dashboard
         show_dashboard("admin")
 
     # Buttons
-    button_frame = ttk.Frame(root)
-    button_frame.pack(pady=10)
+    button_frame = tk.Frame(root, bg=PINK_LIGHT)
+    button_frame.pack(pady=(0, 15))
 
-    ttk.Button(
+    tk.Button(
         button_frame,
         text="Confirm Discharge",
-        command=discharge_patient
-    ).pack(side="left", padx=10)
+        command=discharge_patient,
+        bg=PINK_DARK,
+        fg=WHITE,
+        width=18
+    ).pack(side="left", padx=5)
 
-    ttk.Button(
+    tk.Button(
+        button_frame,
+        text="Clear Search",
+        command=clear_search,
+        bg=PINK_PALE,
+        fg=TEXT_DARK,
+        width=12
+    ).pack(side="left", padx=5)
+
+    tk.Button(
         button_frame,
         text="Back to Dashboard",
-        command=back_to_dashboard
-    ).pack(side="left", padx=10)
+        command=back_to_dashboard,
+        bg=PINK_ACTIVE,
+        fg=WHITE,
+        width=18
+    ).pack(side="left", padx=5)
 
-    # Show patients who can be discharged
+    search_entry.bind("<KeyRelease>", lambda event: display_patients())
+
     display_patients()
