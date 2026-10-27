@@ -1,249 +1,469 @@
+
 import tkinter as tk
-import json
-import os
 from tkinter import ttk, messagebox
 from datetime import date
-from data import PATIENT_FIELDS
-from data import save_database
-def show_patients(self): 
-    frame = self.replace_page("Patient Management") 
+from data import load_database, save_database, PATIENT_FIELDS
 
-    # Patient information form 
-    form = ttk.LabelFrame(frame, text="Patient Information", padding=10) 
 
-    form.pack(side="left", fill="y", padx=10) 
+# ---------- PATIENT MANAGEMENT ----------
 
-    fields = [ 
-        ("Patient ID", "patient_id"), 
-        ("Full Name", "name"), 
-        ("Date of Birth", "dob"), 
-        ("Phone", "phone"), 
-        ("Address", "address"), 
-        ("Emergency Contact", "emergency_contact"), 
-        ("Diagnosis", "diagnosis") 
-    ] 
+def show_patients(root):
 
-    entries = {} 
-    for row, (label, key) in enumerate(fields): 
-     
-        ttk.Label(form, text=label).grid(row=row, column=0, pady=5) 
-        entry = ttk.Entry(form, width=25) 
-        entry.grid(row=row, column=1, pady=5) 
-        entries[key] = entry 
-    # Gender selection 
+    # Load the shared database.
+    data = load_database()
+    patients = data["patients"]
+    beds = data["beds"]
 
-    row = len(fields) 
-    ttk.Label(form, text="Gender").grid(row=row, column=0, pady=5) 
+    # Clear the current page.
+    for widget in root.winfo_children():
+        widget.destroy()
 
-    gender = ttk.Combobox( 
-        form, values=["Female", "Male", "Other"], 
-        state="readonly", width=22 
-    ) 
+    root.title("Careflow - Patient Management")
 
-    gender.grid(row=row, column=1, pady=5) 
-    entries["gender"] = gender 
+    # Store the ID of the selected patient.
+    selected_id = [""]
 
-    # Bed selection 
-    row += 1 
-    ttk.Label(form, text="Bed").grid(row=row, column=0, pady=5) 
+    # ---------- PAGE TITLE ----------
 
-    bed_box = ttk.Combobox(form, state="readonly", width=22) 
-    bed_box.grid(row=row, column=1, pady=5) 
+    tk.Label(
+        root,
+        text="Patient Management",
+        font=("Arial", 20, "bold")
+    ).pack(pady=10)
 
-    selected_id = [""] 
+    # ---------- PATIENT INFORMATION FORM ----------
 
-    # Search and patient list 
-    result = ttk.LabelFrame(frame, text="Patient Records", padding=10) 
-    result.pack(side="left", fill="both", expand=True) 
+    form = ttk.LabelFrame(
+        root,
+        text="Patient Information",
+        padding=10
+    )
+    form.pack(side="left", fill="y", padx=10, pady=10)
 
-    search = ttk.Entry(result) 
-    search.pack(fill="x", pady=5) 
+    fields = [
+        ("Patient ID", "patient_id"),
+        ("Full Name", "name"),
+        ("Date of Birth", "dob"),
+        ("Phone", "phone"),
+        ("Address", "address"),
+        ("Emergency Contact", "emergency_contact"),
+        ("Diagnosis", "diagnosis")
+    ]
 
-    tree = ttk.Treeview( 
-        result, 
-        columns=("id", "name", "bed", "status"), 
-        show="headings" 
-    ) 
+    entries = {}
 
-    tree.heading("id", text="Patient ID") 
-    tree.heading("name", text="Name") 
-    tree.heading("bed", text="Bed") 
-    tree.heading("status", text="Status") 
-    tree.pack(fill="both", expand=True) 
+    for row, (label, key) in enumerate(fields):
+        ttk.Label(
+            form,
+            text=label
+        ).grid(row=row, column=0, padx=5, pady=5, sticky="w")
 
-    # Update available bed choices 
-    def update_beds(): 
-        choices = ["No bed"] 
+        entry = ttk.Entry(form, width=23)
+        entry.grid(row=row, column=1, padx=5, pady=5)
 
-        for bed in self.beds: 
+        entries[key] = entry
 
-            if bed["status"] == "Available": 
+    # ---------- GENDER SELECTION ----------
 
-                choices.append(bed["bed_id"]) 
+    row = len(fields)
 
-        bed_box["values"] = choices 
+    ttk.Label(
+        form,
+        text="Gender"
+    ).grid(row=row, column=0, padx=5, pady=5, sticky="w")
 
-        if bed_box.get() not in choices: 
-            bed_box.set("No bed") 
+    gender_box = ttk.Combobox(
+        form,
+        values=["Female", "Male", "Other"],
+        state="readonly",
+        width=20
+    )
+    gender_box.grid(row=row, column=1, padx=5, pady=5)
 
-    # Display and search patients 
-    def display_patients(event=None): 
-        for item in tree.get_children(): 
-            tree.delete(item) 
+    entries["gender"] = gender_box
 
-        keyword = search.get().lower() 
+    # ---------- BED SELECTION ----------
 
-        for patient in self.patients: 
+    row += 1
 
-            if (keyword in patient["patient_id"].lower() 
-                    or keyword in patient["name"].lower()): 
-                tree.insert("", "end", values=( 
-                    patient["patient_id"], 
-                    patient["name"], 
-                    patient["bed_id"] or "-", 
-                    patient["status"] 
-                )) 
+    ttk.Label(
+        form,
+        text="Available Bed"
+    ).grid(row=row, column=0, padx=5, pady=5, sticky="w")
 
-    # Show selected patient's details in the form 
+    bed_box = ttk.Combobox(
+        form,
+        state="readonly",
+        width=20
+    )
+    bed_box.grid(row=row, column=1, padx=5, pady=5)
 
-    def view_patient(event=None): 
-        selected = tree.selection() 
+    # ---------- PATIENT RECORDS ----------
 
-        if not selected: 
+    result = ttk.LabelFrame(
+        root,
+        text="Patient Records",
+        padding=10
+    )
+    result.pack(side="left", fill="both", expand=True, padx=10, pady=10)
 
-            return 
-        
-        patient_id = tree.item(selected[0], "values")[0] 
+    search_entry = ttk.Entry(result)
+    search_entry.pack(fill="x", pady=5)
 
-        for patient in self.patients: 
-            if patient["patient_id"] == patient_id: 
-                for key, widget in entries.items(): 
-                     if isinstance (widget, ttk.Entry):
+    search_entry.insert(0, "Search by Patient ID or Name")
+
+    tree = ttk.Treeview(
+        result,
+        columns=("id", "name", "bed", "status"),
+        show="headings"
+    )
+
+    tree.heading("id", text="Patient ID")
+    tree.heading("name", text="Name")
+    tree.heading("bed", text="Bed")
+    tree.heading("status", text="Status")
+
+    tree.column("id", width=90)
+    tree.column("name", width=140)
+    tree.column("bed", width=90)
+    tree.column("status", width=100)
+
+    tree.pack(fill="both", expand=True)
+
+    # ---------- UPDATE AVAILABLE BEDS ----------
+
+    def update_beds():
+
+        choices = []
+
+        for bed in beds:
+            if bed["status"] == "Available":
+                choices.append(bed["bed_id"])
+
+        # During an update, keep the patient's current bed available
+        # as a choice for that same patient.
+        if selected_id[0]:
+            for patient in patients:
+                if patient["patient_id"] == selected_id[0]:
+                    current_bed = patient.get("bed_id", "")
+
+                    if current_bed and current_bed not in choices:
+                        choices.append(current_bed)
+
+        bed_box["values"] = choices
+
+        if bed_box.get() not in choices:
+            bed_box.set("")
+
+    # ---------- DISPLAY PATIENTS ----------
+
+    def display_patients(event=None):
+
+        for item in tree.get_children():
+            tree.delete(item)
+
+        keyword = search_entry.get().lower().strip()
+
+        if keyword == "search by patient id or name":
+            keyword = ""
+
+        for patient in patients:
+            patient_id = patient.get("patient_id", "")
+            name = patient.get("name", "")
+
+            if (
+                keyword in patient_id.lower()
+                or keyword in name.lower()
+            ):
+                tree.insert(
+                    "",
+                    "end",
+                    values=(
+                        patient_id,
+                        name,
+                        patient.get("bed_id", ""),
+                        patient.get("status", "Registered")
+                    )
+                )
+
+    # ---------- VIEW SELECTED PATIENT ----------
+
+    def view_patient(event=None):
+
+        selected = tree.selection()
+
+        if not selected:
+            return
+
+        patient_id = tree.item(
+            selected[0],
+            "values"
+        )[0]
+
+        for patient in patients:
+            if patient["patient_id"] == patient_id:
+
+                selected_id[0] = patient_id
+
+                # Display the selected patient's information.
+                for key, widget in entries.items():
+                    value = patient.get(key, "")
+
+                    if isinstance(widget, ttk.Entry):
+                        widget.config(state="normal")
                         widget.delete(0, "end")
-                        widget.insert(0, patient.get(key, ""))
-                     else:
-                        widget.set(patient.get(key, ""))
+                        widget.insert(0, value)
 
+                        # Do not allow the patient ID to be changed.
+                        if key == "patient_id":
+                            widget.config(state="readonly")
+                    else:
+                        widget.set(value)
 
-                selected_id[0] = patient_id 
+                update_beds()
+                bed_box.set(patient.get("bed_id", ""))
 
-                if patient["bed_id"]: 
+                break
 
-                    bed_box.set(patient["bed_id"]) 
+    # ---------- SAVE PATIENT AND BED INFORMATION ----------
 
-                else: 
-                    bed_box.set("No bed") 
+    def save_patient_data(patient, new_bed_id):
 
- 
+        old_bed_id = patient.get("bed_id", "")
 
-                break 
+        # Release the old bed if the patient changes beds.
+        if old_bed_id != new_bed_id:
+            for bed in beds:
+                if bed["bed_id"] == old_bed_id:
+                    bed["status"] = "Available"
+                    bed["patient_id"] = ""
 
- 
+        # Mark the new bed as occupied.
+        for bed in beds:
+            if bed["bed_id"] == new_bed_id:
+                bed["status"] = "Occupied"
+                bed["patient_id"] = patient["patient_id"]
 
-    # Register a new patient 
-    def register_patient(): 
-        patient = {} 
+        patient["bed_id"] = new_bed_id
 
-        for key, widget in entries.items(): 
-            patient[key] = widget.get().strip() 
+        # Keep the patient status as Registered.
+        patient["status"] = "Registered"
 
-        patient["bed_id"] = bed_box.get() 
-        if patient["bed_id"] == "No bed": 
-            patient["bed_id"] = "" 
+        # Save the complete shared database.
+        save_database(data)
 
-        if not patient["patient_id"] or not patient["name"]: 
-            messagebox.showerror( 
-                "Error", "Patient ID and name are required." 
-            ) 
-            return 
+    # ---------- REGISTER PATIENT ----------
 
-        for old_patient in self.patients: 
-            if old_patient["patient_id"] == patient["patient_id"]: 
-                messagebox.showerror( 
+    def register_patient():
 
-                    "Error", "Patient ID already exists." 
-                ) 
-                return 
+        patient = {}
 
-        patient["admission_date"] = date.today().isoformat() 
-        patient["status"] = ( 
+        # Read the information entered in the form.
+        for key, widget in entries.items():
+            patient[key] = widget.get().strip()
 
-            "Admitted" if patient["bed_id"] else "Registered" 
-        ) 
+        new_bed_id = bed_box.get()
 
-        patient["discharge_date"] = "" 
-        patient["payment_confirmed"] = "" 
+        # Check required information.
+        if not patient["patient_id"] or not patient["name"]:
+            messagebox.showerror(
+                "Error",
+                "Patient ID and name are required."
+            )
+            return
 
-        for field in PATIENT_FIELDS: 
+        if not patient["gender"]:
+            messagebox.showerror(
+                "Error",
+                "Please select the patient's gender."
+            )
+            return
 
-            if field not in patient: 
+        # Every patient must have a bed.
+        if not new_bed_id:
+            messagebox.showerror(
+                "Error",
+                "Please select an available bed."
+            )
+            return
 
-                patient[field] = "" 
- 
-        self.patients.append(patient) 
+        # Check for duplicate patient IDs.
+        for old_patient in patients:
+            if old_patient["patient_id"] == patient["patient_id"]:
+                messagebox.showerror(
+                    "Error",
+                    "Patient ID already exists."
+                )
+                return
 
-        save_database(self.patients, self.beds) 
+        # Check that the selected bed is available.
+        selected_bed = None
 
- 
-        display_patients() 
-        update_beds() 
+        for bed in beds:
+            if bed["bed_id"] == new_bed_id:
+                if bed["status"] == "Available":
+                    selected_bed = bed
+                break
 
-        messagebox.showinfo("Success", "Patient registered.") 
+        if selected_bed is None:
+            messagebox.showerror(
+                "Error",
+                "This bed is unavailable. Please select another bed."
+            )
+            update_beds()
+            return
 
-    # Update an existing patient 
+        # Add any missing patient fields.
+        for field in PATIENT_FIELDS:
+            if field not in patient:
+                patient[field] = ""
 
-    def update_patient(): 
+        patient["bed_id"] = new_bed_id
+        patient["admission_date"] = date.today().isoformat()
+        patient["status"] = "Registered"
+        patient["discharge_date"] = ""
+        patient["payment_confirmed"] = ""
 
-        if not selected_id[0]: 
+        # Add the patient to the database.
+        patients.append(patient)
 
-            messagebox.showwarning( 
+        # Mark the selected bed as occupied.
+        selected_bed["status"] = "Occupied"
+        selected_bed["patient_id"] = patient["patient_id"]
 
-                "Warning", "Select a patient from the list first." 
-            ) 
-            return 
+        # Save patients and beds together.
+        save_database(data)
 
-        for patient in self.patients: 
-            if patient["patient_id"] == selected_id[0]: 
-                if patient["status"] == "Discharged": 
-                    messagebox.showwarning( 
+        # Refresh the patient list and available beds.
+        display_patients()
+        update_beds()
+        clear_form()
 
-                        "Warning", "Cannot edit a discharged patient." 
-                    ) 
-                    return 
-                
-                for key, widget in entries.items(): 
-                    patient[key] = widget.get().strip() 
+        messagebox.showinfo(
+            "Success",
+            "Patient registered successfully and bed assigned."
+        )
 
-                patient["bed_id"] = bed_box.get() 
+    # ---------- UPDATE PATIENT ----------
 
-                if patient["bed_id"] == "No bed": 
+    def update_patient():
 
-                    patient["bed_id"] = "" 
+        if not selected_id[0]:
+            messagebox.showwarning(
+                "Warning",
+                "Select a patient from the list first."
+            )
+            return
 
-                patient["status"] = ( 
+        new_bed_id = bed_box.get()
 
-                 "Admitted" if patient["bed_id"] else "Registered" 
-                ) 
+        if not new_bed_id:
+            messagebox.showerror(
+                "Error",
+                "Every patient must have an assigned bed."
+            )
+            return
 
-                save_database(self.patients, self.beds) 
-                display_patients() 
-                update_beds() 
+        for patient in patients:
+            if patient["patient_id"] == selected_id[0]:
 
-                messagebox.showinfo("Success", "Patient updated.") 
-                return 
+                # Prevent editing discharged patients.
+                if patient["status"] == "Discharged":
+                    messagebox.showwarning(
+                        "Warning",
+                        "Cannot edit a discharged patient."
+                    )
+                    return
 
-    # Buttons 
-    ttk.Button( 
+                # Check whether another patient occupies the selected bed.
+                for bed in beds:
+                    if (
+                        bed["bed_id"] == new_bed_id
+                        and bed["status"] == "Occupied"
+                        and bed.get("patient_id") != patient["patient_id"]
+                    ):
+                        messagebox.showerror(
+                            "Error",
+                            "This bed is already occupied."
+                        )
+                        return
 
-        form, text="Register", command=register_patient 
+                # Update the patient's information.
+                for key, widget in entries.items():
+                    if key != "patient_id":
+                        patient[key] = widget.get().strip()
 
-    ).grid(row=row + 1, column=0, pady=10) 
+                save_patient_data(patient, new_bed_id)
 
-    ttk.Button( 
-        form, text="Update", command=update_patient
-    ).grid(row=row + 1, column=1, pady=10)
+                display_patients()
+                update_beds()
+                clear_form()
 
-    # Connect search and selection 
-    search.bind("<KeyRelease>", display_patients) 
-    tree.bind("<<TreeviewSelect>>", view_patient) 
-    update_beds() 
+                messagebox.showinfo(
+                    "Success",
+                    "Patient information updated."
+                )
+                return
+
+    # ---------- CLEAR FORM ----------
+
+    def clear_form():
+
+        selected_id[0] = ""
+
+        for widget in entries.values():
+            if isinstance(widget, ttk.Entry):
+                widget.config(state="normal")
+                widget.delete(0, "end")
+            else:
+                widget.set("")
+
+        bed_box.set("")
+
+        update_beds()
+
+    # ---------- BUTTONS ----------
+
+    row += 1
+
+    ttk.Button(
+        form,
+        text="Register",
+        command=register_patient
+    ).grid(row=row, column=0, padx=5, pady=10)
+
+    ttk.Button(
+        form,
+        text="Update",
+        command=update_patient
+    ).grid(row=row, column=1, padx=5, pady=10)
+
+    ttk.Button(
+        form,
+        text="Clear",
+        command=clear_form
+    ).grid(row=row + 1, column=0, columnspan=2, pady=5)
+
+    # ---------- SEARCH AND SELECT EVENTS ----------
+
+    search_entry.bind("<KeyRelease>", display_patients)
+    tree.bind("<<TreeviewSelect>>", view_patient)
+
+    # ---------- BACK TO DASHBOARD ----------
+
+    def back_to_dashboard():
+
+        from dashboard import show_dashboard
+
+        # Return to the dashboard using a simple default username.
+        show_dashboard("admin")
+
+    tk.Button(
+        root,
+        text="Back to Dashboard",
+        command=back_to_dashboard
+    ).pack(side="bottom", pady=5)
+
+    # Display existing records and available beds.
+    update_beds()
+    display_patients()
