@@ -29,9 +29,7 @@ DEFAULT_DATA = {
             "password": "admin123"
         }
     ],
-
     "patients": [],
-
     "beds": [
         {"bed_id": "Bed 101", "status": "Available", "patient_id": ""},
         {"bed_id": "Bed 102", "status": "Available", "patient_id": ""},
@@ -49,11 +47,10 @@ def save_database(data):
 
 # Load data from the JSON file
 def load_database():
-    # Create the database if it does not exist
+
+# Create the database if it does not exist
     if not os.path.exists(DATA_FILE):
         save_database(DEFAULT_DATA)
-
-        # Return a separate copy of the default data
         return json.loads(json.dumps(DEFAULT_DATA))
 
     try:
@@ -66,7 +63,7 @@ def load_database():
 
 # Add missing sections if necessary
     if "users" not in data:
-    data["users"] = json.loads(json.dumps(DEFAULT_DATA["users"]))
+        data["users"] = json.loads(json.dumps(DEFAULT_DATA["users"]))
 
     if "patients" not in data:
         data["patients"] = []
@@ -95,6 +92,6 @@ def load_database():
         if "patient_id" not in bed:
             bed["patient_id"] = ""
 
-    # Save any updates to the database structure
+# Save any updates to the database structure
     save_database(data)
     return data
