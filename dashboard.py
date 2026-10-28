@@ -17,7 +17,6 @@ WHITE = "#FFFFFF"
 root = None
 current_username = ""
 
-
 # Set the style of tables and dropdowns
 def setup_styles():
     style = ttk.Style()
@@ -45,12 +44,10 @@ def setup_styles():
         foreground=[("selected", WHITE)]
     )
 
-
 # Remove the current page
 def clear_page():
     for widget in root.winfo_children():
         widget.destroy()
-
 
 # Add an admin account after verifying an existing admin
 def add_admin_account():
@@ -179,7 +176,6 @@ def add_admin_account():
         "You can now log in with the new account.",
         parent=root
     )
-
 
 # Display the login page
 def show_login():
@@ -316,7 +312,6 @@ def show_login():
 
     password_entry.bind("<Return>", lambda event: login())
 
-
 # Create the shared navigation menu
 def add_navigation(parent, active_page):
     sidebar = tk.Frame(
@@ -407,9 +402,7 @@ def add_navigation(parent, active_page):
 
     content = tk.Frame(parent, bg=PINK_LIGHT)
     content.pack(side="right", fill="both", expand=True)
-
     return content
-
 
 # Create a dashboard statistic card
 def create_card(parent, title, value, row, column):
@@ -445,7 +438,6 @@ def create_card(parent, title, value, row, column):
         bg=WHITE,
         fg=PINK_DARK
     ).pack(anchor="w", pady=(8, 0))
-
 
 # Display the main dashboard
 def show_dashboard(username=None):
