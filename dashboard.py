@@ -1,7 +1,7 @@
 import tkinter as tk
-from tkinter import ttk, messagebox
+from tkinter import ttk, messagebox, simpledialog
 from datetime import date
-from data import load_database
+from data import load_database, save_database
 
 # Pink theme colours
 PINK_DARK = "#7D3458"
@@ -16,6 +16,7 @@ WHITE = "#FFFFFF"
 # Main application window
 root = None
 current_username = ""
+
 
 # Set the style of tables and dropdowns
 def setup_styles():
@@ -44,10 +45,141 @@ def setup_styles():
         foreground=[("selected", WHITE)]
     )
 
+
 # Remove the current page
 def clear_page():
     for widget in root.winfo_children():
         widget.destroy()
+
+
+# Add an admin account after verifying an existing admin
+def add_admin_account():
+    admin_username = simpledialog.askstring(
+        "Admin Verification",
+        "Enter your existing admin username:",
+        parent=root
+    )
+
+    if admin_username is None:
+        return
+
+    admin_username = admin_username.strip()
+
+    if not admin_username:
+        messagebox.showwarning(
+            "Invalid Username",
+            "Please enter your existing admin username.",
+            parent=root
+        )
+        return
+
+    admin_password = simpledialog.askstring(
+        "Admin Verification",
+        "Enter your existing admin password:",
+        show="*",
+        parent=root
+    )
+
+    if admin_password is None:
+        return
+
+    data = load_database()
+    admin_verified = False
+
+    for user in data["users"]:
+        if (
+            user.get("username", "").lower() == admin_username.lower()
+            and user.get("password", "") == admin_password
+        ):
+            admin_verified = True
+            break
+
+    if not admin_verified:
+        messagebox.showerror(
+            "Verification Failed",
+            "Incorrect admin username or password.",
+            parent=root
+        )
+        return
+
+    new_username = simpledialog.askstring(
+        "Add Admin Account",
+        "Enter a username for the new admin:",
+        parent=root
+    )
+
+    if new_username is None:
+        return
+
+    new_username = new_username.strip()
+
+    if not new_username:
+        messagebox.showwarning(
+            "Invalid Username",
+            "Username cannot be empty.",
+            parent=root
+        )
+        return
+
+    for user in data["users"]:
+        if user.get("username", "").lower() == new_username.lower():
+            messagebox.showerror(
+                "Username Exists",
+                "This username is already in use.",
+                parent=root
+            )
+            return
+
+    new_password = simpledialog.askstring(
+        "Add Admin Account",
+        "Enter a password for the new admin:",
+        show="*",
+        parent=root
+    )
+
+    if new_password is None:
+        return
+
+    if len(new_password) < 6:
+        messagebox.showwarning(
+            "Invalid Password",
+            "Password must contain at least 6 characters.",
+            parent=root
+        )
+        return
+
+    confirm_password = simpledialog.askstring(
+        "Confirm Password",
+        "Enter the new password again:",
+        show="*",
+        parent=root
+    )
+
+    if confirm_password is None:
+        return
+
+    if new_password != confirm_password:
+        messagebox.showerror(
+            "Password Mismatch",
+            "The passwords do not match. Please try again.",
+            parent=root
+        )
+        return
+
+    data["users"].append({
+        "username": new_username,
+        "password": new_password
+    })
+
+    save_database(data)
+
+    messagebox.showinfo(
+        "Success",
+        "Admin account created successfully!\n"
+        "You can now log in with the new account.",
+        parent=root
+    )
+
 
 # Display the login page
 def show_login():
@@ -120,25 +252,30 @@ def show_login():
         username = username_entry.get().strip()
         password = password_entry.get()
 
+        if not username or not password:
+            messagebox.showwarning(
+                "Missing Information",
+                "Please enter your username and password.",
+                parent=root
+            )
+            return
+
         data = load_database()
-        login_successful = False
 
         for user in data["users"]:
             if (
-                user.get("username") == username
-                and user.get("password") == password
+                user.get("username", "").lower() == username.lower()
+                and user.get("password", "") == password
             ):
-                login_successful = True
-                break
+                current_username = username
+                show_dashboard(username)
+                return
 
-        if login_successful:
-            current_username = username
-            show_dashboard(username)
-        else:
-            messagebox.showerror(
-                "Login Failed",
-                "Incorrect username or password."
-            )
+        messagebox.showerror(
+            "Login Failed",
+            "Incorrect username or password.",
+            parent=root
+        )
 
     tk.Button(
         login_frame,
@@ -150,8 +287,24 @@ def show_login():
         activeforeground=WHITE,
         font=("Arial", 12, "bold"),
         width=25,
-        pady=7
+        pady=7,
+        cursor="hand2"
     ).pack()
+
+# Add Admin Account button
+    tk.Button(
+        login_frame,
+        text="Add Admin Account",
+        command=add_admin_account,
+        bg=PINK_PALE,
+        fg=TEXT_DARK,
+        activebackground=PINK_LIGHT,
+        activeforeground=TEXT_DARK,
+        font=("Arial", 10, "bold"),
+        width=25,
+        pady=7,
+        cursor="hand2"
+    ).pack(pady=(10, 0))
 
     tk.Label(
         login_frame,
@@ -161,9 +314,11 @@ def show_login():
         fg=TEXT_LIGHT
     ).pack(pady=(15, 0))
 
+    password_entry.bind("<Return>", lambda event: login())
+
+
 # Create the shared navigation menu
 def add_navigation(parent, active_page):
-    # Main sidebar
     sidebar = tk.Frame(
         parent,
         bg=PINK_DARK,
@@ -205,7 +360,6 @@ def add_navigation(parent, active_page):
             import discharge
             discharge.show_discharge(root)
 
-# Navigation buttons
     pages = [
         "Dashboard",
         "Patient Information",
@@ -235,7 +389,6 @@ def add_navigation(parent, active_page):
             cursor="hand2"
         ).pack(fill="x", padx=10, pady=3)
 
-# Logout button
     tk.Button(
         sidebar,
         text="Logout",
@@ -252,11 +405,11 @@ def add_navigation(parent, active_page):
         cursor="hand2"
     ).pack(side="bottom", fill="x", padx=10, pady=20)
 
-    # Return a frame for the page's main content
     content = tk.Frame(parent, bg=PINK_LIGHT)
     content.pack(side="right", fill="both", expand=True)
 
     return content
+
 
 # Create a dashboard statistic card
 def create_card(parent, title, value, row, column):
@@ -293,11 +446,11 @@ def create_card(parent, title, value, row, column):
         fg=PINK_DARK
     ).pack(anchor="w", pady=(8, 0))
 
+
 # Display the main dashboard
 def show_dashboard(username=None):
     global current_username
 
-# Keep the current user's login session
     if username:
         current_username = username
 
@@ -312,7 +465,7 @@ def show_dashboard(username=None):
     patients = data["patients"]
     beds = data["beds"]
 
-    # Calculate dashboard statistics
+# Calculate dashboard statistics
     registered_count = len(patients)
     inpatient_count = 0
     today_discharge_count = 0
@@ -324,7 +477,10 @@ def show_dashboard(username=None):
         ):
             inpatient_count += 1
 
-        if patient.get("discharge_date", "") == date.today().isoformat():
+        if (
+            patient.get("discharge_date", "")
+            == date.today().isoformat()
+        ):
             today_discharge_count += 1
 
     available_count = 0
@@ -340,7 +496,6 @@ def show_dashboard(username=None):
     main_frame = tk.Frame(root, bg=PINK_LIGHT)
     main_frame.pack(fill="both", expand=True)
 
-# Add the shared navigation menu
     content = add_navigation(main_frame, "Dashboard")
 
 # Dashboard heading
@@ -415,7 +570,6 @@ def show_dashboard(username=None):
     )
 
     columns = ("patient_id", "name", "bed_id", "status")
-
     patient_table = ttk.Treeview(
         table_frame,
         columns=columns,
@@ -440,7 +594,6 @@ def show_dashboard(username=None):
     )
 
     patient_table.configure(yscrollcommand=scrollbar.set)
-
     patient_table.pack(
         side="left",
         fill="both",
@@ -448,7 +601,6 @@ def show_dashboard(username=None):
         padx=8,
         pady=8
     )
-
     scrollbar.pack(side="right", fill="y", pady=8)
 
 # Display recent patient records
@@ -479,14 +631,15 @@ def logout():
 
     answer = messagebox.askyesno(
         "Logout",
-        "Are you sure you want to log out?"
+        "Are you sure you want to log out?",
+        parent=root
     )
 
     if answer:
         current_username = ""
         show_login()
 
-# Start the application only when this file is run directly
+# Start the application
 def start_app():
     global root
 
