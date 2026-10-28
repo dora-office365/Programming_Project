@@ -113,7 +113,7 @@ def show_login():
     )
     password_entry.pack(pady=(5, 20))
 
-    # Check the username and password
+# Check the username and password
     def login():
         global current_username
 
@@ -188,7 +188,7 @@ def add_navigation(parent, active_page):
         fg=PINK_PALE
     ).pack(pady=(0, 30))
 
-    # Open the selected page
+# Open the selected page
     def open_page(page_name):
         if page_name == "Dashboard":
             show_dashboard(current_username)
@@ -205,7 +205,7 @@ def add_navigation(parent, active_page):
             import discharge
             discharge.show_discharge(root)
 
-    # Navigation buttons
+# Navigation buttons
     pages = [
         "Dashboard",
         "Patient Information",
@@ -235,7 +235,7 @@ def add_navigation(parent, active_page):
             cursor="hand2"
         ).pack(fill="x", padx=10, pady=3)
 
-    # Logout button
+# Logout button
     tk.Button(
         sidebar,
         text="Logout",
@@ -297,7 +297,7 @@ def create_card(parent, title, value, row, column):
 def show_dashboard(username=None):
     global current_username
 
-    # Keep the current user's login session
+# Keep the current user's login session
     if username:
         current_username = username
 
@@ -336,14 +336,14 @@ def show_dashboard(username=None):
         elif bed.get("status") == "Occupied":
             occupied_count += 1
 
-    # Main layout
+# Main layout
     main_frame = tk.Frame(root, bg=PINK_LIGHT)
     main_frame.pack(fill="both", expand=True)
 
-    # Add the shared navigation menu
+# Add the shared navigation menu
     content = add_navigation(main_frame, "Dashboard")
 
-    # Dashboard heading
+# Dashboard heading
     header = tk.Frame(content, bg=PINK_LIGHT)
     header.pack(fill="x", padx=25, pady=(25, 15))
 
@@ -364,7 +364,7 @@ def show_dashboard(username=None):
         fg=TEXT_DARK
     ).pack(anchor="w", pady=(5, 0))
 
-    # Statistic cards
+# Statistic cards
     cards_frame = tk.Frame(content, bg=PINK_LIGHT)
     cards_frame.pack(fill="x", padx=18, pady=5)
 
@@ -396,7 +396,7 @@ def show_dashboard(username=None):
         today_discharge_count, 1, 1
     )
 
-    # Patient records heading
+# Patient records heading
     tk.Label(
         content,
         text="Patient Records",
@@ -405,7 +405,7 @@ def show_dashboard(username=None):
         fg=PINK_DARK
     ).pack(anchor="w", padx=25, pady=(20, 10))
 
-    # Patient table
+# Patient table
     table_frame = tk.Frame(content, bg=WHITE)
     table_frame.pack(
         fill="both",
@@ -451,7 +451,7 @@ def show_dashboard(username=None):
 
     scrollbar.pack(side="right", fill="y", pady=8)
 
-    # Display recent patient records
+# Display recent patient records
     for patient in patients[-100:]:
         patient_table.insert(
             "",
@@ -464,7 +464,7 @@ def show_dashboard(username=None):
             )
         )
 
-    # Footer
+# Footer
     tk.Label(
         content,
         text="Careflow | Hospital Inpatient Management System",
@@ -472,7 +472,6 @@ def show_dashboard(username=None):
         bg=PINK_LIGHT,
         fg=TEXT_LIGHT
     ).pack(pady=(0, 10))
-
 
 # Log out of the system
 def logout():
@@ -487,7 +486,6 @@ def logout():
         current_username = ""
         show_login()
 
-
 # Start the application only when this file is run directly
 def start_app():
     global root
@@ -500,7 +498,6 @@ def start_app():
     setup_styles()
     show_login()
     root.mainloop()
-
 
 if __name__ == "__main__":
     start_app()
