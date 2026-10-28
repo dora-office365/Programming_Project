@@ -301,7 +301,6 @@ def show_login():
         cursor="hand2"
     ).pack()
 
-    # Add Admin Account button
     tk.Button(
         login_frame,
         text="Add Admin Account",
@@ -514,22 +513,19 @@ def show_dashboard(username=None):
         ):
             today_discharge_count += 1
 
-    available_count = 0
-    occupied_count = 0
+    available_count = sum(
+        1 for bed in beds
+        if bed.get("status", "Available") == "Available"
+    )
 
-    for bed in beds:
-        if bed.get("status", "Available") == "Available":
-            available_count += 1
-        elif bed.get("status") == "Occupied":
-            occupied_count += 1
+    occupied_count = sum(
+        1 for bed in beds
+        if bed.get("status") == "Occupied"
+    )
 
-    # Main layout
-    main_frame = tk.Frame(root, bg=PINK_LIGHT)
-    main_frame.pack(fill="both", expand=True)
+    # Attach navigation directly to the main window
+    content = add_navigation(root, "Dashboard")
 
-    content = add_navigation(main_frame, "Dashboard")
-
-    # Dashboard heading
     header = tk.Frame(content, bg=PINK_LIGHT)
     header.pack(fill="x", padx=25, pady=(25, 15))
 
@@ -561,22 +557,18 @@ def show_dashboard(username=None):
         cards_frame, "Registered Patients",
         registered_count, 0, 0
     )
-
     create_card(
         cards_frame, "Current Inpatients",
         inpatient_count, 0, 1
     )
-
     create_card(
         cards_frame, "Available Beds",
         available_count, 0, 2
     )
-
     create_card(
         cards_frame, "Occupied Beds",
         occupied_count, 1, 0
     )
-
     create_card(
         cards_frame, "Today's Discharges",
         today_discharge_count, 1, 1
@@ -614,17 +606,22 @@ def show_dashboard(username=None):
     patient_table.heading("bed_id", text="Bed ID")
     patient_table.heading("status", text="Status")
 
-    patient_table.column("patient_id", width=110, anchor="center")
+    patient_table.column(
+        "patient_id", width=110, anchor="center"
+    )
     patient_table.column("name", width=200)
-    patient_table.column("bed_id", width=110, anchor="center")
-    patient_table.column("status", width=130, anchor="center")
+    patient_table.column(
+        "bed_id", width=110, anchor="center"
+    )
+    patient_table.column(
+        "status", width=130, anchor="center"
+    )
 
     scrollbar = ttk.Scrollbar(
         table_frame,
         orient="vertical",
         command=patient_table.yview
     )
-
     patient_table.configure(yscrollcommand=scrollbar.set)
 
     patient_table.pack(
@@ -634,7 +631,6 @@ def show_dashboard(username=None):
         padx=8,
         pady=8
     )
-
     scrollbar.pack(side="right", fill="y", pady=8)
 
     # Display recent patient records
@@ -650,7 +646,6 @@ def show_dashboard(username=None):
             )
         )
 
-    # Footer
     tk.Label(
         content,
         text="Careflow | Hospital Inpatient Management System",
@@ -686,9 +681,10 @@ def start_app():
     root.title("Careflow - Hospital Inpatient Management System")
     root.geometry("1150x750")
     root.configure(bg=PINK_LIGHT)
+
+    setup_styles()
     show_login()
     root.mainloop()
-
 
 if __name__ == "__main__":
     start_app()
