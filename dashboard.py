@@ -686,8 +686,6 @@ def start_app():
     root.title("Careflow - Hospital Inpatient Management System")
     root.geometry("1150x750")
     root.configure(bg=PINK_LIGHT)
-
-    setup_styles()
     show_login()
     root.mainloop()
 
