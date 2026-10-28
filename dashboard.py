@@ -327,7 +327,6 @@ def show_dashboard(username="admin"):
     navigation_button("Patient Information", open_patients)
     navigation_button("Bed Management", open_beds)
     navigation_button("Discharge", open_discharge)
-    navigation_button("Reports", show_report_message)
 
     # Logout button at the bottom
     tk.Button(

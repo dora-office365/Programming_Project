@@ -549,4 +549,3 @@ def show_patients(root):
     # Show initial data
     update_beds()
     display_patients()
-```    
