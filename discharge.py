@@ -13,9 +13,9 @@ TEXT_DARK = "#49323D"
 WHITE = "#FFFFFF"
 
 def show_discharge(root):
-data = load_database()
-patients = data["patients"]
-beds = data["beds"]
+    data = load_database()
+    patients = data["patients"]
+    beds = data["beds"]
 
 # Clear the current page
 for widget in root.winfo_children():
