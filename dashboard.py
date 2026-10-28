@@ -3,7 +3,6 @@ from tkinter import ttk, messagebox
 from datetime import date
 from data import load_database
 
-
 # Pink theme colours
 PINK_DARK = "#7D3458"
 PINK_ACTIVE = "#AD5B82"
@@ -14,20 +13,13 @@ TEXT_DARK = "#49323D"
 TEXT_LIGHT = "#A45B7D"
 WHITE = "#FFFFFF"
 
-
 # Main application window
-root = tk.Tk()
-root.title("Careflow - Hospital Inpatient Management System")
-root.geometry("1150x750")
-root.configure(bg=PINK_LIGHT)
-
+root = None
 current_username = ""
-
 
 # Set the style of tables and dropdowns
 def setup_styles():
     style = ttk.Style()
-
     style.theme_use("clam")
 
     style.configure(
@@ -52,15 +44,15 @@ def setup_styles():
         foreground=[("selected", WHITE)]
     )
 
-
 # Remove the current page
 def clear_page():
     for widget in root.winfo_children():
         widget.destroy()
 
-
 # Display the login page
 def show_login():
+    global current_username
+
     clear_page()
     root.title("Careflow - Login")
 
@@ -169,6 +161,102 @@ def show_login():
         fg=TEXT_LIGHT
     ).pack(pady=(15, 0))
 
+# Create the shared navigation menu
+def add_navigation(parent, active_page):
+    # Main sidebar
+    sidebar = tk.Frame(
+        parent,
+        bg=PINK_DARK,
+        width=220
+    )
+    sidebar.pack(side="left", fill="y")
+    sidebar.pack_propagate(False)
+
+    tk.Label(
+        sidebar,
+        text="Careflow",
+        font=("Arial", 24, "bold"),
+        bg=PINK_DARK,
+        fg=WHITE
+    ).pack(pady=(30, 5))
+
+    tk.Label(
+        sidebar,
+        text="HOSPITAL MANAGEMENT",
+        font=("Arial", 8, "bold"),
+        bg=PINK_DARK,
+        fg=PINK_PALE
+    ).pack(pady=(0, 30))
+
+    # Open the selected page
+    def open_page(page_name):
+        if page_name == "Dashboard":
+            show_dashboard(current_username)
+
+        elif page_name == "Patient Information":
+            import patient
+            patient.show_patients(root)
+
+        elif page_name == "Bed Management":
+            import bed_management
+            bed_management.show_bed_management(root)
+
+        elif page_name == "Discharge":
+            import discharge
+            discharge.show_discharge(root)
+
+    # Navigation buttons
+    pages = [
+        "Dashboard",
+        "Patient Information",
+        "Bed Management",
+        "Discharge"
+    ]
+
+    for page in pages:
+        button_colour = (
+            PINK_ACTIVE if page == active_page else PINK_DARK
+        )
+
+        tk.Button(
+            sidebar,
+            text=page,
+            command=lambda name=page: open_page(name),
+            bg=button_colour,
+            fg=WHITE,
+            activebackground=PINK_ACTIVE,
+            activeforeground=WHITE,
+            font=("Arial", 11),
+            anchor="w",
+            relief="flat",
+            bd=0,
+            padx=22,
+            pady=13,
+            cursor="hand2"
+        ).pack(fill="x", padx=10, pady=3)
+
+    # Logout button
+    tk.Button(
+        sidebar,
+        text="Logout",
+        command=logout,
+        bg=PINK_DARK,
+        fg=WHITE,
+        activebackground=PINK_ACTIVE,
+        activeforeground=WHITE,
+        font=("Arial", 11),
+        relief="flat",
+        anchor="w",
+        padx=22,
+        pady=13,
+        cursor="hand2"
+    ).pack(side="bottom", fill="x", padx=10, pady=20)
+
+    # Return a frame for the page's main content
+    content = tk.Frame(parent, bg=PINK_LIGHT)
+    content.pack(side="right", fill="both", expand=True)
+
+    return content
 
 # Create a dashboard statistic card
 def create_card(parent, title, value, row, column):
@@ -205,12 +293,17 @@ def create_card(parent, title, value, row, column):
         fg=PINK_DARK
     ).pack(anchor="w", pady=(8, 0))
 
-
 # Display the main dashboard
-def show_dashboard(username="admin"):
+def show_dashboard(username=None):
     global current_username
 
-    current_username = username
+    # Keep the current user's login session
+    if username:
+        current_username = username
+
+    if not current_username:
+        show_login()
+        return
 
     clear_page()
     root.title("Careflow - Dashboard")
@@ -221,7 +314,6 @@ def show_dashboard(username="admin"):
 
     # Calculate dashboard statistics
     registered_count = len(patients)
-
     inpatient_count = 0
     today_discharge_count = 0
 
@@ -239,115 +331,19 @@ def show_dashboard(username="admin"):
     occupied_count = 0
 
     for bed in beds:
-        bed_status = bed.get("status", "Available")
-
-        if bed_status == "Available":
+        if bed.get("status", "Available") == "Available":
             available_count += 1
-        elif bed_status == "Occupied":
+        elif bed.get("status") == "Occupied":
             occupied_count += 1
 
     # Main layout
     main_frame = tk.Frame(root, bg=PINK_LIGHT)
     main_frame.pack(fill="both", expand=True)
 
-    # Sidebar
-    sidebar = tk.Frame(
-        main_frame,
-        bg=PINK_DARK,
-        width=220
-    )
-    sidebar.pack(side="left", fill="y")
-    sidebar.pack_propagate(False)
+    # Add the shared navigation menu
+    content = add_navigation(main_frame, "Dashboard")
 
-    tk.Label(
-        sidebar,
-        text="Careflow",
-        font=("Arial", 24, "bold"),
-        bg=PINK_DARK,
-        fg=WHITE
-    ).pack(pady=(30, 5))
-
-    tk.Label(
-        sidebar,
-        text="HOSPITAL MANAGEMENT",
-        font=("Arial", 8, "bold"),
-        bg=PINK_DARK,
-        fg=PINK_PALE
-    ).pack(pady=(0, 30))
-
-    # Open Patient Information
-    def open_patients():
-        import patient
-        patient.show_patients(root)
-
-    # Open Bed Management
-    def open_beds():
-        import bed_management
-        bed_management.show_bed_management(root)
-
-    # Open Discharge Management
-    def open_discharge():
-        import discharge
-        discharge.show_discharge(root)
-
-    # Show the reports option
-    def show_report_message():
-        messagebox.showinfo(
-            "Reports",
-            "The patient summary is displayed on the dashboard.\n\n"
-            "Registered patients: " + str(registered_count) + "\n"
-            "Current inpatients: " + str(inpatient_count) + "\n"
-            "Available beds: " + str(available_count) + "\n"
-            "Occupied beds: " + str(occupied_count) + "\n"
-            "Today's discharges: " + str(today_discharge_count)
-        )
-
-    # Create sidebar navigation buttons
-    def navigation_button(text, command, active=False):
-        button_colour = PINK_ACTIVE if active else PINK_DARK
-
-        tk.Button(
-            sidebar,
-            text=text,
-            command=command,
-            bg=button_colour,
-            fg=WHITE,
-            activebackground=PINK_ACTIVE,
-            activeforeground=WHITE,
-            font=("Arial", 11),
-            anchor="w",
-            relief="flat",
-            bd=0,
-            padx=22,
-            pady=13
-        ).pack(fill="x", padx=10, pady=3)
-
-    navigation_button("Dashboard", lambda: show_dashboard(current_username), True)
-    navigation_button("Patient Information", open_patients)
-    navigation_button("Bed Management", open_beds)
-    navigation_button("Discharge", open_discharge)
-
-    # Logout button at the bottom
-    tk.Button(
-        sidebar,
-        text="Logout",
-        command=logout,
-        bg=PINK_DARK,
-        fg=WHITE,
-        activebackground=PINK_ACTIVE,
-        activeforeground=WHITE,
-        font=("Arial", 11),
-        relief="flat",
-        anchor="w",
-        padx=22,
-        pady=13
-    ).pack(side="bottom", fill="x", padx=10, pady=20)
-
-    # Dashboard content
-    content = tk.Frame(main_frame, bg=PINK_LIGHT)
-    content.pack(side="right", fill="both", expand=True)
-
-    # Header
+    # Dashboard heading
     header = tk.Frame(content, bg=PINK_LIGHT)
     header.pack(fill="x", padx=25, pady=(25, 15))
 
@@ -361,7 +357,8 @@ def show_dashboard(username="admin"):
 
     tk.Label(
         header,
-        text="Welcome, " + username + "! Here is your hospital overview.",
+        text="Welcome, " + current_username
+             + "! Here is your hospital overview.",
         font=("Arial", 11),
         bg=PINK_LIGHT,
         fg=TEXT_DARK
@@ -399,16 +396,16 @@ def show_dashboard(username="admin"):
         today_discharge_count, 1, 1
     )
 
-    # Recent patient records
-    table_title = tk.Label(
+    # Patient records heading
+    tk.Label(
         content,
         text="Patient Records",
         font=("Arial", 16, "bold"),
         bg=PINK_LIGHT,
         fg=PINK_DARK
-    )
-    table_title.pack(anchor="w", padx=25, pady=(20, 10))
+    ).pack(anchor="w", padx=25, pady=(20, 10))
 
+    # Patient table
     table_frame = tk.Frame(content, bg=WHITE)
     table_frame.pack(
         fill="both",
@@ -454,7 +451,7 @@ def show_dashboard(username="admin"):
 
     scrollbar.pack(side="right", fill="y", pady=8)
 
-    # Display the latest patient records
+    # Display recent patient records
     for patient in patients[-100:]:
         patient_table.insert(
             "",
@@ -479,16 +476,31 @@ def show_dashboard(username="admin"):
 
 # Log out of the system
 def logout():
+    global current_username
+
     answer = messagebox.askyesno(
         "Logout",
         "Are you sure you want to log out?"
     )
 
     if answer:
+        current_username = ""
         show_login()
 
 
-# Start the application
-setup_styles()
-show_login()
-root.mainloop()
+# Start the application only when this file is run directly
+def start_app():
+    global root
+
+    root = tk.Tk()
+    root.title("Careflow - Hospital Inpatient Management System")
+    root.geometry("1150x750")
+    root.configure(bg=PINK_LIGHT)
+
+    setup_styles()
+    show_login()
+    root.mainloop()
+
+
+if __name__ == "__main__":
+    start_app()
