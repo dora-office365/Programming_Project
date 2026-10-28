@@ -687,4 +687,7 @@ def start_app():
     root.mainloop()
 
 if __name__ == "__main__":
+    import sys
+
+    sys.modules["dashboard"] = sys.modules["__main__"]
     start_app()
