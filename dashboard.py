@@ -17,6 +17,7 @@ WHITE = "#FFFFFF"
 root = None
 current_username = ""
 
+
 # Set the style of tables and dropdowns
 def setup_styles():
     style = ttk.Style()
@@ -44,13 +45,21 @@ def setup_styles():
         foreground=[("selected", WHITE)]
     )
 
+
 # Remove the current page
 def clear_page():
-    for widget in root.winfo_children():
-        widget.destroy()
+    global root
+
+    if root is not None:
+        for widget in root.winfo_children():
+            widget.destroy()
+
 
 # Add an admin account after verifying an existing admin
 def add_admin_account():
+    if root is None:
+        return
+
     admin_username = simpledialog.askstring(
         "Admin Verification",
         "Enter your existing admin username:",
@@ -85,7 +94,8 @@ def add_admin_account():
 
     for user in data["users"]:
         if (
-            user.get("username", "").lower() == admin_username.lower()
+            user.get("username", "").lower()
+            == admin_username.lower()
             and user.get("password", "") == admin_password
         ):
             admin_verified = True
@@ -177,9 +187,13 @@ def add_admin_account():
         parent=root
     )
 
+
 # Display the login page
 def show_login():
     global current_username
+
+    if root is None:
+        return
 
     clear_page()
     root.title("Careflow - Login")
@@ -241,7 +255,7 @@ def show_login():
     )
     password_entry.pack(pady=(5, 20))
 
-# Check the username and password
+    # Check the username and password
     def login():
         global current_username
 
@@ -287,7 +301,7 @@ def show_login():
         cursor="hand2"
     ).pack()
 
-# Add Admin Account button
+    # Add Admin Account button
     tk.Button(
         login_frame,
         text="Add Admin Account",
@@ -311,6 +325,7 @@ def show_login():
     ).pack(pady=(15, 0))
 
     password_entry.bind("<Return>", lambda event: login())
+
 
 # Create the shared navigation menu
 def add_navigation(parent, active_page):
@@ -338,22 +353,43 @@ def add_navigation(parent, active_page):
         fg=PINK_PALE
     ).pack(pady=(0, 30))
 
-# Open the selected page
+    # Open the selected page
     def open_page(page_name):
-        if page_name == "Dashboard":
-            show_dashboard(current_username)
+        global root, current_username
 
-        elif page_name == "Patient Information":
-            import patient
-            patient.show_patients(root)
+        if root is None:
+            messagebox.showerror(
+                "Application Error",
+                "The main window has not been created."
+            )
+            return
 
-        elif page_name == "Bed Management":
-            import bed_management
-            bed_management.show_bed_management(root)
+        try:
+            if page_name == "Dashboard":
+                show_dashboard(current_username)
 
-        elif page_name == "Discharge":
-            import discharge
-            discharge.show_discharge(root)
+            elif page_name == "Patient Information":
+                import patient
+                patient.show_patients(root)
+
+            elif page_name == "Bed Management":
+                import bed_management
+                bed_management.show_bed_management(root)
+
+            elif page_name == "Discharge":
+                import discharge
+                discharge.show_discharge(root)
+
+            elif page_name == "Logout":
+                logout()
+
+        except Exception as error:
+            messagebox.showerror(
+                "Page Error",
+                "Could not open " + page_name + ".\n\n"
+                + str(error),
+                parent=root
+            )
 
     pages = [
         "Dashboard",
@@ -387,7 +423,7 @@ def add_navigation(parent, active_page):
     tk.Button(
         sidebar,
         text="Logout",
-        command=logout,
+        command=lambda: open_page("Logout"),
         bg=PINK_DARK,
         fg=WHITE,
         activebackground=PINK_ACTIVE,
@@ -402,7 +438,9 @@ def add_navigation(parent, active_page):
 
     content = tk.Frame(parent, bg=PINK_LIGHT)
     content.pack(side="right", fill="both", expand=True)
+
     return content
+
 
 # Create a dashboard statistic card
 def create_card(parent, title, value, row, column):
@@ -439,6 +477,7 @@ def create_card(parent, title, value, row, column):
         fg=PINK_DARK
     ).pack(anchor="w", pady=(8, 0))
 
+
 # Display the main dashboard
 def show_dashboard(username=None):
     global current_username
@@ -457,7 +496,7 @@ def show_dashboard(username=None):
     patients = data["patients"]
     beds = data["beds"]
 
-# Calculate dashboard statistics
+    # Calculate dashboard statistics
     registered_count = len(patients)
     inpatient_count = 0
     today_discharge_count = 0
@@ -484,13 +523,13 @@ def show_dashboard(username=None):
         elif bed.get("status") == "Occupied":
             occupied_count += 1
 
-# Main layout
+    # Main layout
     main_frame = tk.Frame(root, bg=PINK_LIGHT)
     main_frame.pack(fill="both", expand=True)
 
     content = add_navigation(main_frame, "Dashboard")
 
-# Dashboard heading
+    # Dashboard heading
     header = tk.Frame(content, bg=PINK_LIGHT)
     header.pack(fill="x", padx=25, pady=(25, 15))
 
@@ -505,13 +544,13 @@ def show_dashboard(username=None):
     tk.Label(
         header,
         text="Welcome, " + current_username
-             + "! Here is your hospital overview.",
+        + "! Here is your hospital overview.",
         font=("Arial", 11),
         bg=PINK_LIGHT,
         fg=TEXT_DARK
     ).pack(anchor="w", pady=(5, 0))
 
-# Statistic cards
+    # Statistic cards
     cards_frame = tk.Frame(content, bg=PINK_LIGHT)
     cards_frame.pack(fill="x", padx=18, pady=5)
 
@@ -543,7 +582,7 @@ def show_dashboard(username=None):
         today_discharge_count, 1, 1
     )
 
-# Patient records heading
+    # Patient records heading
     tk.Label(
         content,
         text="Patient Records",
@@ -552,7 +591,7 @@ def show_dashboard(username=None):
         fg=PINK_DARK
     ).pack(anchor="w", padx=25, pady=(20, 10))
 
-# Patient table
+    # Patient table
     table_frame = tk.Frame(content, bg=WHITE)
     table_frame.pack(
         fill="both",
@@ -562,6 +601,7 @@ def show_dashboard(username=None):
     )
 
     columns = ("patient_id", "name", "bed_id", "status")
+
     patient_table = ttk.Treeview(
         table_frame,
         columns=columns,
@@ -586,6 +626,7 @@ def show_dashboard(username=None):
     )
 
     patient_table.configure(yscrollcommand=scrollbar.set)
+
     patient_table.pack(
         side="left",
         fill="both",
@@ -593,9 +634,10 @@ def show_dashboard(username=None):
         padx=8,
         pady=8
     )
+
     scrollbar.pack(side="right", fill="y", pady=8)
 
-# Display recent patient records
+    # Display recent patient records
     for patient in patients[-100:]:
         patient_table.insert(
             "",
@@ -608,7 +650,7 @@ def show_dashboard(username=None):
             )
         )
 
-# Footer
+    # Footer
     tk.Label(
         content,
         text="Careflow | Hospital Inpatient Management System",
@@ -617,9 +659,13 @@ def show_dashboard(username=None):
         fg=TEXT_LIGHT
     ).pack(pady=(0, 10))
 
+
 # Log out of the system
 def logout():
     global current_username
+
+    if root is None:
+        return
 
     answer = messagebox.askyesno(
         "Logout",
@@ -630,6 +676,7 @@ def logout():
     if answer:
         current_username = ""
         show_login()
+
 
 # Start the application
 def start_app():
@@ -643,6 +690,7 @@ def start_app():
     setup_styles()
     show_login()
     root.mainloop()
+
 
 if __name__ == "__main__":
     start_app()
