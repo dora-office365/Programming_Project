@@ -1,32 +1,40 @@
 import tkinter as tk
 from tkinter import ttk, messagebox
+import dashboard
 from data import load_database
-
 
 # Pink theme colours
 PINK_DARK = "#7D3458"
 PINK_ACTIVE = "#AD5B82"
 PINK_LIGHT = "#FFF4F8"
 PINK_PALE = "#FCE7F0"
+PINK_BORDER = "#EAC5D5"
 TEXT_DARK = "#49323D"
+TEXT_LIGHT = "#A45B7D"
 WHITE = "#FFFFFF"
-
 
 def show_bed_management(root):
     data = load_database()
     patients = data["patients"]
     beds = data["beds"]
 
+# Remove the previous page
     for widget in root.winfo_children():
         widget.destroy()
 
     root.title("Careflow - Bed Management")
-    root.geometry("1100x700")
+    root.geometry("1150x750")
     root.configure(bg=PINK_LIGHT)
 
-    # Page heading
-    tk.Label(
+# Add the shared navigation menu
+    content = dashboard.add_navigation(
         root,
+        "Bed Management"
+    )
+
+# Page heading
+    tk.Label(
+        content,
         text="Bed Management",
         font=("Arial", 24, "bold"),
         bg=PINK_LIGHT,
@@ -34,15 +42,15 @@ def show_bed_management(root):
     ).pack(anchor="w", padx=25, pady=(20, 5))
 
     tk.Label(
-        root,
+        content,
         text="View available beds and check current bed assignments",
         font=("Arial", 11),
         bg=PINK_LIGHT,
         fg=TEXT_DARK
     ).pack(anchor="w", padx=25, pady=(0, 20))
 
-    # Statistics
-    stats_frame = tk.Frame(root, bg=PINK_LIGHT)
+# Statistics
+    stats_frame = tk.Frame(content, bg=PINK_LIGHT)
     stats_frame.pack(fill="x", padx=25, pady=5)
 
     available_label = tk.Label(
@@ -54,7 +62,12 @@ def show_bed_management(root):
         padx=20,
         pady=18
     )
-    available_label.pack(side="left", fill="x", expand=True, padx=(0, 10))
+    available_label.pack(
+        side="left",
+        fill="x",
+        expand=True,
+        padx=(0, 10)
+    )
 
     occupied_label = tk.Label(
         stats_frame,
@@ -65,10 +78,20 @@ def show_bed_management(root):
         padx=20,
         pady=18
     )
-    occupied_label.pack(side="left", fill="x", expand=True, padx=(10, 0))
+    occupied_label.pack(
+        side="left",
+        fill="x",
+        expand=True,
+        padx=(10, 0)
+    )
 
-    # Search and filter section
-    search_frame = tk.Frame(root, bg=WHITE, padx=15, pady=15)
+# Search and filter section
+    search_frame = tk.Frame(
+        content,
+        bg=WHITE,
+        padx=15,
+        pady=15
+    )
     search_frame.pack(fill="x", padx=25, pady=20)
 
     tk.Label(
@@ -79,8 +102,12 @@ def show_bed_management(root):
         font=("Arial", 10)
     ).pack(side="left")
 
-    search_entry = tk.Entry(search_frame, width=28, font=("Arial", 10))
-    search_entry.pack(side="left", padx=10)
+    search_entry = tk.Entry(
+        search_frame,
+        width=22,
+        font=("Arial", 10)
+    )
+    search_entry.pack(side="left", padx=8)
 
     tk.Label(
         search_frame,
@@ -88,28 +115,38 @@ def show_bed_management(root):
         bg=WHITE,
         fg=TEXT_DARK,
         font=("Arial", 10)
-    ).pack(side="left", padx=(10, 5))
+    ).pack(side="left", padx=(5, 5))
 
     status_box = ttk.Combobox(
         search_frame,
         values=["All", "Available", "Occupied"],
         state="readonly",
-        width=12
+        width=10
     )
     status_box.set("All")
     status_box.pack(side="left", padx=5)
 
-    # Bed information table
-    table_frame = tk.Frame(root, bg=WHITE)
-    table_frame.pack(fill="both", expand=True, padx=25, pady=(0, 15))
+# Bed information table
+    table_frame = tk.Frame(content, bg=WHITE)
+    table_frame.pack(
+        fill="both",
+        expand=True,
+        padx=25,
+        pady=(0, 10)
+    )
 
-    columns = ("bed_id", "status", "patient_id", "patient_name")
+    columns = (
+        "bed_id",
+        "status",
+        "patient_id",
+        "patient_name"
+    )
 
     table = ttk.Treeview(
         table_frame,
         columns=columns,
         show="headings",
-        height=15
+        height=12
     )
 
     table.heading("bed_id", text="Bed ID")
@@ -117,10 +154,10 @@ def show_bed_management(root):
     table.heading("patient_id", text="Patient ID")
     table.heading("patient_name", text="Patient Name")
 
-    table.column("bed_id", width=150, anchor="center")
-    table.column("status", width=150, anchor="center")
-    table.column("patient_id", width=180, anchor="center")
-    table.column("patient_name", width=250, anchor="center")
+    table.column("bed_id", width=120, anchor="center")
+    table.column("status", width=120, anchor="center")
+    table.column("patient_id", width=140, anchor="center")
+    table.column("patient_name", width=180, anchor="center")
 
     scrollbar = ttk.Scrollbar(
         table_frame,
@@ -130,10 +167,16 @@ def show_bed_management(root):
 
     table.configure(yscrollcommand=scrollbar.set)
 
-    table.pack(side="left", fill="both", expand=True, padx=10, pady=10)
+    table.pack(
+        side="left",
+        fill="both",
+        expand=True,
+        padx=10,
+        pady=10
+    )
     scrollbar.pack(side="right", fill="y", pady=10)
 
-    # Find the patient assigned to a bed
+# Find the patient assigned to a bed
     def find_patient(bed):
         patient_id = bed.get("patient_id", "")
 
@@ -144,7 +187,7 @@ def show_bed_management(root):
             ):
                 return patient
 
-        # Also check the patient's bed assignment
+# Check the patient's bed assignment
         for patient in patients:
             if (
                 patient.get("bed_id", "") == bed.get("bed_id", "")
@@ -154,7 +197,7 @@ def show_bed_management(root):
 
         return None
 
-    # Display beds in the table
+# Display beds in the table
     def display_beds():
         for item in table.get_children():
             table.delete(item)
@@ -176,12 +219,12 @@ def show_bed_management(root):
                 patient_id = ""
                 patient_name = ""
 
+# Count all beds before applying filters
             if bed_status == "Available":
                 available_count += 1
             else:
                 occupied_count += 1
 
-            # Match the search keyword
             search_text = (
                 bed.get("bed_id", "") + " "
                 + patient_id + " "
@@ -191,7 +234,10 @@ def show_bed_management(root):
             if keyword and keyword not in search_text:
                 continue
 
-            if selected_status != "All" and selected_status != bed_status:
+            if (
+                selected_status != "All"
+                and selected_status != bed_status
+            ):
                 continue
 
             table.insert(
@@ -213,13 +259,13 @@ def show_bed_management(root):
             text="Occupied Beds: " + str(occupied_count)
         )
 
-    # Clear search and filters
+# Clear search and filters
     def reset_filters():
         search_entry.delete(0, tk.END)
         status_box.set("All")
         display_beds()
 
-    # Open the discharge page for an occupied bed
+# Open the discharge page for an occupied bed
     def discharge_selected():
         selected = table.selection()
 
@@ -243,14 +289,9 @@ def show_bed_management(root):
         from discharge import show_discharge
         show_discharge(root)
 
-    # Return to dashboard
-    def back_to_dashboard():
-        from dashboard import show_dashboard
-        show_dashboard("admin")
-
-    # Buttons
-    button_frame = tk.Frame(root, bg=PINK_LIGHT)
-    button_frame.pack(pady=(0, 15))
+# Buttons
+    button_frame = tk.Frame(content, bg=PINK_LIGHT)
+    button_frame.pack(pady=(0, 12))
 
     tk.Button(
         button_frame,
@@ -258,7 +299,10 @@ def show_bed_management(root):
         command=display_beds,
         bg=PINK_ACTIVE,
         fg=WHITE,
-        width=12
+        activebackground=PINK_DARK,
+        font=("Arial", 10),
+        width=10,
+        cursor="hand2"
     ).pack(side="left", padx=5)
 
     tk.Button(
@@ -267,7 +311,9 @@ def show_bed_management(root):
         command=reset_filters,
         bg=PINK_PALE,
         fg=TEXT_DARK,
-        width=12
+        font=("Arial", 10),
+        width=12,
+        cursor="hand2"
     ).pack(side="left", padx=5)
 
     tk.Button(
@@ -276,20 +322,21 @@ def show_bed_management(root):
         command=discharge_selected,
         bg=PINK_DARK,
         fg=WHITE,
-        width=16
+        activebackground=PINK_ACTIVE,
+        font=("Arial", 10),
+        width=16,
+        cursor="hand2"
     ).pack(side="left", padx=5)
 
-    tk.Button(
-        button_frame,
-        text="Back to Dashboard",
-        command=back_to_dashboard,
-        bg=WHITE,
-        fg=PINK_DARK,
-        width=18
-    ).pack(side="left", padx=5)
+# Update the table when the user searches or changes status
+    search_entry.bind(
+        "<KeyRelease>",
+        lambda event: display_beds()
+    )
 
-    # Update the table when the user types or changes status
-    search_entry.bind("<KeyRelease>", lambda event: display_beds())
-    status_box.bind("<<ComboboxSelected>>", lambda event: display_beds())
+    status_box.bind(
+        "<<ComboboxSelected>>",
+        lambda event: display_beds()
+    )
 
     display_beds()
