@@ -14,13 +14,14 @@ TEXT_DARK = "#49323D"
 TEXT_LIGHT = "#A45B7D"
 WHITE = "#FFFFFF"
 
+
 def show_patients(root):
-    # Load the shared database
+    # Load the shared JSON database
     data = load_database()
     patients = data["patients"]
     beds = data["beds"]
 
-# Clear the previous page
+    # Clear the previous page
     for widget in root.winfo_children():
         widget.destroy()
 
@@ -28,13 +29,12 @@ def show_patients(root):
     root.geometry("1150x750")
     root.configure(bg=PINK_LIGHT)
 
-# Add the shared navigation menu
+    # Shared navigation menu
     content = dashboard.add_navigation(
-        root,
-        "Patient Information"
+        root, "Patient Information"
     )
 
-# Page heading
+    # Page heading
     tk.Label(
         content,
         text="Patient Information",
@@ -51,7 +51,7 @@ def show_patients(root):
         fg=TEXT_DARK
     ).pack(anchor="w", padx=20, pady=(0, 10))
 
-# Main content area
+    # Main content area
     main_content = tk.Frame(content, bg=PINK_LIGHT)
     main_content.pack(
         fill="both",
@@ -60,7 +60,7 @@ def show_patients(root):
         pady=(0, 12)
     )
 
-# Patient information form
+    # Patient information form
     form = tk.LabelFrame(
         main_content,
         text="Patient Details",
@@ -84,7 +84,7 @@ def show_patients(root):
 
     entries = {}
 
-# Create text fields
+    # Create text fields
     for row, (label_text, field_name) in enumerate(fields):
         tk.Label(
             form,
@@ -95,11 +95,12 @@ def show_patients(root):
         ).grid(row=row, column=0, sticky="w", pady=4)
 
         entry = tk.Entry(form, width=19, font=("Arial", 9))
-        entry.grid(row=row, column=1, padx=(6, 0), pady=4)
-
+        entry.grid(
+            row=row, column=1, padx=(6, 0), pady=4
+        )
         entries[field_name] = entry
 
-# Gender selection
+    # Gender selection
     tk.Label(
         form,
         text="Gender",
@@ -114,9 +115,11 @@ def show_patients(root):
         state="readonly",
         width=17
     )
-    gender_box.grid(row=7, column=1, padx=(6, 0), pady=4)
+    gender_box.grid(
+        row=7, column=1, padx=(6, 0), pady=4
+    )
 
-# Bed selection
+    # Bed selection
     tk.Label(
         form,
         text="Assign Bed",
@@ -130,12 +133,14 @@ def show_patients(root):
         state="readonly",
         width=17
     )
-    bed_box.grid(row=8, column=1, padx=(6, 0), pady=4)
+    bed_box.grid(
+        row=8, column=1, padx=(6, 0), pady=4
+    )
 
-# Remember the selected patient
+    # Remember the selected patient
     selected_id = [""]
 
-# Patient records section
+    # Patient records section
     result = tk.LabelFrame(
         main_content,
         text="Patient Records",
@@ -147,7 +152,7 @@ def show_patients(root):
     )
     result.pack(side="right", fill="both", expand=True)
 
-# Search box
+    # Search box
     tk.Label(
         result,
         text="Search by Patient ID or Name",
@@ -159,7 +164,7 @@ def show_patients(root):
     search = tk.Entry(result, font=("Arial", 10))
     search.pack(fill="x", pady=(5, 8))
 
-# Patient table
+    # Patient table
     columns = ("id", "name", "gender", "bed", "status")
 
     tree = ttk.Treeview(
@@ -185,21 +190,29 @@ def show_patients(root):
         orient="vertical",
         command=tree.yview
     )
-
     tree.configure(yscrollcommand=scrollbar.set)
 
     tree.pack(side="left", fill="both", expand=True)
     scrollbar.pack(side="right", fill="y")
 
-# Update the available bed choices
+    # Refresh data from the shared JSON file
+    def refresh_data():
+        nonlocal data, patients, beds
+
+        data = load_database()
+        patients = data["patients"]
+        beds = data["beds"]
+
+    # Update available bed choices
     def update_beds():
+        refresh_data()
         choices = []
 
         for bed in beds:
             if bed.get("status") == "Available":
                 choices.append(bed.get("bed_id", ""))
 
-# Keep the selected patient's existing bed available
+        # Keep the selected patient's current bed selectable
         for patient in patients:
             if patient.get("patient_id") == selected_id[0]:
                 current_bed = patient.get("bed_id", "")
@@ -212,16 +225,18 @@ def show_patients(root):
         if bed_box.get() not in choices:
             bed_box.set("")
 
-# Display and search patient records
-    def display_patients():
+    # Display and search patient records
+    def display_patients(event=None):
+        refresh_data()
+
         for item in tree.get_children():
             tree.delete(item)
 
         keyword = search.get().strip().lower()
 
         for patient in patients:
-            patient_id = patient.get("patient_id", "")
-            patient_name = patient.get("name", "")
+            patient_id = str(patient.get("patient_id", ""))
+            patient_name = str(patient.get("name", ""))
 
             if (
                 keyword in patient_id.lower()
@@ -239,14 +254,18 @@ def show_patients(root):
                     )
                 )
 
-# Show the selected patient's information
+    # Show the selected patient's information
     def view_patient(event=None):
         selected = tree.selection()
 
         if not selected:
             return
 
-        patient_id = tree.item(selected[0], "values")[0]
+        patient_id = tree.item(
+            selected[0], "values"
+        )[0]
+
+        refresh_data()
 
         for patient in patients:
             if patient.get("patient_id", "") == patient_id:
@@ -254,7 +273,9 @@ def show_patients(root):
 
                 for key, entry in entries.items():
                     entry.delete(0, tk.END)
-                    entry.insert(0, patient.get(key, ""))
+                    entry.insert(
+                        0, patient.get(key, "")
+                    )
 
                 gender_box.set(patient.get("gender", ""))
 
@@ -267,19 +288,21 @@ def show_patients(root):
 
                 break
 
-# Check the date format
+    # Validate date of birth
     def valid_date(dob):
         if not dob:
             return True
 
         try:
-            date.fromisoformat(dob)
-            return True
+            birth_date = date.fromisoformat(dob)
+            return birth_date <= date.today()
         except ValueError:
             return False
 
-# Register a new patient
+    # Register a new patient
     def register_patient():
+        refresh_data()
+
         patient = {}
 
         for key, entry in entries.items():
@@ -287,6 +310,7 @@ def show_patients(root):
 
         patient["gender"] = gender_box.get()
 
+        # Check required information
         if not patient["patient_id"] or not patient["name"]:
             messagebox.showwarning(
                 "Missing Information",
@@ -297,20 +321,24 @@ def show_patients(root):
         if not valid_date(patient["dob"]):
             messagebox.showwarning(
                 "Invalid Date",
-                "Enter the date of birth in YYYY-MM-DD format."
+                "Enter a valid date of birth in YYYY-MM-DD format. "
+                "The date cannot be in the future."
             )
             return
 
-# Check for duplicate Patient IDs
+        # Check for duplicate patient IDs
         for old_patient in patients:
-            if old_patient.get("patient_id", "") == patient["patient_id"]:
+            if (
+                old_patient.get("patient_id", "")
+                == patient["patient_id"]
+            ):
                 messagebox.showerror(
                     "Duplicate ID",
                     "This Patient ID already exists."
                 )
                 return
 
-# Every new patient must have a bed
+        # Every new patient must have a bed
         selected_bed = bed_box.get().strip()
 
         if not selected_bed:
@@ -320,7 +348,7 @@ def show_patients(root):
             )
             return
 
-# Check that the selected bed is available
+        # Confirm that the selected bed is still available
         bed_available = False
 
         for bed in beds:
@@ -332,7 +360,8 @@ def show_patients(root):
         if not bed_available:
             messagebox.showwarning(
                 "Bed Unavailable",
-                "Please select an available bed."
+                "This bed is no longer available. "
+                "Please select another bed."
             )
             update_beds()
             return
@@ -343,12 +372,12 @@ def show_patients(root):
         patient["discharge_date"] = ""
         patient["payment_confirmed"] = ""
 
-# Add any missing fields
+        # Add any missing fields required by data.py
         for field in PATIENT_FIELDS:
             if field not in patient:
                 patient[field] = ""
 
-# Mark the selected bed as occupied
+        # Mark the bed as occupied
         for bed in beds:
             if bed.get("bed_id") == selected_bed:
                 bed["status"] = "Occupied"
@@ -366,8 +395,10 @@ def show_patients(root):
             "Patient registered successfully."
         )
 
-# Update an existing patient
+    # Update an existing patient
     def update_patient():
+        refresh_data()
+
         patient_id = selected_id[0]
 
         if not patient_id:
@@ -391,6 +422,7 @@ def show_patients(root):
             )
             return
 
+        # Do not edit discharged patients
         if selected_patient.get("status") == "Discharged":
             messagebox.showwarning(
                 "Discharged Patient",
@@ -398,7 +430,17 @@ def show_patients(root):
             )
             return
 
-# Check required fields
+        # Patient ID must not change
+        entered_id = entries["patient_id"].get().strip()
+
+        if entered_id != patient_id:
+            messagebox.showwarning(
+                "Patient ID Cannot Be Changed",
+                "Please keep the original Patient ID."
+            )
+            return
+
+        # Check required information
         if not entries["name"].get().strip():
             messagebox.showwarning(
                 "Missing Information",
@@ -411,14 +453,15 @@ def show_patients(root):
         if not valid_date(dob):
             messagebox.showwarning(
                 "Invalid Date",
-                "Enter the date of birth in YYYY-MM-DD format."
+                "Enter a valid date of birth in YYYY-MM-DD format. "
+                "The date cannot be in the future."
             )
             return
 
         old_bed = selected_patient.get("bed_id", "")
         new_bed = bed_box.get().strip()
 
-# A patient must always have an assigned bed
+        # A patient must always have a bed
         if not new_bed:
             messagebox.showwarning(
                 "Bed Required",
@@ -426,7 +469,7 @@ def show_patients(root):
             )
             return
 
-# Check the new bed if the assignment changes
+        # Check availability if the bed is changing
         if new_bed != old_bed:
             bed_available = False
 
@@ -444,7 +487,7 @@ def show_patients(root):
                 update_beds()
                 return
 
-# Release the old bed and assign the new bed
+        # Release the old bed and occupy the new bed
         if old_bed != new_bed:
             for bed in beds:
                 if bed.get("bed_id") == old_bed:
@@ -458,9 +501,10 @@ def show_patients(root):
                     bed["patient_id"] = patient_id
                     break
 
-# Update patient details
+        # Update patient details without changing the ID
         for key, entry in entries.items():
-            selected_patient[key] = entry.get().strip()
+            if key != "patient_id":
+                selected_patient[key] = entry.get().strip()
 
         selected_patient["gender"] = gender_box.get()
         selected_patient["bed_id"] = new_bed
@@ -476,7 +520,7 @@ def show_patients(root):
             "Patient information updated successfully."
         )
 
-# Clear the form
+    # Clear the form
     def clear_form():
         for entry in entries.values():
             entry.delete(0, tk.END)
@@ -490,7 +534,7 @@ def show_patients(root):
 
         update_beds()
 
-# Buttons
+    # Buttons
     button_frame = tk.Frame(form, bg=WHITE)
     button_frame.grid(
         row=9,
@@ -533,10 +577,10 @@ def show_patients(root):
         font=("Arial", 9)
     ).pack(side="left", padx=2)
 
-# Search and table selection
+    # Search and table selection
     search.bind("<KeyRelease>", display_patients)
     tree.bind("<<TreeviewSelect>>", view_patient)
 
-# Show initial data
+    # Show initial data
     update_beds()
     display_patients()
