@@ -1,10 +1,8 @@
 import json
 import os
 
-
 # Name of the database file
 DATA_FILE = "hospital_database.json"
-
 
 # Fields used to store patient information
 PATIENT_FIELDS = [
@@ -22,7 +20,6 @@ PATIENT_FIELDS = [
     "discharge_date",
     "payment_confirmed"
 ]
-
 
 # Default data used when the database does not exist
 DEFAULT_DATA = {
@@ -45,12 +42,10 @@ DEFAULT_DATA = {
     ]
 }
 
-
 # Save data to the JSON file
 def save_database(data):
     with open(DATA_FILE, "w", encoding="utf-8") as file:
         json.dump(data, file, indent=4, ensure_ascii=False)
-
 
 # Load data from the JSON file
 def load_database():
@@ -69,9 +64,9 @@ def load_database():
         print("Error: Unable to read the database file.")
         return json.loads(json.dumps(DEFAULT_DATA))
 
-    # Add missing sections if necessary
+# Add missing sections if necessary
     if "users" not in data:
-        data["users"] = DEFAULT_DATA["users"]
+    data["users"] = json.loads(json.dumps(DEFAULT_DATA["users"]))
 
     if "patients" not in data:
         data["patients"] = []
@@ -79,17 +74,17 @@ def load_database():
     if "beds" not in data:
         data["beds"] = json.loads(json.dumps(DEFAULT_DATA["beds"]))
 
-    # Add missing fields to existing patient records
+# Add missing fields to existing patient records
     for patient in data["patients"]:
         for field in PATIENT_FIELDS:
             if field not in patient:
                 patient[field] = ""
 
-        # Give older records a default status
+# Give older records a default status
         if not patient["status"]:
             patient["status"] = "Registered"
 
-    # Add missing fields to existing bed records
+# Add missing fields to existing bed records
     for bed in data["beds"]:
         if "bed_id" not in bed:
             bed["bed_id"] = ""
