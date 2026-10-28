@@ -97,5 +97,4 @@ def load_database():
 
     # Save any updates to the database structure
     save_database(data)
-
     return data
