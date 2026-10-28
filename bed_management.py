@@ -14,11 +14,7 @@ TEXT_LIGHT = "#A45B7D"
 WHITE = "#FFFFFF"
 
 def show_bed_management(root):
-    data = load_database()
-    patients = data["patients"]
-    beds = data["beds"]
-
-# Remove the previous page
+    # Clear the previous page
     for widget in root.winfo_children():
         widget.destroy()
 
@@ -26,13 +22,13 @@ def show_bed_management(root):
     root.geometry("1150x750")
     root.configure(bg=PINK_LIGHT)
 
-# Add the shared navigation menu
+    # Add the shared navigation menu
     content = dashboard.add_navigation(
         root,
         "Bed Management"
     )
 
-# Page heading
+    # Page heading
     tk.Label(
         content,
         text="Bed Management",
@@ -49,7 +45,7 @@ def show_bed_management(root):
         fg=TEXT_DARK
     ).pack(anchor="w", padx=25, pady=(0, 20))
 
-# Statistics
+    # Statistics
     stats_frame = tk.Frame(content, bg=PINK_LIGHT)
     stats_frame.pack(fill="x", padx=25, pady=5)
 
@@ -85,7 +81,7 @@ def show_bed_management(root):
         padx=(10, 0)
     )
 
-# Search and filter section
+    # Search and filter section
     search_frame = tk.Frame(
         content,
         bg=WHITE,
@@ -126,7 +122,7 @@ def show_bed_management(root):
     status_box.set("All")
     status_box.pack(side="left", padx=5)
 
-# Bed information table
+    # Bed information table
     table_frame = tk.Frame(content, bg=WHITE)
     table_frame.pack(
         fill="both",
@@ -176,57 +172,66 @@ def show_bed_management(root):
     )
     scrollbar.pack(side="right", fill="y", pady=10)
 
-# Find the patient assigned to a bed
-    def find_patient(bed):
-        patient_id = bed.get("patient_id", "")
+    # Find the patient assigned to a bed
+    def find_patient(bed, patients):
+        bed_id = str(bed.get("bed_id", ""))
+        bed_patient_id = str(bed.get("patient_id", ""))
 
         for patient in patients:
-            if (
-                patient.get("patient_id", "") == patient_id
-                and patient.get("status", "") != "Discharged"
-            ):
+            if patient.get("status", "") == "Discharged":
+                continue
+
+            patient_bed_id = str(patient.get("bed_id", ""))
+            patient_id = str(patient.get("patient_id", ""))
+
+            if patient_bed_id == bed_id and patient_bed_id:
                 return patient
 
-# Check the patient's bed assignment
-        for patient in patients:
-            if (
-                patient.get("bed_id", "") == bed.get("bed_id", "")
-                and patient.get("status", "") != "Discharged"
-            ):
+            if bed_patient_id and patient_id == bed_patient_id:
                 return patient
 
         return None
 
-# Display beds in the table
+    # Display beds in the table
     def display_beds():
         for item in table.get_children():
             table.delete(item)
 
+        # Reload the shared database
+        data = load_database()
+        patients = data["patients"]
+        beds = data["beds"]
+
         available_count = 0
         occupied_count = 0
+
         keyword = search_entry.get().strip().lower()
         selected_status = status_box.get()
 
         for bed in beds:
-            patient = find_patient(bed)
+            patient = find_patient(bed, patients)
 
             if patient:
                 bed_status = "Occupied"
-                patient_id = patient.get("patient_id", "")
-                patient_name = patient.get("name", "")
+                patient_id = str(
+                    patient.get("patient_id", "")
+                )
+                patient_name = str(
+                    patient.get("name", "")
+                )
             else:
                 bed_status = "Available"
                 patient_id = ""
                 patient_name = ""
 
-# Count all beds before applying filters
+            # Count all beds before applying filters
             if bed_status == "Available":
                 available_count += 1
             else:
                 occupied_count += 1
 
             search_text = (
-                bed.get("bed_id", "") + " "
+                str(bed.get("bed_id", "")) + " "
                 + patient_id + " "
                 + patient_name
             ).lower()
@@ -259,20 +264,21 @@ def show_bed_management(root):
             text="Occupied Beds: " + str(occupied_count)
         )
 
-# Clear search and filters
+    # Clear search and filters
     def reset_filters():
         search_entry.delete(0, tk.END)
         status_box.set("All")
         display_beds()
 
-# Open the discharge page for an occupied bed
+    # Open the discharge page for an occupied bed
     def discharge_selected():
         selected = table.selection()
 
         if not selected:
             messagebox.showwarning(
                 "Select Bed",
-                "Please select a bed first."
+                "Please select a bed first.",
+                parent=root
             )
             return
 
@@ -282,14 +288,15 @@ def show_bed_management(root):
         if bed_status != "Occupied":
             messagebox.showinfo(
                 "Available Bed",
-                "This bed is already available."
+                "This bed is already available.",
+                parent=root
             )
             return
 
         from discharge import show_discharge
         show_discharge(root)
 
-# Buttons
+    # Buttons
     button_frame = tk.Frame(content, bg=PINK_LIGHT)
     button_frame.pack(pady=(0, 12))
 
@@ -311,6 +318,7 @@ def show_bed_management(root):
         command=reset_filters,
         bg=PINK_PALE,
         fg=TEXT_DARK,
+        activebackground=PINK_LIGHT,
         font=("Arial", 10),
         width=12,
         cursor="hand2"
@@ -328,7 +336,7 @@ def show_bed_management(root):
         cursor="hand2"
     ).pack(side="left", padx=5)
 
-# Update the table when the user searches or changes status
+    # Update the table when searching or changing status
     search_entry.bind(
         "<KeyRelease>",
         lambda event: display_beds()
@@ -339,4 +347,5 @@ def show_bed_management(root):
         lambda event: display_beds()
     )
 
+    # Show beds when the page opens
     display_beds()
