@@ -6,6 +6,7 @@ DATA_FILE = "hospital_database.json"
 
 # Fields used to store patient information
 PATIENT_FIELDS = [
+    "patient_ic"
     "patient_id",
     "name",
     "dob",
