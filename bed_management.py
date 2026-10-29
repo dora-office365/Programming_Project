@@ -13,6 +13,7 @@ TEXT_DARK = "#49323D"
 TEXT_LIGHT = "#A45B7D"
 WHITE = "#FFFFFF"
 
+
 def show_bed_management(root):
     # Clear the previous page
     for widget in root.winfo_children():
@@ -92,7 +93,7 @@ def show_bed_management(root):
 
     tk.Label(
         search_frame,
-        text="Search by Bed ID, Patient ID or Name:",
+        text="Search by Bed ID, Patient IC, ID or Name:",
         bg=WHITE,
         fg=TEXT_DARK,
         font=("Arial", 10)
@@ -134,6 +135,7 @@ def show_bed_management(root):
     columns = (
         "bed_id",
         "status",
+        "patient_ic",
         "patient_id",
         "patient_name"
     )
@@ -145,15 +147,29 @@ def show_bed_management(root):
         height=12
     )
 
+    # Table headings
     table.heading("bed_id", text="Bed ID")
     table.heading("status", text="Bed Status")
+    table.heading("patient_ic", text="Patient IC")
     table.heading("patient_id", text="Patient ID")
     table.heading("patient_name", text="Patient Name")
 
-    table.column("bed_id", width=120, anchor="center")
-    table.column("status", width=120, anchor="center")
-    table.column("patient_id", width=140, anchor="center")
-    table.column("patient_name", width=180, anchor="center")
+    # Table column widths
+    table.column(
+        "bed_id", width=100, anchor="center"
+    )
+    table.column(
+        "status", width=100, anchor="center"
+    )
+    table.column(
+        "patient_ic", width=140, anchor="center"
+    )
+    table.column(
+        "patient_id", width=110, anchor="center"
+    )
+    table.column(
+        "patient_name", width=160, anchor="center"
+    )
 
     scrollbar = ttk.Scrollbar(
         table_frame,
@@ -181,8 +197,12 @@ def show_bed_management(root):
             if patient.get("status", "") == "Discharged":
                 continue
 
-            patient_bed_id = str(patient.get("bed_id", ""))
-            patient_id = str(patient.get("patient_id", ""))
+            patient_bed_id = str(
+                patient.get("bed_id", "")
+            )
+            patient_id = str(
+                patient.get("patient_id", "")
+            )
 
             if patient_bed_id == bed_id and patient_bed_id:
                 return patient
@@ -213,6 +233,9 @@ def show_bed_management(root):
 
             if patient:
                 bed_status = "Occupied"
+                patient_ic = str(
+                    patient.get("patient_ic", "")
+                )
                 patient_id = str(
                     patient.get("patient_id", "")
                 )
@@ -221,6 +244,7 @@ def show_bed_management(root):
                 )
             else:
                 bed_status = "Available"
+                patient_ic = ""
                 patient_id = ""
                 patient_name = ""
 
@@ -230,8 +254,10 @@ def show_bed_management(root):
             else:
                 occupied_count += 1
 
+            # Include Patient IC in the search
             search_text = (
                 str(bed.get("bed_id", "")) + " "
+                + patient_ic + " "
                 + patient_id + " "
                 + patient_name
             ).lower()
@@ -251,6 +277,7 @@ def show_bed_management(root):
                 values=(
                     bed.get("bed_id", ""),
                     bed_status,
+                    patient_ic or "-",
                     patient_id or "-",
                     patient_name or "-"
                 )
