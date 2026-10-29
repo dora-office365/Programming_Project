@@ -598,7 +598,9 @@ def show_dashboard(username=None):
         "patient_id",
         "name",
         "bed_id",
-        "status"
+        "status",
+        "admission_date",
+        "discharge_date"
     )
 
     patient_table = ttk.Treeview(
@@ -614,21 +616,17 @@ def show_dashboard(username=None):
     patient_table.heading("name", text="Patient Name")
     patient_table.heading("bed_id", text="Bed ID")
     patient_table.heading("status", text="Status")
+    patient_table.heading("admission_date", text="Admission Date")
+    patient_table.heading("discharge_date", text="Discharge Date")
 
     # Table column widths
-    patient_table.column(
-        "patient_ic", width=140, anchor="center"
-    )
-    patient_table.column(
-        "patient_id", width=110, anchor="center"
-    )
+    patient_table.column("patient_ic", width=140, anchor="center")
+    patient_table.column("patient_id", width=110, anchor="center")
     patient_table.column("name", width=180)
-    patient_table.column(
-        "bed_id", width=110, anchor="center"
-    )
-    patient_table.column(
-        "status", width=130, anchor="center"
-    )
+    patient_table.column("bed_id", width=110, anchor="center")
+    patient_table.column("status", width=130, anchor="center")
+    patient_table.column("admission_date", width=110, anchor="center")
+    patient_table.column("discharge_date", width=110, anchor="center")
 
     scrollbar = ttk.Scrollbar(
         table_frame,
@@ -656,7 +654,9 @@ def show_dashboard(username=None):
                 patient.get("patient_id", ""),
                 patient.get("name", ""),
                 patient.get("bed_id", "") or "-",
-                patient.get("status", "Registered")
+                patient.get("status", "Registered"),
+                patient.get("admission_date", "") ,
+                patient.get("discharge_date", "") or "-"
             )
         )
 
