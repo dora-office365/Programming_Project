@@ -72,6 +72,7 @@ def show_patients(root):
     )
     form.pack(side="left", fill="y", padx=(0, 12))
 
+    # Patient fields, including Patient IC
     fields = [
         ("Patient IC", "patient_ic"),
         ("Patient ID", "patient_id"),
@@ -95,9 +96,16 @@ def show_patients(root):
             font=("Arial", 9)
         ).grid(row=row, column=0, sticky="w", pady=4)
 
-        entry = tk.Entry(form, width=19, font=("Arial", 9))
+        entry = tk.Entry(
+            form,
+            width=19,
+            font=("Arial", 9)
+        )
         entry.grid(
-            row=row, column=1, padx=(6, 0), pady=4
+            row=row,
+            column=1,
+            padx=(6, 0),
+            pady=4
         )
         entries[field_name] = entry
 
@@ -108,7 +116,7 @@ def show_patients(root):
         bg=WHITE,
         fg=TEXT_DARK,
         font=("Arial", 9)
-    ).grid(row=7, column=0, sticky="w", pady=4)
+    ).grid(row=8, column=0, sticky="w", pady=4)
 
     gender_box = ttk.Combobox(
         form,
@@ -117,7 +125,10 @@ def show_patients(root):
         width=17
     )
     gender_box.grid(
-        row=7, column=1, padx=(6, 0), pady=4
+        row=8,
+        column=1,
+        padx=(6, 0),
+        pady=4
     )
 
     # Bed selection
@@ -127,7 +138,7 @@ def show_patients(root):
         bg=WHITE,
         fg=TEXT_DARK,
         font=("Arial", 9)
-    ).grid(row=8, column=0, sticky="w", pady=4)
+    ).grid(row=9, column=0, sticky="w", pady=4)
 
     bed_box = ttk.Combobox(
         form,
@@ -135,7 +146,10 @@ def show_patients(root):
         width=17
     )
     bed_box.grid(
-        row=8, column=1, padx=(6, 0), pady=4
+        row=9,
+        column=1,
+        padx=(6, 0),
+        pady=4
     )
 
     # Remember the selected patient
@@ -151,22 +165,32 @@ def show_patients(root):
         padx=8,
         pady=8
     )
-    result.pack(side="right", fill="both", expand=True)
+    result.pack(
+        side="right",
+        fill="both",
+        expand=True
+    )
 
     # Search box
     tk.Label(
         result,
-        text="Search by Patient ID or Name",
+        text="Search by Patient ID, Name or IC",
         bg=WHITE,
         fg=TEXT_DARK,
         font=("Arial", 9)
     ).pack(anchor="w")
 
-    search = tk.Entry(result, font=("Arial", 10))
+    search = tk.Entry(
+        result,
+        font=("Arial", 10)
+    )
     search.pack(fill="x", pady=(5, 8))
 
     # Patient table
-    columns = ("id", "name", "gender", "bed", "status")
+    columns = (
+        "ic", "id", "name",
+        "gender", "bed", "status"
+    )
 
     tree = ttk.Treeview(
         result,
@@ -174,12 +198,14 @@ def show_patients(root):
         show="headings"
     )
 
+    tree.heading("ic", text="Patient IC")
     tree.heading("id", text="Patient ID")
     tree.heading("name", text="Patient Name")
     tree.heading("gender", text="Gender")
     tree.heading("bed", text="Bed")
     tree.heading("status", text="Status")
 
+    tree.column("ic", width=110, anchor="center")
     tree.column("id", width=75, anchor="center")
     tree.column("name", width=105)
     tree.column("gender", width=65, anchor="center")
@@ -193,7 +219,11 @@ def show_patients(root):
     )
     tree.configure(yscrollcommand=scrollbar.set)
 
-    tree.pack(side="left", fill="both", expand=True)
+    tree.pack(
+        side="left",
+        fill="both",
+        expand=True
+    )
     scrollbar.pack(side="right", fill="y")
 
     # Refresh data from the shared JSON file
@@ -236,21 +266,31 @@ def show_patients(root):
         keyword = search.get().strip().lower()
 
         for patient in patients:
-            patient_id = str(patient.get("patient_id", ""))
-            patient_name = str(patient.get("name", ""))
+            patient_id = str(
+                patient.get("patient_id", "")
+            )
+            patient_name = str(
+                patient.get("name", "")
+            )
+            patient_ic = str(
+                patient.get("patient_ic", "")
+            )
 
+            # Search by Patient ID, name or IC
             if (
                 keyword in patient_id.lower()
                 or keyword in patient_name.lower()
+                or keyword in patient_ic.lower()
             ):
                 tree.insert(
                     "",
                     "end",
                     values=(
+                        patient_ic,
                         patient_id,
                         patient_name,
                         patient.get("gender", ""),
-                        patient.get("bed_id", "") or "-",
+                        patient.get("bed_id", ""),
                         patient.get("status", "Registered")
                     )
                 )
@@ -262,23 +302,28 @@ def show_patients(root):
         if not selected:
             return
 
+        # Patient ID is the second table column
         patient_id = tree.item(
             selected[0], "values"
-        )[0]
+        )[1]
 
         refresh_data()
 
         for patient in patients:
-            if patient.get("patient_id", "") == patient_id:
+            if str(patient.get("patient_id", "")) == str(patient_id):
                 selected_id[0] = patient_id
 
+                # Fill all form fields, including Patient IC
                 for key, entry in entries.items():
                     entry.delete(0, tk.END)
                     entry.insert(
-                        0, patient.get(key, "")
+                        0,
+                        str(patient.get(key, ""))
                     )
 
-                gender_box.set(patient.get("gender", ""))
+                gender_box.set(
+                    patient.get("gender", "")
+                )
 
                 update_beds()
 
@@ -306,6 +351,7 @@ def show_patients(root):
 
         patient = {}
 
+        # Collect all form information, including Patient IC
         for key, entry in entries.items():
             patient[key] = entry.get().strip()
 
@@ -330,7 +376,7 @@ def show_patients(root):
         # Check for duplicate patient IDs
         for old_patient in patients:
             if (
-                old_patient.get("patient_id", "")
+                str(old_patient.get("patient_id", ""))
                 == patient["patient_id"]
             ):
                 messagebox.showerror(
@@ -367,6 +413,7 @@ def show_patients(root):
             update_beds()
             return
 
+        # Set patient admission information
         patient["bed_id"] = selected_bed
         patient["admission_date"] = date.today().isoformat()
         patient["status"] = "Registered"
@@ -385,6 +432,7 @@ def show_patients(root):
                 bed["patient_id"] = patient["patient_id"]
                 break
 
+        # Save patient and bed information to the shared JSON
         patients.append(patient)
         save_database(data)
 
@@ -412,7 +460,7 @@ def show_patients(root):
         selected_patient = None
 
         for patient in patients:
-            if patient.get("patient_id", "") == patient_id:
+            if str(patient.get("patient_id", "")) == str(patient_id):
                 selected_patient = patient
                 break
 
@@ -502,7 +550,7 @@ def show_patients(root):
                     bed["patient_id"] = patient_id
                     break
 
-        # Update patient details without changing the ID
+        # Update patient details without changing Patient ID
         for key, entry in entries.items():
             if key != "patient_id":
                 selected_patient[key] = entry.get().strip()
@@ -511,6 +559,7 @@ def show_patients(root):
         selected_patient["bed_id"] = new_bed
         selected_patient["status"] = "Registered"
 
+        # Save updated information to the shared JSON
         save_database(data)
 
         display_patients()
@@ -536,9 +585,12 @@ def show_patients(root):
         update_beds()
 
     # Buttons
-    button_frame = tk.Frame(form, bg=WHITE)
+    button_frame = tk.Frame(
+        form,
+        bg=WHITE
+    )
     button_frame.grid(
-        row=9,
+        row=10,
         column=0,
         columnspan=2,
         pady=12
