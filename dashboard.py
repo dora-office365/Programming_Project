@@ -592,7 +592,14 @@ def show_dashboard(username=None):
         pady=(0, 10)
     )
 
-    columns = ("patient_id", "name", "bed_id", "status")
+    # Patient IC is now the first column
+    columns = (
+        "patient_ic",
+        "patient_id",
+        "name",
+        "bed_id",
+        "status"
+    )
 
     patient_table = ttk.Treeview(
         table_frame,
@@ -601,15 +608,21 @@ def show_dashboard(username=None):
         height=8
     )
 
+    # Table headings
+    patient_table.heading("patient_ic", text="Patient IC")
     patient_table.heading("patient_id", text="Patient ID")
     patient_table.heading("name", text="Patient Name")
     patient_table.heading("bed_id", text="Bed ID")
     patient_table.heading("status", text="Status")
 
+    # Table column widths
+    patient_table.column(
+        "patient_ic", width=140, anchor="center"
+    )
     patient_table.column(
         "patient_id", width=110, anchor="center"
     )
-    patient_table.column("name", width=200)
+    patient_table.column("name", width=180)
     patient_table.column(
         "bed_id", width=110, anchor="center"
     )
@@ -633,12 +646,13 @@ def show_dashboard(username=None):
     )
     scrollbar.pack(side="right", fill="y", pady=8)
 
-    # Display recent patient records
+    # Display recent patient records, including Patient IC
     for patient in patients[-100:]:
         patient_table.insert(
             "",
             "end",
             values=(
+                patient.get("patient_ic", ""),
                 patient.get("patient_id", ""),
                 patient.get("name", ""),
                 patient.get("bed_id", "") or "-",
@@ -686,8 +700,8 @@ def start_app():
     show_login()
     root.mainloop()
 
+#Keep all the modules connected to the same dashboard
 if __name__ == "__main__":
     import sys
-
     sys.modules["dashboard"] = sys.modules["__main__"]
     start_app()
