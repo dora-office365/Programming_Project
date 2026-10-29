@@ -15,6 +15,25 @@ TEXT_LIGHT = "#A45B7D"
 WHITE = "#FFFFFF"
 
 
+# Generate the next Patient ID automatically
+def generate_patient_id():
+    data = load_database()
+    patients = data.get("patients", [])
+
+    highest_number = 0
+
+    for patient in patients:
+        patient_id = str(patient.get("patient_id", ""))
+
+        if patient_id.startswith("P") and patient_id[1:].isdigit():
+            number = int(patient_id[1:])
+
+            if number > highest_number:
+                highest_number = number
+
+    return f"P{highest_number + 1:04d}"
+
+
 def show_patients(root):
     # Load the shared JSON database
     data = load_database()
@@ -72,7 +91,7 @@ def show_patients(root):
     )
     form.pack(side="left", fill="y", padx=(0, 12))
 
-    # Patient fields, including Patient IC
+    # Patient fields
     fields = [
         ("Patient IC", "patient_ic"),
         ("Patient ID", "patient_id"),
@@ -96,18 +115,38 @@ def show_patients(root):
             font=("Arial", 9)
         ).grid(row=row, column=0, sticky="w", pady=4)
 
-        entry = tk.Entry(
-            form,
-            width=19,
-            font=("Arial", 9)
-        )
+        # Patient ID is read-only
+        if field_name == "patient_id":
+            entry = tk.Entry(
+                form,
+                width=19,
+                font=("Arial", 9),
+                state="readonly"
+            )
+        else:
+            entry = tk.Entry(
+                form,
+                width=19,
+                font=("Arial", 9)
+            )
+
         entry.grid(
             row=row,
             column=1,
             padx=(6, 0),
             pady=4
         )
+
         entries[field_name] = entry
+
+    # Display a Patient ID in the read-only field
+    def set_patient_id(patient_id):
+        entry = entries["patient_id"]
+
+        entry.config(state="normal")
+        entry.delete(0, tk.END)
+        entry.insert(0, patient_id)
+        entry.config(state="readonly")
 
     # Gender selection
     tk.Label(
@@ -276,7 +315,6 @@ def show_patients(root):
                 patient.get("patient_ic", "")
             )
 
-            # Search by Patient ID, name or IC
             if (
                 keyword in patient_id.lower()
                 or keyword in patient_name.lower()
@@ -313,13 +351,17 @@ def show_patients(root):
             if str(patient.get("patient_id", "")) == str(patient_id):
                 selected_id[0] = patient_id
 
-                # Fill all form fields, including Patient IC
                 for key, entry in entries.items():
-                    entry.delete(0, tk.END)
-                    entry.insert(
-                        0,
-                        str(patient.get(key, ""))
-                    )
+                    if key == "patient_id":
+                        set_patient_id(
+                            str(patient.get("patient_id", ""))
+                        )
+                    else:
+                        entry.delete(0, tk.END)
+                        entry.insert(
+                            0,
+                            str(patient.get(key, ""))
+                        )
 
                 gender_box.set(
                     patient.get("gender", "")
@@ -349,19 +391,30 @@ def show_patients(root):
     def register_patient():
         refresh_data()
 
+        # Do not register over an existing selected record
+        if selected_id[0]:
+            messagebox.showwarning(
+                "Clear Form First",
+                "Please click Clear before registering a new patient."
+            )
+            return
+
         patient = {}
 
-        # Collect all form information, including Patient IC
+        # Collect all form information
         for key, entry in entries.items():
             patient[key] = entry.get().strip()
+
+        # Generate the Patient ID automatically
+        patient["patient_id"] = generate_patient_id()
 
         patient["gender"] = gender_box.get()
 
         # Check required information
-        if not patient["patient_id"] or not patient["name"]:
+        if not patient["name"]:
             messagebox.showwarning(
                 "Missing Information",
-                "Patient ID and Full Name are required."
+                "Full Name is required."
             )
             return
 
@@ -372,18 +425,6 @@ def show_patients(root):
                 "The date cannot be in the future."
             )
             return
-
-        # Check for duplicate patient IDs
-        for old_patient in patients:
-            if (
-                str(old_patient.get("patient_id", ""))
-                == patient["patient_id"]
-            ):
-                messagebox.showerror(
-                    "Duplicate ID",
-                    "This Patient ID already exists."
-                )
-                return
 
         # Every new patient must have a bed
         selected_bed = bed_box.get().strip()
@@ -420,7 +461,7 @@ def show_patients(root):
         patient["discharge_date"] = ""
         patient["payment_confirmed"] = ""
 
-        # Add any missing fields required by data.py
+        # Add missing fields required by data.py
         for field in PATIENT_FIELDS:
             if field not in patient:
                 patient[field] = ""
@@ -432,7 +473,7 @@ def show_patients(root):
                 bed["patient_id"] = patient["patient_id"]
                 break
 
-        # Save patient and bed information to the shared JSON
+        # Add patient and save shared JSON
         patients.append(patient)
         save_database(data)
 
@@ -441,7 +482,8 @@ def show_patients(root):
 
         messagebox.showinfo(
             "Success",
-            "Patient registered successfully."
+            "Patient registered successfully.\n"
+            f"Patient ID: {patient['patient_id']}"
         )
 
     # Update an existing patient
@@ -476,16 +518,6 @@ def show_patients(root):
             messagebox.showwarning(
                 "Discharged Patient",
                 "A discharged patient's record cannot be updated here."
-            )
-            return
-
-        # Patient ID must not change
-        entered_id = entries["patient_id"].get().strip()
-
-        if entered_id != patient_id:
-            messagebox.showwarning(
-                "Patient ID Cannot Be Changed",
-                "Please keep the original Patient ID."
             )
             return
 
@@ -536,7 +568,7 @@ def show_patients(root):
                 update_beds()
                 return
 
-        # Release the old bed and occupy the new bed
+        # Release old bed and occupy new bed
         if old_bed != new_bed:
             for bed in beds:
                 if bed.get("bed_id") == old_bed:
@@ -559,7 +591,7 @@ def show_patients(root):
         selected_patient["bed_id"] = new_bed
         selected_patient["status"] = "Registered"
 
-        # Save updated information to the shared JSON
+        # Save updated information
         save_database(data)
 
         display_patients()
@@ -570,10 +602,11 @@ def show_patients(root):
             "Patient information updated successfully."
         )
 
-    # Clear the form
+    # Clear the form and show the next Patient ID
     def clear_form():
-        for entry in entries.values():
-            entry.delete(0, tk.END)
+        for key, entry in entries.items():
+            if key != "patient_id":
+                entry.delete(0, tk.END)
 
         gender_box.set("")
         bed_box.set("")
@@ -583,6 +616,7 @@ def show_patients(root):
             tree.selection_remove(item)
 
         update_beds()
+        set_patient_id(generate_patient_id())
 
     # Buttons
     button_frame = tk.Frame(
@@ -634,6 +668,7 @@ def show_patients(root):
     search.bind("<KeyRelease>", display_patients)
     tree.bind("<<TreeviewSelect>>", view_patient)
 
-    # Show initial data
+    # Show initial data and next Patient ID
     update_beds()
     display_patients()
+    set_patient_id(generate_patient_id())
