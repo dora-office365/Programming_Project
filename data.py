@@ -36,7 +36,21 @@ DEFAULT_DATA = {
         {"bed_id": "Bed 103", "status": "Available", "patient_id": ""},
         {"bed_id": "Bed 104", "status": "Available", "patient_id": ""},
         {"bed_id": "Bed 105", "status": "Available", "patient_id": ""},
-        {"bed_id": "Bed 106", "status": "Available", "patient_id": ""}
+        {"bed_id": "Bed 106", "status": "Available", "patient_id": ""},
+        {"bed_id": "Bed 107", "status": "Available", "patient_id": ""},
+        {"bed_id": "Bed 108", "status": "Available", "patient_id": ""},
+        {"bed_id": "Bed 109", "status": "Available", "patient_id": ""},
+        {"bed_id": "Bed 110", "status": "Available", "patient_id": ""},
+        {"bed_id": "Bed 201", "status": "Available", "patient_id": ""},
+        {"bed_id": "Bed 202", "status": "Available", "patient_id": ""},
+        {"bed_id": "Bed 203", "status": "Available", "patient_id": ""},
+        {"bed_id": "Bed 204", "status": "Available", "patient_id": ""},
+        {"bed_id": "Bed 205", "status": "Available", "patient_id": ""},
+        {"bed_id": "Bed 206", "status": "Available", "patient_id": ""},
+        {"bed_id": "Bed 207", "status": "Available", "patient_id": ""},
+        {"bed_id": "Bed 208", "status": "Available", "patient_id": ""},
+        {"bed_id": "Bed 209", "status": "Available", "patient_id": ""},
+        {"bed_id": "Bed 210", "status": "Available", "patient_id": ""}
     ]
 }
 
