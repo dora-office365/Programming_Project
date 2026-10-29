@@ -60,7 +60,7 @@ def show_discharge(root):
 
     tk.Label(
         search_frame,
-        text="Search Patient ID or Name:",
+        text="Search Patient IC, ID or Name:",
         bg=WHITE,
         fg=TEXT_DARK,
         font=("Arial", 10)
@@ -82,7 +82,14 @@ def show_discharge(root):
         pady=(0, 15)
     )
 
-    columns = ("patient_id", "name", "bed_id", "status")
+    # Patient IC is added as the first column
+    columns = (
+        "patient_ic",
+        "patient_id",
+        "name",
+        "bed_id",
+        "status"
+    )
 
     table = ttk.Treeview(
         table_frame,
@@ -91,15 +98,29 @@ def show_discharge(root):
         height=15
     )
 
+    # Table headings
+    table.heading("patient_ic", text="Patient IC")
     table.heading("patient_id", text="Patient ID")
     table.heading("name", text="Patient Name")
     table.heading("bed_id", text="Bed ID")
     table.heading("status", text="Status")
 
-    table.column("patient_id", width=130, anchor="center")
-    table.column("name", width=200, anchor="center")
-    table.column("bed_id", width=120, anchor="center")
-    table.column("status", width=120, anchor="center")
+    # Table column widths
+    table.column(
+        "patient_ic", width=140, anchor="center"
+    )
+    table.column(
+        "patient_id", width=110, anchor="center"
+    )
+    table.column(
+        "name", width=180, anchor="center"
+    )
+    table.column(
+        "bed_id", width=100, anchor="center"
+    )
+    table.column(
+        "status", width=110, anchor="center"
+    )
 
     scrollbar = ttk.Scrollbar(
         table_frame,
@@ -130,15 +151,27 @@ def show_discharge(root):
         keyword = search_entry.get().strip().lower()
 
         for patient in latest_patients:
-            patient_id = str(patient.get("patient_id", ""))
-            patient_name = str(patient.get("name", ""))
-            bed_id = str(patient.get("bed_id", ""))
+            patient_ic = str(
+                patient.get("patient_ic", "")
+            )
+            patient_id = str(
+                patient.get("patient_id", "")
+            )
+            patient_name = str(
+                patient.get("name", "")
+            )
+            bed_id = str(
+                patient.get("bed_id", "")
+            )
             status = patient.get("status", "Registered")
 
             # Only show patients who are not discharged
             if status != "Discharged" and bed_id:
+                # Search by IC, Patient ID or name
                 search_text = (
-                    patient_id + " " + patient_name
+                    patient_ic + " "
+                    + patient_id + " "
+                    + patient_name
                 ).lower()
 
                 if keyword in search_text:
@@ -146,6 +179,7 @@ def show_discharge(root):
                         "",
                         "end",
                         values=(
+                            patient_ic or "-",
                             patient_id,
                             patient_name,
                             bed_id,
@@ -166,7 +200,9 @@ def show_discharge(root):
             return
 
         values = table.item(selected[0], "values")
-        patient_id = str(values[0])
+
+        # Patient ID is the second column because IC is first
+        patient_id = str(values[1])
 
         # Reload the latest shared data before updating it
         latest_data = load_database()
