@@ -6,7 +6,7 @@ DATA_FILE = "hospital_database.json"
 
 # Fields used to store patient information
 PATIENT_FIELDS = [
-    "patient_ic"
+    "patient_ic",
     "patient_id",
     "name",
     "dob",
@@ -82,10 +82,21 @@ def load_database():
 
     if "patients" not in data:
         data["patients"] = []
-
+        
     if "beds" not in data:
         data["beds"] = json.loads(json.dumps(DEFAULT_DATA["beds"]))
-
+    else:
+        existing_bed_ids = {
+            bed.get("bed_id", "")
+            for bed in data["beds"]
+        }
+        
+        for default_bed in DEFAULT_DATA["beds"]:
+            if default_bed["bed_id"] not in existing_bed_ids:
+                new_bed = default_bed.copy()
+                data["beds"].append(new_bed)
+                existing_bed_ids.add(default_bed["bed_id"])
+                
 # Add missing fields to existing patient records
     for patient in data["patients"]:
         for field in PATIENT_FIELDS:
