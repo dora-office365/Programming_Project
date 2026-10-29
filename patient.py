@@ -73,6 +73,7 @@ def show_patients(root):
     form.pack(side="left", fill="y", padx=(0, 12))
 
     fields = [
+        ("Patient IC", "patient_ic"),
         ("Patient ID", "patient_id"),
         ("Full Name", "name"),
         ("Date of Birth", "dob"),
