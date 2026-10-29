@@ -227,8 +227,7 @@ def show_patients(root):
 
     # Patient table
     columns = (
-        "ic", "id", "name",
-        "gender", "bed", "status"
+        "ic", "id", "name","gender", "bed", "status", "admission_date","discharge_date"
     )
 
     tree = ttk.Treeview(
@@ -243,6 +242,8 @@ def show_patients(root):
     tree.heading("gender", text="Gender")
     tree.heading("bed", text="Bed")
     tree.heading("status", text="Status")
+    tree.heading("admission_date", text="Admission Date")
+    tree.heading("discharge_date", text="Discharge Date")
 
     tree.column("ic", width=110, anchor="center")
     tree.column("id", width=75, anchor="center")
@@ -250,6 +251,8 @@ def show_patients(root):
     tree.column("gender", width=65, anchor="center")
     tree.column("bed", width=75, anchor="center")
     tree.column("status", width=85, anchor="center")
+    tree.column("admission_date", width=105, anchor="center")
+    tree.column("discharge_date", width=105, anchor="center")
 
     scrollbar = ttk.Scrollbar(
         result,
@@ -329,7 +332,9 @@ def show_patients(root):
                         patient_name,
                         patient.get("gender", ""),
                         patient.get("bed_id", ""),
-                        patient.get("status", "Registered")
+                        patient.get("status", "Registered"),
+                        patient.get("admission_date", " "),
+                        patient.get("discharge_date", " ") or "-"
                     )
                 )
 
