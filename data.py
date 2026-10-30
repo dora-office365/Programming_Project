@@ -56,50 +56,48 @@ DEFAULT_DATA = {
 }
 
 
+# Create a separate copy of the default data
+def create_default_data():
+    return json.loads(json.dumps(DEFAULT_DATA))
+
+
 # Save data to the JSON file
 def save_database(data):
     with open(DATA_FILE, "w", encoding="utf-8") as file:
         json.dump(data, file, indent=4, ensure_ascii=False)
 
 
-# Load data from the JSON file
-def load_database():
+# Add missing sections to the database
+def add_missing_sections(data):
 
-    # Create the database if it does not exist
-    if not os.path.exists(DATA_FILE):
-        save_database(DEFAULT_DATA)
-        return json.loads(json.dumps(DEFAULT_DATA))
-
-    try:
-        with open(DATA_FILE, "r", encoding="utf-8") as file:
-            data = json.load(file)
-
-    except (json.JSONDecodeError, OSError):
-        print("Error: Unable to read the database file.")
-        return json.loads(json.dumps(DEFAULT_DATA))
-
-    # Add missing sections if necessary
     if "users" not in data:
-        data["users"] = json.loads(json.dumps(DEFAULT_DATA["users"]))
+        data["users"] = create_default_data()["users"]
 
     if "patients" not in data:
         data["patients"] = []
 
     if "beds" not in data:
-        data["beds"] = json.loads(json.dumps(DEFAULT_DATA["beds"]))
-    else:
-        existing_bed_ids = {
-            bed.get("bed_id", "")
-            for bed in data["beds"]
-        }
+        data["beds"] = create_default_data()["beds"]
 
-        for default_bed in DEFAULT_DATA["beds"]:
-            if default_bed["bed_id"] not in existing_bed_ids:
-                new_bed = default_bed.copy()
-                data["beds"].append(new_bed)
-                existing_bed_ids.add(default_bed["bed_id"])
 
-    # Add missing fields to existing patient records
+# Add default beds that are missing
+def add_missing_beds(data):
+
+    existing_bed_ids = {
+        bed.get("bed_id", "")
+        for bed in data["beds"]
+    }
+
+    for default_bed in DEFAULT_DATA["beds"]:
+        if default_bed["bed_id"] not in existing_bed_ids:
+            new_bed = default_bed.copy()
+            data["beds"].append(new_bed)
+            existing_bed_ids.add(default_bed["bed_id"])
+
+
+# Add missing fields to existing patient records
+def update_patient_fields(data):
+
     for patient in data["patients"]:
         for field in PATIENT_FIELDS:
             if field not in patient:
@@ -109,7 +107,10 @@ def load_database():
         if not patient["status"]:
             patient["status"] = "Registered"
 
-    # Add missing fields to existing bed records
+
+# Add missing fields to existing bed records
+def update_bed_fields(data):
+
     for bed in data["beds"]:
         if "bed_id" not in bed:
             bed["bed_id"] = ""
@@ -120,8 +121,33 @@ def load_database():
         if "patient_id" not in bed:
             bed["patient_id"] = ""
 
+
+# Load data from the JSON file
+def load_database():
+
+    # Create the database if it does not exist
+    if not os.path.exists(DATA_FILE):
+        data = create_default_data()
+        save_database(data)
+        return data
+
+    try:
+        with open(DATA_FILE, "r", encoding="utf-8") as file:
+            data = json.load(file)
+
+    except (json.JSONDecodeError, OSError):
+        print("Error: Unable to read the database file.")
+        return create_default_data()
+
+    # Check and update database structure
+    add_missing_sections(data)
+    add_missing_beds(data)
+    update_patient_fields(data)
+    update_bed_fields(data)
+
     # Save any updates to the database structure
     save_database(data)
+
     return data
 
 
