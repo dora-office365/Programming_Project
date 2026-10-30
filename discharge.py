@@ -1,8 +1,10 @@
+
 import tkinter as tk
 from tkinter import ttk, messagebox
 from datetime import date
 import dashboard
 from data import load_database, save_database
+
 
 # Pink theme colours
 PINK_DARK = "#7D3458"
@@ -15,8 +17,174 @@ TEXT_LIGHT = "#A45B7D"
 WHITE = "#FFFFFF"
 
 
+# Get patient information using patient ID
+def find_patient(patient_id, patients):
+    for patient in patients:
+        if str(patient.get("patient_id", "")) == patient_id:
+            return patient
+
+    return None
+
+
+# Check whether the patient can be discharged
+def check_discharge_eligibility(patient):
+    if patient is None:
+        return "Patient record could not be found."
+
+    if patient.get("status", "") == "Discharged":
+        return "This patient has already been discharged."
+
+    if not patient.get("bed_id", ""):
+        return "This patient does not have an assigned bed."
+
+    return ""
+
+
+# Confirm patient's payment
+def confirm_payment(root):
+    return messagebox.askyesno(
+        "Payment Confirmation",
+        "Has the patient's payment been checked and completed?",
+        parent=root
+    )
+
+
+# Release the patient's bed
+def release_bed(bed_id, beds):
+    for bed in beds:
+        if str(bed.get("bed_id", "")) == bed_id:
+            bed["status"] = "Available"
+            bed["patient_id"] = ""
+            return
+
+
+# Update patient's discharge information
+def update_discharge_record(patient):
+    patient["status"] = "Discharged"
+    patient["discharge_date"] = date.today().isoformat()
+    patient["payment_confirmed"] = "Yes"
+    patient["bed_id"] = ""
+
+
+# Save updated patient and bed information
+def save_discharge_data(data, patient, beds):
+    bed_id = str(patient.get("bed_id", ""))
+
+    update_discharge_record(patient)
+    release_bed(bed_id, beds)
+
+    save_database(data)
+
+
+# Display patients in the table
+def display_patients(table, search_entry):
+    for item in table.get_children():
+        table.delete(item)
+
+    latest_data = load_database()
+    latest_patients = latest_data["patients"]
+
+    keyword = search_entry.get().strip().lower()
+
+    for patient in latest_patients:
+        patient_ic = str(patient.get("patient_ic", ""))
+        patient_id = str(patient.get("patient_id", ""))
+        patient_name = str(patient.get("name", ""))
+        bed_id = str(patient.get("bed_id", ""))
+        status = patient.get("status", "Registered")
+
+        if status != "Discharged" and bed_id:
+            search_text = (
+                patient_ic + " "
+                + patient_id + " "
+                + patient_name
+            ).lower()
+
+            if keyword in search_text:
+                table.insert(
+                    "",
+                    "end",
+                    values=(
+                        patient_ic or "-",
+                        patient_id,
+                        patient_name,
+                        bed_id,
+                        status
+                    )
+                )
+
+
+# Clear the search box
+def clear_search(search_entry, table):
+    search_entry.delete(0, tk.END)
+    display_patients(table, search_entry)
+
+
+# Process the selected patient's discharge
+def discharge_patient(root, table, search_entry, data, patients, beds):
+    selected = table.selection()
+
+    if not selected:
+        messagebox.showwarning(
+            "Select Patient",
+            "Please select a patient to discharge.",
+            parent=root
+        )
+        return
+
+    values = table.item(selected[0], "values")
+    patient_id = str(values[1])
+
+    latest_data = load_database()
+    latest_patients = latest_data["patients"]
+    latest_beds = latest_data["beds"]
+
+    selected_patient = find_patient(patient_id, latest_patients)
+
+    error_message = check_discharge_eligibility(selected_patient)
+
+    if error_message:
+        messagebox.showwarning(
+            "Discharge Not Allowed",
+            error_message,
+            parent=root
+        )
+        display_patients(table, search_entry)
+        return
+
+    if not confirm_payment(root):
+        messagebox.showwarning(
+            "Discharge Cancelled",
+            "Please complete the payment before discharging the patient.",
+            parent=root
+        )
+        return
+
+    save_discharge_data(
+        latest_data,
+        selected_patient,
+        latest_beds
+    )
+
+    # Update the local database references
+    data.clear()
+    data.update(latest_data)
+    patients[:] = latest_patients
+    beds[:] = latest_beds
+
+    display_patients(table, search_entry)
+
+    messagebox.showinfo(
+        "Success",
+        "Patient discharged successfully.\n"
+        "The bed is now available.",
+        parent=root
+    )
+
+
+# Main discharge page
 def show_discharge(root):
-    # Load the shared database
+
     data = load_database()
     patients = data["patients"]
     beds = data["beds"]
@@ -29,7 +197,7 @@ def show_discharge(root):
     root.geometry("1100x700")
     root.configure(bg=PINK_LIGHT)
 
-    # Add the shared navigation sidebar
+    # Navigation sidebar
     content = dashboard.add_navigation(root, "Discharge")
 
     # Page heading
@@ -82,7 +250,6 @@ def show_discharge(root):
         pady=(0, 15)
     )
 
-    # Patient IC is added as the first column
     columns = (
         "patient_ic",
         "patient_id",
@@ -106,21 +273,11 @@ def show_discharge(root):
     table.heading("status", text="Status")
 
     # Table column widths
-    table.column(
-        "patient_ic", width=140, anchor="center"
-    )
-    table.column(
-        "patient_id", width=110, anchor="center"
-    )
-    table.column(
-        "name", width=180, anchor="center"
-    )
-    table.column(
-        "bed_id", width=100, anchor="center"
-    )
-    table.column(
-        "status", width=110, anchor="center"
-    )
+    table.column("patient_ic", width=140, anchor="center")
+    table.column("patient_id", width=110, anchor="center")
+    table.column("name", width=180, anchor="center")
+    table.column("bed_id", width=100, anchor="center")
+    table.column("status", width=110, anchor="center")
 
     scrollbar = ttk.Scrollbar(
         table_frame,
@@ -137,164 +294,8 @@ def show_discharge(root):
         padx=10,
         pady=10
     )
+
     scrollbar.pack(side="right", fill="y", pady=10)
-
-    # Display patients who have an assigned bed
-    def display_patients():
-        for item in table.get_children():
-            table.delete(item)
-
-        # Reload data so the page displays the latest records
-        latest_data = load_database()
-        latest_patients = latest_data["patients"]
-
-        keyword = search_entry.get().strip().lower()
-
-        for patient in latest_patients:
-            patient_ic = str(
-                patient.get("patient_ic", "")
-            )
-            patient_id = str(
-                patient.get("patient_id", "")
-            )
-            patient_name = str(
-                patient.get("name", "")
-            )
-            bed_id = str(
-                patient.get("bed_id", "")
-            )
-            status = patient.get("status", "Registered")
-
-            # Only show patients who are not discharged
-            if status != "Discharged" and bed_id:
-                # Search by IC, Patient ID or name
-                search_text = (
-                    patient_ic + " "
-                    + patient_id + " "
-                    + patient_name
-                ).lower()
-
-                if keyword in search_text:
-                    table.insert(
-                        "",
-                        "end",
-                        values=(
-                            patient_ic or "-",
-                            patient_id,
-                            patient_name,
-                            bed_id,
-                            status
-                        )
-                    )
-
-    # Discharge the selected patient
-    def discharge_patient():
-        selected = table.selection()
-
-        if not selected:
-            messagebox.showwarning(
-                "Select Patient",
-                "Please select a patient to discharge.",
-                parent=root
-            )
-            return
-
-        values = table.item(selected[0], "values")
-
-        # Patient ID is the second column because IC is first
-        patient_id = str(values[1])
-
-        # Reload the latest shared data before updating it
-        latest_data = load_database()
-        latest_patients = latest_data["patients"]
-        latest_beds = latest_data["beds"]
-
-        selected_patient = None
-
-        for patient in latest_patients:
-            if str(patient.get("patient_id", "")) == patient_id:
-                selected_patient = patient
-                break
-
-        if selected_patient is None:
-            messagebox.showerror(
-                "Error",
-                "Patient record could not be found.",
-                parent=root
-            )
-            display_patients()
-            return
-
-        if selected_patient.get("status", "") == "Discharged":
-            messagebox.showwarning(
-                "Already Discharged",
-                "This patient has already been discharged.",
-                parent=root
-            )
-            display_patients()
-            return
-
-        bed_id = str(selected_patient.get("bed_id", ""))
-
-        if not bed_id:
-            messagebox.showwarning(
-                "No Bed Assigned",
-                "This patient does not have an assigned bed.",
-                parent=root
-            )
-            return
-
-        # Ask staff to confirm payment
-        payment_complete = messagebox.askyesno(
-            "Payment Confirmation",
-            "Has the patient's payment been checked and completed?",
-            parent=root
-        )
-
-        if not payment_complete:
-            messagebox.showwarning(
-                "Discharge Cancelled",
-                "Please complete the payment before discharging the patient.",
-                parent=root
-            )
-            return
-
-        # Update patient information
-        selected_patient["status"] = "Discharged"
-        selected_patient["discharge_date"] = date.today().isoformat()
-        selected_patient["payment_confirmed"] = "Yes"
-        selected_patient["bed_id"] = ""
-
-        # Make the matching bed available again
-        for bed in latest_beds:
-            if str(bed.get("bed_id", "")) == bed_id:
-                bed["status"] = "Available"
-                bed["patient_id"] = ""
-                break
-
-        # Save changes to the shared JSON database
-        save_database(latest_data)
-
-        # Update the local references for this page
-        data.clear()
-        data.update(latest_data)
-        patients[:] = latest_patients
-        beds[:] = latest_beds
-
-        # Refresh the table
-        display_patients()
-
-        messagebox.showinfo(
-            "Success",
-            "Patient discharged successfully.\n"
-            "The bed is now available.",
-            parent=root
-        )
-
-    # Clear search
-    def clear_search():
-        search_entry.delete(0, tk.END)
-        display_patients()
 
     # Buttons
     button_frame = tk.Frame(content, bg=PINK_LIGHT)
@@ -303,7 +304,9 @@ def show_discharge(root):
     tk.Button(
         button_frame,
         text="Confirm Discharge",
-        command=discharge_patient,
+        command=lambda: discharge_patient(
+            root, table, search_entry, data, patients, beds
+        ),
         bg=PINK_DARK,
         fg=WHITE,
         activebackground=PINK_ACTIVE,
@@ -315,7 +318,7 @@ def show_discharge(root):
     tk.Button(
         button_frame,
         text="Clear Search",
-        command=clear_search,
+        command=lambda: clear_search(search_entry, table),
         bg=PINK_PALE,
         fg=TEXT_DARK,
         activebackground=PINK_LIGHT,
@@ -326,8 +329,8 @@ def show_discharge(root):
     # Search while typing
     search_entry.bind(
         "<KeyRelease>",
-        lambda event: display_patients()
+        lambda event: display_patients(table, search_entry)
     )
 
-    # Show patients when the page opens
-    display_patients()
+    # Display patients when the page opens
+    display_patients(table, search_entry)
