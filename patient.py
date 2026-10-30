@@ -2,7 +2,13 @@ import tkinter as tk
 from tkinter import ttk, messagebox
 from datetime import date
 import dashboard
-from data import PATIENT_FIELDS, load_database, save_database
+
+from data import (
+    PATIENT_FIELDS,
+    load_database,
+    save_database,
+    get_available_beds
+)
 
 # Pink theme colours
 PINK_DARK = "#7D3458"
@@ -227,7 +233,8 @@ def show_patients(root):
 
     # Patient table
     columns = (
-        "ic", "id", "name","gender", "bed", "status", "admission_date","discharge_date"
+        "ic", "id", "name", "gender", "bed",
+        "status", "admission_date", "discharge_date"
     )
 
     tree = ttk.Treeview(
@@ -276,14 +283,18 @@ def show_patients(root):
         patients = data["patients"]
         beds = data["beds"]
 
-    # Update available bed choices
+    # Update available bed choices using data.py
     def update_beds():
         refresh_data()
-        choices = []
 
-        for bed in beds:
-            if bed.get("status") == "Available":
-                choices.append(bed.get("bed_id", ""))
+        # Use the new function from data.py
+        available_beds = get_available_beds()
+
+        choices = [
+            bed.get("bed_id", "")
+            for bed in available_beds
+            if bed.get("bed_id", "")
+        ]
 
         # Keep the selected patient's current bed selectable
         for patient in patients:
@@ -412,7 +423,6 @@ def show_patients(root):
 
         # Generate the Patient ID automatically
         patient["patient_id"] = generate_patient_id()
-
         patient["gender"] = gender_box.get()
 
         # Check required information
@@ -442,15 +452,13 @@ def show_patients(root):
             return
 
         # Confirm that the selected bed is still available
-        bed_available = False
+        # Use the latest database information
+        available_bed_ids = {
+            bed.get("bed_id", "")
+            for bed in get_available_beds()
+        }
 
-        for bed in beds:
-            if bed.get("bed_id") == selected_bed:
-                if bed.get("status") == "Available":
-                    bed_available = True
-                break
-
-        if not bed_available:
+        if selected_bed not in available_bed_ids:
             messagebox.showwarning(
                 "Bed Unavailable",
                 "This bed is no longer available. "
@@ -557,15 +565,12 @@ def show_patients(root):
 
         # Check availability if the bed is changing
         if new_bed != old_bed:
-            bed_available = False
+            available_bed_ids = {
+                bed.get("bed_id", "")
+                for bed in get_available_beds()
+            }
 
-            for bed in beds:
-                if bed.get("bed_id") == new_bed:
-                    if bed.get("status") == "Available":
-                        bed_available = True
-                    break
-
-            if not bed_available:
+            if new_bed not in available_bed_ids:
                 messagebox.showwarning(
                     "Bed Unavailable",
                     "Please select an available bed."
