@@ -9,7 +9,24 @@
             "password": "admin1234"
         }
     ],
-    "patients": [],
+    "patients": [
+        {
+            "patient_ic": "010101130101",
+            "patient_id": "P0001",
+            "name": "Daniel Lee Teck Long",
+            "dob": "2001-01-01",
+            "phone": "0112222333",
+            "address": "13,Taman Batu, Kuching,Sarawak",
+            "emergency_contact": "0123333444",
+            "diagnosis": "Diarrhea",
+            "gender": "Male",
+            "bed_id": "",
+            "admission_date": "2026-10-29",
+            "status": "Discharged",
+            "discharge_date": "2026-10-29",
+            "payment_confirmed": "Yes"
+        }
+    ],
     "beds": [
         {
             "bed_id": "Bed 101",
