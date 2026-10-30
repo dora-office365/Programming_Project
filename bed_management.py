@@ -212,6 +212,30 @@ def show_bed_management(root):
 
         return None
 
+    # Get bed status and patient information
+    def get_bed_status(bed, patients):
+        patient = find_patient(bed, patients)
+
+        if patient:
+            bed_status = "Occupied"
+            patient_ic = str(
+                patient.get("patient_ic", "")
+            )
+            patient_id = str(
+                patient.get("patient_id", "")
+            )
+            patient_name = str(
+                patient.get("name", "")
+            )
+
+        else:
+            bed_status = "Available"
+            patient_ic = ""
+            patient_id = ""
+            patient_name = ""
+
+        return bed_status, patient_ic, patient_id, patient_name
+
     # Display beds in the table
     def display_beds():
         for item in table.get_children():
@@ -229,24 +253,9 @@ def show_bed_management(root):
         selected_status = status_box.get()
 
         for bed in beds:
-            patient = find_patient(bed, patients)
-
-            if patient:
-                bed_status = "Occupied"
-                patient_ic = str(
-                    patient.get("patient_ic", "")
-                )
-                patient_id = str(
-                    patient.get("patient_id", "")
-                )
-                patient_name = str(
-                    patient.get("name", "")
-                )
-            else:
-                bed_status = "Available"
-                patient_ic = ""
-                patient_id = ""
-                patient_name = ""
+            bed_status, patient_ic, patient_id, patient_name = (
+                get_bed_status(bed, patients)
+            )
 
             # Count all beds before applying filters
             if bed_status == "Available":
