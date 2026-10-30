@@ -426,13 +426,23 @@ def show_patients(root):
         patient["gender"] = gender_box.get()
 
         # Check required information
-        if not patient["name"]:
+        if (
+            not patient["patient_ic"]
+            or not patient["name"]
+            or not patient["dob"]
+            or not patient["gender"]
+            or not patient["phone"]
+            or not patient["address"]
+            or not patient["emergency_contact"]
+            or not patient["diagnosis"]
+        ):
             messagebox.showwarning(
                 "Missing Information",
-                "Full Name is required."
+                "Please fill in all fields before registering the patient."
             )
             return
 
+        # Validate date of birth
         if not valid_date(patient["dob"]):
             messagebox.showwarning(
                 "Invalid Date",
