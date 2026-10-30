@@ -55,15 +55,17 @@ DEFAULT_DATA = {
     ]
 }
 
+
 # Save data to the JSON file
 def save_database(data):
     with open(DATA_FILE, "w", encoding="utf-8") as file:
         json.dump(data, file, indent=4, ensure_ascii=False)
 
+
 # Load data from the JSON file
 def load_database():
 
-# Create the database if it does not exist
+    # Create the database if it does not exist
     if not os.path.exists(DATA_FILE):
         save_database(DEFAULT_DATA)
         return json.loads(json.dumps(DEFAULT_DATA))
@@ -76,13 +78,13 @@ def load_database():
         print("Error: Unable to read the database file.")
         return json.loads(json.dumps(DEFAULT_DATA))
 
-# Add missing sections if necessary
+    # Add missing sections if necessary
     if "users" not in data:
         data["users"] = json.loads(json.dumps(DEFAULT_DATA["users"]))
 
     if "patients" not in data:
         data["patients"] = []
-        
+
     if "beds" not in data:
         data["beds"] = json.loads(json.dumps(DEFAULT_DATA["beds"]))
     else:
@@ -90,24 +92,24 @@ def load_database():
             bed.get("bed_id", "")
             for bed in data["beds"]
         }
-        
+
         for default_bed in DEFAULT_DATA["beds"]:
             if default_bed["bed_id"] not in existing_bed_ids:
                 new_bed = default_bed.copy()
                 data["beds"].append(new_bed)
                 existing_bed_ids.add(default_bed["bed_id"])
-                
-# Add missing fields to existing patient records
+
+    # Add missing fields to existing patient records
     for patient in data["patients"]:
         for field in PATIENT_FIELDS:
             if field not in patient:
                 patient[field] = ""
 
-# Give older records a default status
+        # Give older records a default status
         if not patient["status"]:
             patient["status"] = "Registered"
 
-# Add missing fields to existing bed records
+    # Add missing fields to existing bed records
     for bed in data["beds"]:
         if "bed_id" not in bed:
             bed["bed_id"] = ""
@@ -118,6 +120,30 @@ def load_database():
         if "patient_id" not in bed:
             bed["patient_id"] = ""
 
-# Save any updates to the database structure
+    # Save any updates to the database structure
     save_database(data)
     return data
+
+
+# Get all patient records
+def get_all_patients():
+    data = load_database()
+    return data["patients"]
+
+
+# Get all bed records
+def get_all_beds():
+    data = load_database()
+    return data["beds"]
+
+
+# Get only available beds
+def get_available_beds():
+    data = load_database()
+    available_beds = []
+
+    for bed in data["beds"]:
+        if bed.get("status") == "Available":
+            available_beds.append(bed)
+
+    return available_beds
