@@ -290,7 +290,7 @@ def show_bed_management(root):
             if keyword and keyword not in search_text:
                 continue
 
-            ＃Filter by Bed Status
+            #Filter by Bed Status
             if (
                 selected_status != "All"
                 and selected_status != bed_status
