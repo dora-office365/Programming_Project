@@ -123,6 +123,22 @@ def show_bed_management(root):
     status_box.set("All")
     status_box.pack(side="left", padx=5)
 
+    #Room type filter
+    tk.Label(
+        search_frame,
+        text="Room Type:",
+        bg=WHITE,
+        fg=TEXT_DARK,
+        font=("Arial", 10)
+    ).pack(side="left", padx=(10, 5))
+    
+    room_type_box = ttk.Combobox(
+        search_frame,
+        values=["All Room Types", "Four-beddded", "Second-bedded", "Single-bedded", "Nursery", "ICU"],
+        state="readonly"
+    )
+    room_type_box.set("All Room Types")
+
     # Bed information table
     table_frame = tk.Frame(content, bg=WHITE)
     table_frame.pack(
@@ -274,12 +290,20 @@ def show_bed_management(root):
             if keyword and keyword not in search_text:
                 continue
 
+            ＃Filter by Bed Status
             if (
                 selected_status != "All"
                 and selected_status != bed_status
             ):
                 continue
 
+            #Filter by Room Type
+            selected_room_type = room_type_box.get()
+
+            if selected_room_type != "All Room Types":
+                if bed.get("room_type") != selected_room_type:
+                    continue
+                    
             table.insert(
                 "",
                 "end",
@@ -379,6 +403,11 @@ def show_bed_management(root):
     )
 
     status_box.bind(
+        "<<ComboboxSelected>>",
+        lambda event: display_beds()
+    )
+
+    room_type_box.bind(
         "<<ComboboxSelected>>",
         lambda event: display_beds()
     )
