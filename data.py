@@ -68,8 +68,8 @@ DEFAULT_DATA = {
         {"bed_id": "Bed 204",  "room_type": "Single-bedded", "status": "Available", "patient_id": ""},
         {"bed_id": "Bed 205",  "room_type": "Single-bedded", "status": "Available", "patient_id": ""},
         {"bed_id": "Bed 206",  "room_type": "Single-bedded", "status": "Available", "patient_id": ""},
-        {"bed_id": "Bed 207",  "room_type": "Double-bedded" "status": "Available", "patient_id": ""},
-        {"bed_id": "Bed 208",  "room_type": "Double-bedded""status": "Available", "patient_id": ""},
+        {"bed_id": "Bed 207",  "room_type": "Double-bedded", "status": "Available", "patient_id": ""},
+        {"bed_id": "Bed 208",  "room_type": "Double-bedded", "status": "Available", "patient_id": ""},
         {"bed_id": "Bed 209",  "room_type": "Double-bedded", "status": "Available", "patient_id": ""},
         {"bed_id": "Bed 210", "room_type": "Double-bedded", "status": "Available", "patient_id": ""},
         {"bed_id": "Bed 211", "room_type": "Double-bedded", "status": "Available", "patient_id": ""},
@@ -148,7 +148,9 @@ def add_missing_sections(data):
 
     if "beds" not in data:
         data["beds"] = create_default_data()["beds"]
-
+        
+    if "room_type" not in bed:
+            bed["room_type"] = "Four-bedded"
 
 # Add default beds that are missing
 def add_missing_beds(data):
