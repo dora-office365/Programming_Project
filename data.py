@@ -41,7 +41,7 @@ DEFAULT_DATA = {
         {"bed_id": "Bed 307",  "room_type": "ICU", "status": "Available", "patient_id": ""},
         {"bed_id": "Bed 308",  "room_type": "ICU", "status": "Available", "patient_id": ""},
         {"bed_id": "Bed 309",  "room_type": "ICU", "status": "Available", "patient_id": ""},
-        {"bed_id": "Bed 3100",  "room_type": "ICU", "status": "Available", "patient_id": ""},
+        {"bed_id": "Bed 310",  "room_type": "ICU", "status": "Available", "patient_id": ""},
         {"bed_id": "Bed 311",  "room_type": "Nursery", "status": "Available", "patient_id": ""},
         {"bed_id": "Bed 312",  "room_type": "Nursery", "status": "Available", "patient_id": ""},
         {"bed_id": "Bed 313",  "room_type": "Nursery", "status": "Available", "patient_id": ""},
@@ -148,9 +148,6 @@ def add_missing_sections(data):
 
     if "beds" not in data:
         data["beds"] = create_default_data()["beds"]
-        
-    if "room_type" not in bed:
-            bed["room_type"] = "Four-bedded"
 
 # Add default beds that are missing
 def add_missing_beds(data):
@@ -192,6 +189,9 @@ def update_bed_fields(data):
 
         if "patient_id" not in bed:
             bed["patient_id"] = ""
+        
+        if "room_type" not in bed:
+        	bed["room_type"] = "Four-bedded"
 
 
 # Load data from the JSON file
