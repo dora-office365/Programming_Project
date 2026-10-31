@@ -134,7 +134,7 @@ def show_bed_management(root):
     
     room_type_box = ttk.Combobox(
         search_frame,
-        values=["All Room Types", "Four-beddded", "Second-bedded", "Single-bedded", "Nursery", "ICU"],
+        values=["All Room Types", "Four-bedded", "Double-bedded", "Single-bedded", "Nursery", "ICU"],
         state="readonly"
     )
     room_type_box.set("All Room Types")
