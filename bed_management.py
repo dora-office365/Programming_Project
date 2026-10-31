@@ -138,7 +138,8 @@ def show_bed_management(root):
         state="readonly"
     )
     room_type_box.set("All Room Types")
-
+    room_type_box.pack(side="left", padx=5)
+    
     # Bed information table
     table_frame = tk.Frame(content, bg=WHITE)
     table_frame.pack(
@@ -328,6 +329,7 @@ def show_bed_management(root):
     def reset_filters():
         search_entry.delete(0, tk.END)
         status_box.set("All")
+        room_type_box.set("All Room Types")
         display_beds()
 
     # Open the discharge page for an occupied bed
