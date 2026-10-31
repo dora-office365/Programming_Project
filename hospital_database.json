@@ -358,6 +358,90 @@
             "status": "Available",
             "patient_id": ""
         },
+                {
+            "bed_id": "Bed 221",
+            "room_type": "Double-bedded",
+            "status": "Available",
+            "patient_id": ""
+        },
+        {
+            "bed_id": "Bed 222",
+            "room_type": "Double-bedded",
+            "status": "Available",
+            "patient_id": ""
+        },
+        {
+            "bed_id": "Bed 223",
+            "room_type": "Double-bedded",
+            "status": "Available",
+            "patient_id": ""
+        },
+        {
+            "bed_id": "Bed 224",
+            "room_type": "Double-bedded",
+            "status": "Available",
+            "patient_id": ""
+        },
+        {
+            "bed_id": "Bed 225",
+            "room_type": "Double-bedded",
+            "status": "Available",
+            "patient_id": ""
+        },
+        {
+            "bed_id": "Bed 226",
+            "room_type": "Double-bedded",
+            "status": "Available",
+            "patient_id": ""
+        },
+        {
+            "bed_id": "Bed 227",
+            "room_type": "Double-bedded",
+            "status": "Available",
+            "patient_id": ""
+        },
+        {
+            "bed_id": "Bed 228",
+            "room_type": "Double-bedded",
+            "status": "Available",
+            "patient_id": ""
+        },
+        {
+            "bed_id": "Bed 229",
+            "room_type": "Double-bedded",
+            "status": "Available",
+            "patient_id": ""
+        },
+        {
+            "bed_id": "Bed 230",
+            "room_type": "Double-bedded",
+            "status": "Available",
+            "patient_id": ""
+        },
+        {
+            "bed_id": "Bed 231",
+            "room_type": "Double-bedded",
+            "status": "Available",
+            "patient_id": ""
+        },
+        {
+            "bed_id": "Bed 232",
+            "room_type": "Double-bedded",
+            "status": "Available",
+            "patient_id": ""
+        },
+        {
+            "bed_id": "Bed 233",
+            "room_type": "Double-bedded",
+            "status": "Available",
+            "patient_id": ""
+        },
+        {
+            "bed_id": "Bed 234",
+            "room_type": "Double-bedded",
+            "status": "Available",
+            "patient_id": ""
+        },
         {
             "bed_id": "Bed 101",
             "room_type": "Four-bedded",
