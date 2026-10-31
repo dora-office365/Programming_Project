@@ -81,6 +81,7 @@ DEFAULT_DATA = {
         {"bed_id": "Bed 217", "room_type": "Double-bedded", "status": "Available", "patient_id": ""},
         {"bed_id": "Bed 218", "room_type": "Double-bedded", "status": "Available", "patient_id": ""},
         {"bed_id": "Bed 219", "room_type": "Double-bedded", "status": "Available", "patient_id": ""},
+        {"bed_id": "Bed 220", "room_type": "Double-bedded", "status": "Available", "patient_id": ""},
         {"bed_id": "Bed 221", "room_type": "Double-bedded", "status": "Available", "patient_id": ""},
         {"bed_id": "Bed 222", "room_type": "Double-bedded", "status": "Available", "patient_id": ""},
         {"bed_id": "Bed 223", "room_type": "Double-bedded", "status": "Available", "patient_id": ""},
