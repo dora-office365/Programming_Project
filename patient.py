@@ -286,15 +286,16 @@ def show_patients(root):
     # Update available bed choices using data.py
     def update_beds():
         refresh_data()
-
-        # Use the new function from data.py
+        
         available_beds = get_available_beds()
-
-        choices = [
-            bed.get("bed_id", "")
-            for bed in available_beds
-            if bed.get("bed_id", "")
-        ]
+        choices = sorted(
+            [
+                bed.get("bed_id", "")
+                for bed in available_beds
+                if bed.get("bed_id", "")
+            ],
+            key=lambda x: int(x.replace("Bed ", ""))
+        )
 
         # Keep the selected patient's current bed selectable
         for patient in patients:
