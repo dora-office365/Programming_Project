@@ -1,132 +1,164 @@
 {
-    "users": [
-        {
-            "username": "admin",
-            "password": "admin123"
-        },
-        {
-            "username": "admin2",
-            "password": "admin1234"
-        }
-    ],
-    "patients": [
-        {
-            "patient_ic": "010101130101",
-            "patient_id": "P0001",
-            "name": "Daniel Lee Teck Long",
-            "dob": "2001-01-01",
-            "phone": "0112222333",
-            "address": "13,Taman Batu, Kuching,Sarawak",
-            "emergency_contact": "0123333444",
-            "diagnosis": "Diarrhea",
-            "gender": "Male",
-            "bed_id": "",
-            "admission_date": "2026-10-29",
-            "status": "Discharged",
-            "discharge_date": "2026-10-29",
-            "payment_confirmed": "Yes"
-        }
-    ],
-    "beds": [
-        {
-            "bed_id": "Bed 101",
-            "status": "Available",
-            "patient_id": ""
-        },
-        {
-            "bed_id": "Bed 102",
-            "status": "Available",
-            "patient_id": ""
-        },
-        {
-            "bed_id": "Bed 103",
-            "status": "Available",
-            "patient_id": ""
-        },
-        {
-            "bed_id": "Bed 104",
-            "status": "Available",
-            "patient_id": ""
-        },
-        {
-            "bed_id": "Bed 105",
-            "status": "Available",
-            "patient_id": ""
-        },
-        {
-            "bed_id": "Bed 106",
-            "status": "Available",
-            "patient_id": ""
-        },
-        {
-            "bed_id": "Bed 107",
-            "status": "Available",
-            "patient_id": ""
-        },
-        {
-            "bed_id": "Bed 108",
-            "status": "Available",
-            "patient_id": ""
-        },
-        {
-            "bed_id": "Bed 109",
-            "status": "Available",
-            "patient_id": ""
-        },
-        {
-            "bed_id": "Bed 110",
-            "status": "Available",
-            "patient_id": ""
-        },
-        {
-            "bed_id": "Bed 201",
-            "status": "Available",
-            "patient_id": ""
-        },
-        {
-            "bed_id": "Bed 202",
-            "status": "Available",
-            "patient_id": ""
-        },
-        {
-            "bed_id": "Bed 203",
-            "status": "Available",
-            "patient_id": ""
-        },
-        {
-            "bed_id": "Bed 204",
-            "status": "Available",
-            "patient_id": ""
-        },
-        {
-            "bed_id": "Bed 205",
-            "status": "Available",
-            "patient_id": ""
-        },
-        {
-            "bed_id": "Bed 206",
-            "status": "Available",
-            "patient_id": ""
-        },
-        {
-            "bed_id": "Bed 207",
-            "status": "Available",
-            "patient_id": ""
-        },
-        {
-            "bed_id": "Bed 208",
-            "status": "Available",
-            "patient_id": ""
-        },
-        {
-            "bed_id": "Bed 209",
-            "status": "Available",
-            "patient_id": ""
-        },
-        {
-            "bed_id": "Bed 210",
-            "status": "Available",
-            "patient_id": ""
-        }
-    ]
+  "users": [
+    {
+      "username": "admin",
+      "password": "admin123"
+    },
+    {
+      "username": "admin2",
+      "password": "admin1234"
+    }
+  ],
+  "patients": [
+    {
+      "patient_ic": "010101130101",
+      "patient_id": "P0001",
+      "name": "Daniel Lee Teck Long",
+      "dob": "2001-01-01",
+      "phone": "0112222333",
+      "address": "13,Taman Batu, Kuching,Sarawak",
+      "emergency_contact": "0123333444",
+      "diagnosis": "Diarrhea",
+      "gender": "Male",
+      "bed_id": "",
+      "admission_date": "2026-10-29",
+      "status": "Discharged",
+      "discharge_date": "2026-10-29",
+      "payment_confirmed": "Yes"
+    },
+    {
+      "patient_ic": "770305130817",
+      "patient_id": "P0002",
+      "name": "Wu Xie",
+      "dob": "1977-03-05",
+      "phone": "01539583946",
+      "address": "03, Wu San Resident, Kuching, Sarawak",
+      "emergency_contact": "01810654864",
+      "diagnosis": "Pulmonary Fibrosis",
+      "gender": "Male",
+      "bed_id": "Bed 108",
+      "admission_date": "2026-10-30",
+      "status": "Registered",
+      "discharge_date": "",
+      "payment_confirmed": ""
+    },
+    {
+      "patient_ic": "991005130005",
+      "patient_id": "P0003",
+      "name": "Xavier Lim Qi Yee",
+      "dob": "1999-10-05",
+      "phone": "0120050072",
+      "address": "136, Taman North Sea, Kuching, Sarawak",
+      "emergency_contact": "0170050375",
+      "diagnosis": "Concussion",
+      "gender": "Male",
+      "bed_id": "Bed 105",
+      "admission_date": "2026-10-30",
+      "status": "Registered",
+      "discharge_date": "",
+      "payment_confirmed": ""
+    }
+  ],
+  "beds": [
+    {
+      "bed_id": "Bed 101",
+      "status": "Available",
+      "patient_id": ""
+    },
+    {
+      "bed_id": "Bed 102",
+      "status": "Available",
+      "patient_id": ""
+    },
+    {
+      "bed_id": "Bed 103",
+      "status": "Available",
+      "patient_id": ""
+    },
+    {
+      "bed_id": "Bed 104",
+      "status": "Available",
+      "patient_id": ""
+    },
+    {
+      "bed_id": "Bed 105",
+      "status": "Occupied",
+      "patient_id": "P0003"
+    },
+    {
+      "bed_id": "Bed 106",
+      "status": "Available",
+      "patient_id": ""
+    },
+    {
+      "bed_id": "Bed 107",
+      "status": "Available",
+      "patient_id": ""
+    },
+    {
+      "bed_id": "Bed 108",
+      "status": "Occupied",
+      "patient_id": "P0002"
+    },
+    {
+      "bed_id": "Bed 109",
+      "status": "Available",
+      "patient_id": ""
+    },
+    {
+      "bed_id": "Bed 110",
+      "status": "Available",
+      "patient_id": ""
+    },
+    {
+      "bed_id": "Bed 201",
+      "status": "Available",
+      "patient_id": ""
+    },
+    {
+      "bed_id": "Bed 202",
+      "status": "Available",
+      "patient_id": ""
+    },
+    {
+      "bed_id": "Bed 203",
+      "status": "Available",
+      "patient_id": ""
+    },
+    {
+      "bed_id": "Bed 204",
+      "status": "Available",
+      "patient_id": ""
+    },
+    {
+      "bed_id": "Bed 205",
+      "status": "Available",
+      "patient_id": ""
+    },
+    {
+      "bed_id": "Bed 206",
+      "status": "Available",
+      "patient_id": ""
+    },
+    {
+      "bed_id": "Bed 207",
+      "status": "Available",
+      "patient_id": ""
+    },
+    {
+      "bed_id": "Bed 208",
+      "status": "Available",
+      "patient_id": ""
+    },
+    {
+      "bed_id": "Bed 209",
+      "status": "Available",
+      "patient_id": ""
+    },
+    {
+      "bed_id": "Bed 210",
+      "status": "Available",
+      "patient_id": ""
+    }
+  ]
 }
