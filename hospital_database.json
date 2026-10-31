@@ -3,10 +3,13 @@
         {
             "username": "admin",
             "password": "admin123"
+        },
+        {
+            "username": "admin2",
+            "password": "admin1234"
         }
     ],
-    
-    "patients": [ 
+    "patients": [
         {
             "patient_ic": "010101130101",
             "patient_id": "P0001",
@@ -33,13 +36,13 @@
             "emergency_contact": "01810654864",
             "diagnosis": "Pulmonary Fibrosis",
             "gender": "Male",
-            "bed_id": "Bed 108",
+            "bed_id": "Bed 201",
             "admission_date": "2026-10-30",
             "status": "Registered",
             "discharge_date": "",
             "payment_confirmed": ""
-         },
-         {
+        },
+        {
             "patient_ic": "991005130005",
             "patient_id": "P0003",
             "name": "Xavier Lim Qi Yee",
@@ -49,14 +52,29 @@
             "emergency_contact": "0170050375",
             "diagnosis": "Mild Traumatic Brain Injury",
             "gender": "Male",
-            "bed_id": "Bed 105",
+            "bed_id": "Bed 207",
             "admission_date": "2026-10-30",
             "status": "Registered",
             "discharge_date": "",
             "payment_confirmed": ""
-          }
+        },
+        {
+            "patient_ic": "780708130708",
+            "patient_id": "P0004",
+            "name": "Mohammad Bin Jafari",
+            "dob": "1978-07-08",
+            "phone": "0122222333",
+            "address": "04, Jalan Nanas, Taman Pokok, Kuching, Sarawak",
+            "emergency_contact": "0143333444",
+            "diagnosis": "Leg Fracture",
+            "gender": "Male",
+            "bed_id": "Bed 101",
+            "admission_date": "2026-11-01",
+            "status": "Registered",
+            "discharge_date": "",
+            "payment_confirmed": ""
+        }
     ],
-    
     "beds": [
         {
             "bed_id": "Bed 301",
@@ -241,8 +259,8 @@
         {
             "bed_id": "Bed 201",
             "room_type": "Single-bedded",
-            "status": "Available",
-            "patient_id": ""
+            "status": "Occupied",
+            "patient_id": "P0002"
         },
         {
             "bed_id": "Bed 202",
@@ -277,8 +295,8 @@
         {
             "bed_id": "Bed 207",
             "room_type": "Double-bedded",
-            "status": "Available",
-            "patient_id": ""
+            "status": "Occupied",
+            "patient_id": "P0003"
         },
         {
             "bed_id": "Bed 208",
@@ -358,7 +376,7 @@
             "status": "Available",
             "patient_id": ""
         },
-                {
+        {
             "bed_id": "Bed 221",
             "room_type": "Double-bedded",
             "status": "Available",
@@ -445,8 +463,8 @@
         {
             "bed_id": "Bed 101",
             "room_type": "Four-bedded",
-            "status": "Available",
-            "patient_id": ""
+            "status": "Occupied",
+            "patient_id": "P0004"
         },
         {
             "bed_id": "Bed 102",
