@@ -10,6 +10,7 @@ from data import (
     get_available_beds
 )
 
+
 # Pink theme colours
 PINK_DARK = "#7D3458"
 PINK_ACTIVE = "#AD5B82"
@@ -21,7 +22,7 @@ TEXT_LIGHT = "#A45B7D"
 WHITE = "#FFFFFF"
 
 
-# Generate the next Patient ID automatically
+# Generate Patient ID automatically
 def generate_patient_id():
     data = load_database()
     patients = data.get("patients", [])
@@ -310,6 +311,7 @@ def show_patients(root):
         if bed_box.get() not in choices:
             bed_box.set("")
 
+
     # Display and search patient records
     def display_patients(event=None):
         refresh_data()
@@ -357,7 +359,6 @@ def show_patients(root):
         if not selected:
             return
 
-        # Patient ID is the second table column
         patient_id = tree.item(
             selected[0], "values"
         )[1]
@@ -393,7 +394,7 @@ def show_patients(root):
 
                 break
 
-    # Validate date of birth
+    # Validate patient information 
     def valid_date(dob):
         if not dob:
             return True
@@ -403,6 +404,21 @@ def show_patients(root):
             return birth_date <= date.today()
         except ValueError:
             return False
+            
+    def validate_patient_details(patient):
+        if not patient["patient_ic"].isdigit():
+            return False, "Patient IC must contain numbers only."
+
+        if not patient["name"].replace(" ", "").isalpha():
+            return False, "Patient name must contain alphabets only."
+
+        if not patient["phone"].isdigit():
+            return False, "Phone number must contain numbers only."
+            
+        if not patient["emergency_contact"].isdigit():
+            return False, "Emergency contact must contain numbers only."
+
+        return True, ""
 
     # Register a new patient
     def register_patient():
@@ -443,12 +459,20 @@ def show_patients(root):
             )
             return
 
-        # Validate date of birth
+        # Validate patient information
         if not valid_date(patient["dob"]):
             messagebox.showwarning(
                 "Invalid Date",
                 "Enter a valid date of birth in YYYY-MM-DD format. "
                 "The date cannot be in the future."
+            )
+            return
+        
+        is_valid, error_message = validate_patient_details(patient)
+        if not is_valid:
+            messagebox.showwarning(
+                "Invalid Information",
+                error_message
             )
             return
 
@@ -638,6 +662,7 @@ def show_patients(root):
 
         update_beds()
         set_patient_id(generate_patient_id())
+
 
     # Buttons
     button_frame = tk.Frame(
