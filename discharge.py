@@ -59,6 +59,25 @@ def release_bed(bed_id, beds):
 
 # Update patient's discharge information
 def update_discharge_record(patient):
+
+    # Create admission history if it does not exist
+    if "admission_history" not in patient:
+        patient["admission_history"] = []
+
+    # Save the completed admission details
+    admission_record = {
+        "admission_date": patient.get("admission_date", ""),
+        "discharge_date": date.today().isoformat(),
+        "bed_id": patient.get("bed_id", ""),
+        "diagnosis": patient.get("diagnosis", ""),
+        "payment_confirmed": "Yes",
+        "status": "Discharged"
+    }
+
+    # Add the completed admission to the patient's history
+    patient["admission_history"].append(admission_record)
+
+    # Update the patient's latest admission information
     patient["status"] = "Discharged"
     patient["discharge_date"] = date.today().isoformat()
     patient["payment_confirmed"] = "Yes"

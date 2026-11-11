@@ -287,7 +287,7 @@ def show_patients(root):
     # Update available bed choices using data.py
     def update_beds():
         refresh_data()
-        
+
         available_beds = get_available_beds()
         choices = sorted(
             [
@@ -310,7 +310,6 @@ def show_patients(root):
 
         if bed_box.get() not in choices:
             bed_box.set("")
-
 
     # Display and search patient records
     def display_patients(event=None):
@@ -394,7 +393,7 @@ def show_patients(root):
 
                 break
 
-    # Validate patient information 
+    # Validate patient information
     def valid_date(dob):
         if not dob:
             return True
@@ -404,7 +403,7 @@ def show_patients(root):
             return birth_date <= date.today()
         except ValueError:
             return False
-            
+
     def validate_patient_details(patient):
         if not patient["patient_ic"].isdigit():
             return False, "Patient IC must contain numbers only."
@@ -414,13 +413,13 @@ def show_patients(root):
 
         if not patient["phone"].isdigit():
             return False, "Phone number must contain numbers only."
-            
+
         if not patient["emergency_contact"].isdigit():
             return False, "Emergency contact must contain numbers only."
 
         return True, ""
 
-    # Register a new patient
+    # Register a new patient or readmit a discharged patient
     def register_patient():
         refresh_data()
 
@@ -467,7 +466,7 @@ def show_patients(root):
                 "The date cannot be in the future."
             )
             return
-        
+
         is_valid, error_message = validate_patient_details(patient)
         if not is_valid:
             messagebox.showwarning(
@@ -476,7 +475,27 @@ def show_patients(root):
             )
             return
 
-        # Every new patient must have a bed
+        # Check whether the patient already exists
+        existing_patient = None
+
+        for record in patients:
+            if str(record.get("patient_ic", "")) == patient["patient_ic"]:
+                existing_patient = record
+                break
+
+        # Prevent duplicate registration of an active patient
+        if existing_patient:
+            if existing_patient.get("status") != "Discharged":
+                messagebox.showwarning(
+                    "Patient Already Registered",
+                    "This patient already has an active record."
+                )
+                return
+
+            # Reuse the existing Patient ID
+            patient["patient_id"] = existing_patient["patient_id"]
+
+        # Every new patient or readmission must have a bed
         selected_bed = bed_box.get().strip()
 
         if not selected_bed:
@@ -514,6 +533,10 @@ def show_patients(root):
             if field not in patient:
                 patient[field] = ""
 
+        # Initialise admission history for a new patient
+        if not existing_patient:
+            patient["admission_history"] = []
+
         # Mark the bed as occupied
         for bed in beds:
             if bed.get("bed_id") == selected_bed:
@@ -521,8 +544,39 @@ def show_patients(root):
                 bed["patient_id"] = patient["patient_id"]
                 break
 
-        # Add patient and save shared JSON
-        patients.append(patient)
+        # Add a new patient or update an existing discharged patient
+        if existing_patient:
+
+            # Preserve previous admission records
+            admission_history = existing_patient.get(
+                "admission_history", []
+            )
+
+            if not isinstance(admission_history, list):
+                admission_history = []
+
+            # Update the existing patient record for readmission
+            existing_patient.update(patient)
+
+            # Restore previous admission history
+            existing_patient["admission_history"] = admission_history
+
+            message = (
+                "Patient readmitted successfully.\n"
+                f"Patient ID: {patient['patient_id']}\n"
+                "Previous admission records have been preserved."
+            )
+
+        else:
+            # Add a completely new patient
+            patients.append(patient)
+
+            message = (
+                "Patient registered successfully.\n"
+                f"Patient ID: {patient['patient_id']}"
+            )
+
+        # Save patient and bed information
         save_database(data)
 
         display_patients()
@@ -530,8 +584,7 @@ def show_patients(root):
 
         messagebox.showinfo(
             "Success",
-            "Patient registered successfully.\n"
-            f"Patient ID: {patient['patient_id']}"
+            message
         )
 
     # Update an existing patient
@@ -662,7 +715,6 @@ def show_patients(root):
 
         update_beds()
         set_patient_id(generate_patient_id())
-
 
     # Buttons
     button_frame = tk.Frame(

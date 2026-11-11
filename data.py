@@ -19,7 +19,8 @@ PATIENT_FIELDS = [
     "admission_date",
     "status",
     "discharge_date",
-    "payment_confirmed"
+    "payment_confirmed",
+    "admission_history"
 ]
 
 # Default data used when the database does not exist
@@ -184,7 +185,10 @@ def update_patient_fields(data):
     for patient in data["patients"]:
         for field in PATIENT_FIELDS:
             if field not in patient:
-                patient[field] = ""
+                if field == "admission_history":
+                    patient[field] = []
+                else:
+                    patient[field] = ""
 
         # Give older records a default status
         if not patient["status"]:

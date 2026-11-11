@@ -24,7 +24,8 @@
             "admission_date": "2026-10-29",
             "status": "Discharged",
             "discharge_date": "2026-10-29",
-            "payment_confirmed": "Yes"
+            "payment_confirmed": "Yes",
+            "admission_history": []
         },
         {
             "patient_ic": "770305130817",
@@ -40,7 +41,8 @@
             "admission_date": "2026-10-30",
             "status": "Registered",
             "discharge_date": "",
-            "payment_confirmed": ""
+            "payment_confirmed": "",
+            "admission_history": []
         },
         {
             "patient_ic": "991005130005",
@@ -56,7 +58,8 @@
             "admission_date": "2026-10-30",
             "status": "Registered",
             "discharge_date": "",
-            "payment_confirmed": ""
+            "payment_confirmed": "",
+            "admission_history": []
         },
         {
             "patient_ic": "780708130708",
@@ -72,7 +75,8 @@
             "admission_date": "2026-11-01",
             "status": "Discharged",
             "discharge_date": "2026-11-11",
-            "payment_confirmed": "Yes"
+            "payment_confirmed": "Yes",
+            "admission_history": []
         }
     ],
     "beds": [
