@@ -18,14 +18,23 @@
             "phone": "0112222333",
             "address": "13,Taman Batu, Kuching,Sarawak",
             "emergency_contact": "0123333444",
-            "diagnosis": "Diarrhea",
+            "diagnosis": "Hypotension",
             "gender": "Male",
             "bed_id": "",
-            "admission_date": "2026-10-29",
+            "admission_date": "2026-10-01",
             "status": "Discharged",
-            "discharge_date": "2026-10-29",
+            "discharge_date": "2026-10-02",
             "payment_confirmed": "Yes",
-            "admission_history": []
+            "admission_history": [
+                {
+                    "admission_date": "2026-11-01",
+                    "discharge_date": "2026-11-02",
+                    "bed_id": "",
+                    "diagnosis": "Diarhea",
+                    "payment_confirmed": "Yes",
+                    "status": "Discharged"
+                }
+            ]
         },
         {
             "patient_ic": "770305130817",
@@ -54,12 +63,21 @@
             "emergency_contact": "0170050375",
             "diagnosis": "Mild Traumatic Brain Injury",
             "gender": "Male",
-            "bed_id": "Bed 207",
+            "bed_id": "",
             "admission_date": "2026-10-30",
-            "status": "Registered",
-            "discharge_date": "",
-            "payment_confirmed": "",
-            "admission_history": []
+            "status": "Discharged",
+            "discharge_date": "2026-11-12",
+            "payment_confirmed": "Yes",
+            "admission_history": [
+                {
+                    "admission_date": "2026-10-30",
+                    "discharge_date": "2026-11-12",
+                    "bed_id": "",
+                    "diagnosis": "Mild Traumatic Brain Injury",
+                    "payment_confirmed": "Yes",
+                    "status": "Discharged"
+                }
+            ]
         },
         {
             "patient_ic": "780708130708",
@@ -69,14 +87,23 @@
             "phone": "0122222333",
             "address": "04, Jalan Nanas, Taman Pokok, Kuching, Sarawak",
             "emergency_contact": "0143333444",
-            "diagnosis": "Leg Fracture",
+            "diagnosis": "Hypertension",
             "gender": "Male",
-            "bed_id": "",
-            "admission_date": "2026-11-01",
-            "status": "Discharged",
-            "discharge_date": "2026-11-11",
-            "payment_confirmed": "Yes",
-            "admission_history": []
+            "bed_id": "Bed 107",
+            "admission_date": "2026-11-12",
+            "status": "Registered",
+            "discharge_date": "",
+            "payment_confirmed": "",
+            "admission_history": [
+                {
+                    "admission_date": "2026-11-01",
+                    "discharge_date": "2026-11-11",
+                    "bed_id": "",
+                    "diagnosis": "Leg Fracture",
+                    "payment_confirmed": "Yes",
+                    "status": "Discharged"
+                }
+            ]
         }
     ],
     "beds": [
@@ -299,8 +326,8 @@
         {
             "bed_id": "Bed 207",
             "room_type": "Double-bedded",
-            "status": "Occupied",
-            "patient_id": "P0003"
+            "status": "Available",
+            "patient_id": ""
         },
         {
             "bed_id": "Bed 208",
@@ -467,8 +494,8 @@
         {
             "bed_id": "Bed 101",
             "room_type": "Four-bedded",
-            "status": "Available",
-            "patient_id": ""
+            "status": "Occupied",
+            "patient_id": "P0005"
         },
         {
             "bed_id": "Bed 102",
@@ -503,8 +530,8 @@
         {
             "bed_id": "Bed 107",
             "room_type": "Four-bedded",
-            "status": "Available",
-            "patient_id": ""
+            "status": "Occupied",
+            "patient_id": "P0004"
         },
         {
             "bed_id": "Bed 108",

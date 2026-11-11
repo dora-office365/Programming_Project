@@ -201,6 +201,9 @@ def show_patients(root):
     # Remember the selected patient
     selected_id = [""]
 
+    # Remember the IC of the automatically retrieved patient
+    lookup_ic = [""]
+
     # Patient records section
     result = tk.LabelFrame(
         main_content,
@@ -311,7 +314,89 @@ def show_patients(root):
         if bed_box.get() not in choices:
             bed_box.set("")
 
-    # Display and search patient records
+    # Automatically retrieve existing patient information using IC
+    def find_existing_patient(event=None):
+        current_ic = entries["patient_ic"].get().strip()
+
+        # Refresh the latest patient records
+        refresh_data()
+
+        existing_patient = None
+
+        for patient in patients:
+            if str(patient.get("patient_ic", "")) == current_ic:
+                existing_patient = patient
+                break
+
+        # If the IC number is not found
+        if existing_patient is None:
+
+            # Clear previously retrieved information when IC changes
+            if lookup_ic[0] and current_ic != lookup_ic[0]:
+                for key in [
+                    "name",
+                    "dob",
+                    "phone",
+                    "address",
+                    "emergency_contact"
+                ]:
+                    entries[key].delete(0, tk.END)
+
+                gender_box.set("")
+                bed_box.set("")
+
+                set_patient_id(generate_patient_id())
+
+                lookup_ic[0] = ""
+
+            return
+
+        # Do not repeatedly fill the form for the same IC
+        if lookup_ic[0] == current_ic:
+            return
+
+        # Remember this IC number
+        lookup_ic[0] = current_ic
+
+        # Retrieve the original Patient ID
+        set_patient_id(
+            str(existing_patient.get("patient_id", ""))
+        )
+
+        # Automatically fill personal information
+        for key in [
+            "name",
+            "dob",
+            "phone",
+            "address",
+            "emergency_contact"
+        ]:
+            entries[key].delete(0, tk.END)
+            entries[key].insert(
+                0,
+                str(existing_patient.get(key, ""))
+            )
+
+        # Retrieve the patient's gender
+        gender_box.set(
+            existing_patient.get("gender", "")
+        )
+
+        # Diagnosis and bed are for the new admission
+        entries["diagnosis"].delete(0, tk.END)
+        bed_box.set("")
+
+        update_beds()
+
+        # Inform staff if the patient is already active
+        if existing_patient.get("status") != "Discharged":
+            messagebox.showwarning(
+                "Patient Already Registered",
+                "This patient already has an active record.\n"
+                "Duplicate registration is not allowed."
+            )
+
+    # Display and search all patient admission records
     def display_patients(event=None):
         refresh_data()
 
@@ -321,35 +406,70 @@ def show_patients(root):
         keyword = search.get().strip().lower()
 
         for patient in patients:
-            patient_id = str(
-                patient.get("patient_id", "")
-            )
-            patient_name = str(
-                patient.get("name", "")
-            )
-            patient_ic = str(
-                patient.get("patient_ic", "")
-            )
+            patient_id = str(patient.get("patient_id", ""))
+            patient_name = str(patient.get("name", ""))
+            patient_ic = str(patient.get("patient_ic", ""))
 
+            # Check whether the patient matches the search
             if (
                 keyword in patient_id.lower()
                 or keyword in patient_name.lower()
                 or keyword in patient_ic.lower()
             ):
-                tree.insert(
-                    "",
-                    "end",
-                    values=(
-                        patient_ic,
-                        patient_id,
-                        patient_name,
-                        patient.get("gender", ""),
-                        patient.get("bed_id", ""),
-                        patient.get("status", "Registered"),
-                        patient.get("admission_date", " "),
-                        patient.get("discharge_date", " ") or "-"
-                    )
+                # Display previous admission records
+                history = patient.get("admission_history", [])
+
+                if isinstance(history, list):
+                    for record in history:
+                        if not isinstance(record, dict):
+                            continue
+
+                        tree.insert(
+                            "",
+                            "end",
+                            values=(
+                                patient_ic,
+                                patient_id,
+                                patient_name,
+                                patient.get("gender", ""),
+                                record.get("bed_id", "") or "-",
+                                record.get("status", "Discharged"),
+                                record.get("admission_date", ""),
+                                record.get("discharge_date", "") or "-"
+                            )
+                        )
+
+                # Display the current admission only if it is not already archived
+                current_admission = (
+                    patient.get("admission_date", ""),
+                    patient.get("discharge_date", "")
                 )
+                
+                history = patient.get("admission_history", [])
+                already_archived = any(
+                    isinstance(record, dict)
+                    and (
+                        record.get("admission_date", ""),
+                        record.get("discharge_date", "")
+                    ) == current_admission
+                    for record in history
+                )
+
+                if not already_archived:
+                    tree.insert(
+                        "",
+                        "end",
+                        values=(
+                            patient_ic,
+                            patient_id,
+                            patient_name,
+                            patient.get("gender", ""),
+                            "" if record.get("status") == "Discharged" else record.get("bed_id", ""),
+                            patient.get("status", "Registered"),
+                            patient.get("admission_date", ""),
+                            patient.get("discharge_date", "") or "-"
+                        )
+                    )
 
     # Show the selected patient's information
     def view_patient(event=None):
@@ -367,6 +487,9 @@ def show_patients(root):
         for patient in patients:
             if str(patient.get("patient_id", "")) == str(patient_id):
                 selected_id[0] = patient_id
+
+                # Clear automatic lookup state
+                lookup_ic[0] = ""
 
                 for key, entry in entries.items():
                     if key == "patient_id":
@@ -506,7 +629,6 @@ def show_patients(root):
             return
 
         # Confirm that the selected bed is still available
-        # Use the latest database information
         available_bed_ids = {
             bed.get("bed_id", "")
             for bed in get_available_beds()
@@ -709,6 +831,7 @@ def show_patients(root):
         gender_box.set("")
         bed_box.set("")
         selected_id[0] = ""
+        lookup_ic[0] = ""
 
         for item in tree.selection():
             tree.selection_remove(item)
@@ -765,6 +888,12 @@ def show_patients(root):
     # Search and table selection
     search.bind("<KeyRelease>", display_patients)
     tree.bind("<<TreeviewSelect>>", view_patient)
+
+    # Automatically retrieve patient information when IC is entered
+    entries["patient_ic"].bind(
+        "<KeyRelease>",
+        find_existing_patient
+    )
 
     # Show initial data and next Patient ID
     update_beds()

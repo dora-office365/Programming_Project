@@ -49,51 +49,74 @@ def confirm_payment(root):
 
 
 # Release the patient's bed
-def release_bed(bed_id, beds):
+# Release the patient's bed
+def release_bed(bed_id, patient_id, beds):
     for bed in beds:
-        if str(bed.get("bed_id", "")) == bed_id:
+        if (
+            str(bed.get("bed_id", "")) == bed_id
+            and str(bed.get("patient_id", "")) == patient_id
+            and bed.get("status") == "Occupied"
+        ):
             bed["status"] = "Available"
             bed["patient_id"] = ""
-            return
+            return True
+
+    return False
 
 
 # Update patient's discharge information
 def update_discharge_record(patient):
 
+    # Prevent duplicate discharge history
+    if patient.get("status") == "Discharged":
+        return False
+
     # Create admission history if it does not exist
-    if "admission_history" not in patient or not isinstance(
-        patient["admission_history"], list
-    ):
+    if not isinstance(patient.get("admission_history"), list):
         patient["admission_history"] = []
+
+    discharge_date = date.today().isoformat()
 
     # Save the completed admission details
     admission_record = {
         "admission_date": patient.get("admission_date", ""),
-        "discharge_date": date.today().isoformat(),
+        "discharge_date": discharge_date,
         "bed_id": patient.get("bed_id", ""),
         "diagnosis": patient.get("diagnosis", ""),
         "payment_confirmed": "Yes",
         "status": "Discharged"
     }
 
-    # Add the completed admission to the patient's history
+    # Add the completed admission to history
     patient["admission_history"].append(admission_record)
 
-    # Update the patient's latest admission information
+    # Update the latest admission information
     patient["status"] = "Discharged"
-    patient["discharge_date"] = date.today().isoformat()
+    patient["discharge_date"] = discharge_date
     patient["payment_confirmed"] = "Yes"
     patient["bed_id"] = ""
 
+    return True
 
 # Save updated patient and bed information
 def save_discharge_data(data, patient, beds):
-    bed_id = str(patient.get("bed_id", ""))
 
-    update_discharge_record(patient)
-    release_bed(bed_id, beds)
+    bed_id = str(patient.get("bed_id", ""))
+    patient_id = str(patient.get("patient_id", ""))
+
+    # Check whether the bed belongs to the patient
+    bed_released = release_bed(bed_id, patient_id, beds)
+
+    if not bed_released:
+        return False
+
+    # Update the patient's discharge information
+    if not update_discharge_record(patient):
+        return False
 
     save_database(data)
+
+    return True
 
 
 # Display patients in the table
