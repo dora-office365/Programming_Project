@@ -61,7 +61,9 @@ def release_bed(bed_id, beds):
 def update_discharge_record(patient):
 
     # Create admission history if it does not exist
-    if "admission_history" not in patient:
+    if "admission_history" not in patient or not isinstance(
+        patient["admission_history"], list
+    ):
         patient["admission_history"] = []
 
     # Save the completed admission details
@@ -259,13 +261,28 @@ def show_discharge(root):
     )
     search_entry.pack(side="left", padx=10)
 
+    # Buttons - reserve space at the bottom
+    button_frame = tk.Frame(content, bg=PINK_LIGHT)
+    button_frame.pack(
+        side="bottom",
+        fill="x",
+        padx=25,
+        pady=10
+    )
+
+    # Centre both buttons horizontally
+    button_group = tk.Frame(
+        button_frame,
+        bg=PINK_LIGHT
+    )
+    button_group.pack(anchor="center")
+
     # Patient table
     table_frame = tk.Frame(content, bg=WHITE)
     table_frame.pack(
         fill="both",
         expand=True,
-        padx=25,
-        pady=(0, 15)
+        pady=(0, 5)
     )
 
     columns = (
@@ -280,7 +297,7 @@ def show_discharge(root):
         table_frame,
         columns=columns,
         show="headings",
-        height=15
+        height=10
     )
 
     # Table headings
@@ -315,12 +332,9 @@ def show_discharge(root):
 
     scrollbar.pack(side="right", fill="y", pady=10)
 
-    # Buttons
-    button_frame = tk.Frame(content, bg=PINK_LIGHT)
-    button_frame.pack(pady=(0, 15))
-
+    # Confirm Discharge button
     tk.Button(
-        button_frame,
+        button_group,
         text="Confirm Discharge",
         command=lambda: discharge_patient(
             root, table, search_entry, data, patients, beds
@@ -333,8 +347,9 @@ def show_discharge(root):
         cursor="hand2"
     ).pack(side="left", padx=5)
 
+    # Clear Search button
     tk.Button(
-        button_frame,
+        button_group,
         text="Clear Search",
         command=lambda: clear_search(search_entry, table),
         bg=PINK_PALE,
@@ -343,12 +358,6 @@ def show_discharge(root):
         width=12,
         cursor="hand2"
     ).pack(side="left", padx=5)
-
-    # Search while typing
-    search_entry.bind(
-        "<KeyRelease>",
-        lambda event: display_patients(table, search_entry)
-    )
 
     # Display patients when the page opens
     display_patients(table, search_entry)
