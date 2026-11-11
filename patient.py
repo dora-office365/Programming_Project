@@ -100,13 +100,13 @@ def show_patients(root):
 
     # Patient fields
     fields = [
-        ("Patient IC", "patient_ic"),
+        ("Patient IC (without '-')", "patient_ic"),
         ("Patient ID", "patient_id"),
         ("Full Name", "name"),
-        ("Date of Birth", "dob"),
-        ("Phone", "phone"),
+        ("Date of Birth (e.g. 2005-08-21)", "dob"),
+        ("Phone (e.g. 0123456789)", "phone"),
         ("Address", "address"),
-        ("Emergency Contact", "emergency_contact"),
+        ("Emergency Contact (e.g. 0123456789)", "emergency_contact"),
         ("Diagnosis", "diagnosis")
     ]
 
