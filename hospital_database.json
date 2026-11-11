@@ -18,7 +18,7 @@
             "phone": "0112222333",
             "address": "13,Taman Batu, Kuching,Sarawak",
             "emergency_contact": "0123333444",
-            "diagnosis": "Hypotension",
+            "diagnosis": "Diarhea",
             "gender": "Male",
             "bed_id": "",
             "admission_date": "2026-10-01",
@@ -27,8 +27,8 @@
             "payment_confirmed": "Yes",
             "admission_history": [
                 {
-                    "admission_date": "2026-11-01",
-                    "discharge_date": "2026-11-02",
+                    "admission_date": "2026-10-01",
+                    "discharge_date": "2026-10-02",
                     "bed_id": "",
                     "diagnosis": "Diarhea",
                     "payment_confirmed": "Yes",

@@ -1,3 +1,4 @@
+
 import tkinter as tk
 from tkinter import ttk, messagebox, simpledialog
 from datetime import date
@@ -513,15 +514,30 @@ def show_dashboard(username=None):
         ):
             today_discharge_count += 1
 
-    available_count = sum(
-        1 for bed in beds
-        if bed.get("status", "Available") == "Available"
-    )
+    # Calculate occupied beds using the same logic as Bed Management
+    occupied_count = 0
 
-    occupied_count = sum(
-        1 for bed in beds
-        if bed.get("status") == "Occupied"
-    )
+    for bed in beds:
+        bed_id = str(bed.get("bed_id", ""))
+        bed_patient_id = str(bed.get("patient_id", ""))
+
+        for patient in patients:
+            if patient.get("status", "") == "Discharged":
+                continue
+
+            patient_bed_id = str(patient.get("bed_id", ""))
+            patient_id = str(patient.get("patient_id", ""))
+
+            if (
+                patient_bed_id == bed_id and patient_bed_id
+            ) or (
+                bed_patient_id and patient_id == bed_patient_id
+            ):
+                occupied_count += 1
+                break
+
+    # Calculate available beds
+    available_count = len(beds) - occupied_count
 
     # Attach navigation directly to the main window
     content = add_navigation(root, "Dashboard")
@@ -644,21 +660,81 @@ def show_dashboard(username=None):
     )
     scrollbar.pack(side="right", fill="y", pady=8)
 
-    # Display recent patient records, including Patient IC
+    # Display previous and current patient admission records
     for patient in patients[-100:]:
-        patient_table.insert(
-            "",
-            "end",
-            values=(
-                patient.get("patient_ic", ""),
-                patient.get("patient_id", ""),
-                patient.get("name", ""),
-                patient.get("bed_id", "") or "-",
-                patient.get("status", "Registered"),
-                patient.get("admission_date", "") ,
-                patient.get("discharge_date", "") or "-"
-            )
+        patient_ic = patient.get("patient_ic", "")
+        patient_id = patient.get("patient_id", "")
+        patient_name = patient.get("name", "")
+        patient_gender = patient.get("gender", "")
+
+        # Get previous admission records
+        history = patient.get("admission_history", [])
+
+        if isinstance(history, list):
+            for record in history:
+                if not isinstance(record, dict):
+                    continue
+
+                record_status = record.get("status", "Discharged")
+
+                # Discharged records should not display a Bed ID
+                if record_status == "Discharged":
+                    record_bed_id = ""
+                else:
+                    record_bed_id = record.get("bed_id", "") or "-"
+
+                patient_table.insert(
+                    "",
+                    "end",
+                    values=(
+                        patient_ic,
+                        patient_id,
+                        patient_name,
+                        record_bed_id,
+                        record_status,
+                        record.get("admission_date", ""),
+                        record.get("discharge_date", "") or "-"
+                    )
+                )
+
+        # Check whether the current admission has already been archived
+        current_admission = (
+            patient.get("admission_date", ""),
+            patient.get("discharge_date", "")
         )
+
+        already_archived = any(
+            isinstance(record, dict)
+            and (
+                record.get("admission_date", ""),
+                record.get("discharge_date", "")
+            ) == current_admission
+            for record in history
+        ) if isinstance(history, list) else False
+
+        # Display the current admission only if it is not already archived
+        if not already_archived:
+            current_status = patient.get("status", "Registered")
+
+            # Discharged patients should have a blank Bed ID
+            if current_status == "Discharged":
+                current_bed_id = ""
+            else:
+                current_bed_id = patient.get("bed_id", "") or "-"
+
+            patient_table.insert(
+                "",
+                "end",
+                values=(
+                    patient_ic,
+                    patient_id,
+                    patient_name,
+                    current_bed_id,
+                    current_status,
+                    patient.get("admission_date", ""),
+                    patient.get("discharge_date", "") or "-"
+                )
+            )
 
     tk.Label(
         content,
@@ -700,7 +776,8 @@ def start_app():
     show_login()
     root.mainloop()
 
-#Keep all the modules connected to the same dashboard
+
+# Keep all the modules connected to the same dashboard
 if __name__ == "__main__":
     import sys
     sys.modules["dashboard"] = sys.modules["__main__"]

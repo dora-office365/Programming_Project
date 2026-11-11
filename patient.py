@@ -201,6 +201,9 @@ def show_patients(root):
     # Remember the selected patient
     selected_id = [""]
 
+    # Remember whether the selected row is a previous admission
+    selected_record_type = [""]
+
     # Remember the IC of the automatically retrieved patient
     lookup_ic = [""]
 
@@ -278,6 +281,9 @@ def show_patients(root):
         expand=True
     )
     scrollbar.pack(side="right", fill="y")
+
+    # Store the exact admission associated with each table row
+    admission_selection = {}
 
     # Refresh data from the shared JSON file
     def refresh_data():
@@ -403,6 +409,9 @@ def show_patients(root):
         for item in tree.get_children():
             tree.delete(item)
 
+        # Clear the previous admission selection information
+        admission_selection.clear()
+
         keyword = search.get().strip().lower()
 
         for patient in patients:
@@ -419,33 +428,51 @@ def show_patients(root):
                 # Display previous admission records
                 history = patient.get("admission_history", [])
 
-                if isinstance(history, list):
-                    for record in history:
-                        if not isinstance(record, dict):
-                            continue
+                if not isinstance(history, list):
+                    history = []
 
-                        tree.insert(
-                            "",
-                            "end",
-                            values=(
-                                patient_ic,
-                                patient_id,
-                                patient_name,
-                                patient.get("gender", ""),
-                                record.get("bed_id", "") or "-",
-                                record.get("status", "Discharged"),
-                                record.get("admission_date", ""),
-                                record.get("discharge_date", "") or "-"
-                            )
+                for index, record in enumerate(history):
+                    if not isinstance(record, dict):
+                        continue
+
+                    # Give each previous admission its own row ID
+                    row_id = f"{patient_id}_history_{index}"
+
+                    # Discharged records should have a blank Bed ID
+                    if record.get("status", "Discharged") == "Discharged":
+                        record_bed = ""
+                    else:
+                        record_bed = record.get("bed_id", "") or "-"
+
+                    tree.insert(
+                        "",
+                        "end",
+                        iid=row_id,
+                        values=(
+                            patient_ic,
+                            patient_id,
+                            patient_name,
+                            patient.get("gender", ""),
+                            record_bed,
+                            record.get("status", "Discharged"),
+                            record.get("admission_date", ""),
+                            record.get("discharge_date", "") or "-"
                         )
+                    )
 
-                # Display the current admission only if it is not already archived
+                    # Remember which historical admission this row represents
+                    admission_selection[row_id] = {
+                        "patient_id": patient_id,
+                        "history_index": index,
+                        "record_type": "history"
+                    }
+
+                # Check whether the current admission has already been archived
                 current_admission = (
                     patient.get("admission_date", ""),
                     patient.get("discharge_date", "")
                 )
-                
-                history = patient.get("admission_history", [])
+
                 already_archived = any(
                     isinstance(record, dict)
                     and (
@@ -455,21 +482,41 @@ def show_patients(root):
                     for record in history
                 )
 
+                # Display the current admission only if it is not already archived
                 if not already_archived:
+                    current_status = patient.get(
+                        "status", "Registered"
+                    )
+
+                    if current_status == "Discharged":
+                        current_bed = ""
+                    else:
+                        current_bed = patient.get("bed_id", "") or "-"
+
+                    row_id = f"{patient_id}_current"
+
                     tree.insert(
                         "",
                         "end",
+                        iid=row_id,
                         values=(
                             patient_ic,
                             patient_id,
                             patient_name,
                             patient.get("gender", ""),
-                            "" if record.get("status") == "Discharged" else record.get("bed_id", ""),
-                            patient.get("status", "Registered"),
+                            current_bed,
+                            current_status,
                             patient.get("admission_date", ""),
                             patient.get("discharge_date", "") or "-"
                         )
                     )
+
+                    # Remember that this row represents the current admission
+                    admission_selection[row_id] = {
+                        "patient_id": patient_id,
+                        "history_index": None,
+                        "record_type": "current"
+                    }
 
     # Show the selected patient's information
     def view_patient(event=None):
@@ -478,19 +525,30 @@ def show_patients(root):
         if not selected:
             return
 
-        patient_id = tree.item(
-            selected[0], "values"
-        )[1]
+        row_id = selected[0]
+
+        # Identify the exact admission record selected
+        selection_info = admission_selection.get(row_id)
+
+        if selection_info is None:
+            return
+
+        patient_id = selection_info["patient_id"]
+        record_type = selection_info["record_type"]
+        history_index = selection_info["history_index"]
 
         refresh_data()
 
         for patient in patients:
             if str(patient.get("patient_id", "")) == str(patient_id):
+
                 selected_id[0] = patient_id
+                selected_record_type[0] = record_type
 
                 # Clear automatic lookup state
                 lookup_ic[0] = ""
 
+                # Start with the patient's personal information
                 for key, entry in entries.items():
                     if key == "patient_id":
                         set_patient_id(
@@ -498,6 +556,7 @@ def show_patients(root):
                         )
                     else:
                         entry.delete(0, tk.END)
+
                         entry.insert(
                             0,
                             str(patient.get(key, ""))
@@ -509,10 +568,45 @@ def show_patients(root):
 
                 update_beds()
 
-                if patient.get("bed_id", ""):
-                    bed_box.set(patient["bed_id"])
-                else:
+                if record_type == "history":
+                    # Retrieve the exact previous admission
+                    history = patient.get("admission_history", [])
+
+                    if (
+                        not isinstance(history, list)
+                        or history_index is None
+                        or history_index >= len(history)
+                    ):
+                        messagebox.showerror(
+                            "Record Error",
+                            "The selected admission record could not be found."
+                        )
+                        return
+
+                    previous_record = history[history_index]
+
+                    # Display the diagnosis from the previous admission
+                    entries["diagnosis"].delete(0, tk.END)
+                    entries["diagnosis"].insert(
+                        0,
+                        str(previous_record.get("diagnosis", ""))
+                    )
+
+                    # Previous discharged admissions cannot be edited
                     bed_box.set("")
+
+                else:
+                    # Display the diagnosis from the current admission
+                    entries["diagnosis"].delete(0, tk.END)
+                    entries["diagnosis"].insert(
+                        0,
+                        str(patient.get("diagnosis", ""))
+                    )
+
+                    if patient.get("bed_id", ""):
+                        bed_box.set(patient["bed_id"])
+                    else:
+                        bed_box.set("")
 
                 break
 
@@ -722,6 +816,14 @@ def show_patients(root):
             )
             return
 
+        # Prevent editing a previous admission through the current record
+        if selected_record_type[0] == "history":
+            messagebox.showwarning(
+                "Previous Admission",
+                "A previous admission record cannot be updated here."
+            )
+            return
+
         selected_patient = None
 
         for patient in patients:
@@ -831,6 +933,7 @@ def show_patients(root):
         gender_box.set("")
         bed_box.set("")
         selected_id[0] = ""
+        selected_record_type[0] = ""
         lookup_ic[0] = ""
 
         for item in tree.selection():
