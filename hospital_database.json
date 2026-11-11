@@ -68,11 +68,11 @@
             "emergency_contact": "0143333444",
             "diagnosis": "Leg Fracture",
             "gender": "Male",
-            "bed_id": "Bed 101",
+            "bed_id": "",
             "admission_date": "2026-11-01",
-            "status": "Registered",
-            "discharge_date": "",
-            "payment_confirmed": ""
+            "status": "Discharged",
+            "discharge_date": "2026-11-11",
+            "payment_confirmed": "Yes"
         }
     ],
     "beds": [
@@ -463,8 +463,8 @@
         {
             "bed_id": "Bed 101",
             "room_type": "Four-bedded",
-            "status": "Occupied",
-            "patient_id": "P0004"
+            "status": "Available",
+            "patient_id": ""
         },
         {
             "bed_id": "Bed 102",
