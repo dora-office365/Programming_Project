@@ -263,3 +263,26 @@ def get_available_beds():
             available_beds.append(bed)
 
     return available_beds
+
+# Find a patient using a specific field
+def find_patient(value, patients, field="patient_id"):
+    for patient in patients:
+        if str(patient.get(field, "")).lower() == str(value).lower():
+            return patient
+
+    return None
+
+# Search records using a keyword
+def search_records(records, keyword, fields):
+    results = []
+    keyword = keyword.lower().strip()
+
+    for record in records:
+        for field in fields:
+            value = str(record.get(field, "")).lower()
+
+            if keyword in value:
+                results.append(record)
+                break
+                
+    return results
