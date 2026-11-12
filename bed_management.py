@@ -1,7 +1,7 @@
 import tkinter as tk
 from tkinter import ttk, messagebox
 import dashboard
-from data import load_database, find_patient
+from data import load_database, find_patient, search_records
 
 # Pink theme colours
 PINK_DARK = "#7D3458"
@@ -236,25 +236,15 @@ def show_bed_management(root):
     def get_bed_status(bed, patients):
         patient = search_patient(bed, patients)
 
-        if patient:
-            bed_status = "Occupied"
-            patient_ic = str(
-                patient.get("patient_ic", "")
-            )
-            patient_id = str(
-                patient.get("patient_id", "")
-            )
-            patient_name = str(
-                patient.get("name", "")
-            )
+        if patient is None:
+            return "Available", "", "", ""
 
-        else:
-            bed_status = "Available"
-            patient_ic = ""
-            patient_id = ""
-            patient_name = ""
-
-        return bed_status, patient_ic, patient_id, patient_name
+        return (
+            "Occupied",
+            str(patient.get("patient_ic", "")),
+            str(patient.get("patient_id", "")),
+            str(patient.get("name", ""))
+        )
 
     # Display beds in the table
     def display_beds():
@@ -283,16 +273,22 @@ def show_bed_management(root):
                 occupied_count += 1
 
             # Include Patient IC in the search
-            search_text = (
-                str(bed.get("bed_id", "")) + " "
-                + patient_ic + " "
-                + patient_id + " "
-                + patient_name
-            ).lower()
-
-            if keyword and keyword not in search_text:
-                continue
-
+            # Search using the reusable function in data.py
+            searchable_bed = {
+                "bed_id": str(bed.get("bed_id", "")),
+                "patient_ic": patient_ic,
+                "patient_id": patient_id,
+                "patient_name": patient_name
+            }
+            if keyword:
+                search_result = search_records(
+                    [searchable_bed],
+                    keyword,
+                    ["bed_id", "patient_ic", "patient_id", "patient_name"]
+                )
+                
+                if not search_result:
+                    continue
             #Filter by Bed Status
             if (
                 selected_status != "All"
