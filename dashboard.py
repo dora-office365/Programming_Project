@@ -317,7 +317,7 @@ def show_login():
 
     tk.Label(
         login_frame,
-        text="Demo account: admin / admin123",
+        text="Default account: admin / admin123",
         font=("Arial", 9),
         bg=WHITE,
         fg=TEXT_LIGHT
