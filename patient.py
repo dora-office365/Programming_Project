@@ -553,70 +553,68 @@ def show_patients(root):
         selected_id[0] = patient_id
         selected_record_type[0] = record_type
 
-            # Clear automatic lookup state
-            lookup_ic[0] = ""
+        # Clear automatic lookup state
+        lookup_ic[0] = ""
 
-            # Start with the patient's personal information
-            for key, entry in entries.items():
-                if key == "patient_id":
-                    set_patient_id(
-                        str(patient.get("patient_id", ""))
-                    )
-                 else:
-                    entry.delete(0, tk.END)
+        # Start with the patient's personal information
+        for key, entry in entries.items():
+            if key == "patient_id":
+                set_patient_id(
+                    str(patient.get("patient_id", ""))
+                )
+            else:
+                entry.delete(0, tk.END)
 
-                    entry.insert(
-                        0,
-                        str(patient.get(key, ""))
-                    )
+                entry.insert(
+                    0,
+                    str(patient.get(key, ""))
+                )
 
-            gender_box.set(
-                patient.get("gender", "")
+        gender_box.set(
+            patient.get("gender", "")
+        )
+
+        update_beds()
+
+        if record_type == "history":
+            # Retrieve the exact previous admission
+            history = patient.get("admission_history", [])
+
+            if (
+                not isinstance(history, list)
+                or history_index is None
+                or history_index >= len(history)
+            ):
+                messagebox.showerror(
+                    "Record Error",
+                    "The selected admission record could not be found."
+                )
+                return
+
+            previous_record = history[history_index]
+
+            # Display the diagnosis from the previous admission
+            entries["diagnosis"].delete(0, tk.END)
+            entries["diagnosis"].insert(
+                0,
+                str(previous_record.get("diagnosis", ""))
             )
 
-            update_beds()
+            # Previous discharged admissions cannot be edited
+            bed_box.set("")
 
-            if record_type == "history":
-                # Retrieve the exact previous admission
-                history = patient.get("admission_history", [])
+        else:
+            # Display the diagnosis from the current admission
+            entries["diagnosis"].delete(0, tk.END)
+            entries["diagnosis"].insert(
+                0,
+                str(patient.get("diagnosis", ""))
+            )
 
-                if (
-                    not isinstance(history, list)
-                    or history_index is None
-                    or history_index >= len(history)
-                ):
-                    messagebox.showerror(
-                        "Record Error",
-                        "The selected admission record could not be found."
-                    )
-                    return
-
-                previous_record = history[history_index]
-
-                # Display the diagnosis from the previous admission
-                entries["diagnosis"].delete(0, tk.END)
-                entries["diagnosis"].insert(
-                    0,
-                    str(previous_record.get("diagnosis", ""))
-                )
-
-                # Previous discharged admissions cannot be edited
-                bed_box.set("")
-
+            if patient.get("bed_id", ""):
+                bed_box.set(patient["bed_id"])
             else:
-                # Display the diagnosis from the current admission
-                entries["diagnosis"].delete(0, tk.END)
-                entries["diagnosis"].insert(
-                    0,
-                    str(patient.get("diagnosis", ""))
-                )
-
-                if patient.get("bed_id", ""):
-                    bed_box.set(patient["bed_id"])
-                else:
-                    bed_box.set("")
-
-            break
+                bed_box.set("")
 
     # Validate patient information
     def valid_date(dob):
