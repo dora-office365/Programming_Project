@@ -7,7 +7,9 @@ from data import (
     PATIENT_FIELDS,
     load_database,
     save_database,
-    get_available_beds
+    get_available_beds,
+    find_patient,
+    search_records
 )
 
 
@@ -825,12 +827,7 @@ def show_patients(root):
             return
 
         # Find the selected patient
-        selected_patient = None
-
-        for patient in patients:
-            if str(patient.get("patient_id", "")) == str(patient_id):
-                selected_patient = patient
-                break
+        selected_patient = find_patient(patient_id,patients)
 
         if selected_patient is None:
             messagebox.showerror(
