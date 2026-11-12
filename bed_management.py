@@ -207,8 +207,8 @@ def show_bed_management(root):
 
     # Find the patient assigned to a bed
     def find_patient(bed, patients):
-        bed_id = str(bed.get("bed_id", ""))
-        bed_patient_id = str(bed.get("patient_id", ""))
+        bed_id = bed.get("bed_id", "")
+        bed_patient_id = bed.get("patient_id", "")
 
         for patient in patients:
             if patient.get("status", "") == "Discharged":
@@ -270,9 +270,7 @@ def show_bed_management(root):
         selected_status = status_box.get()
 
         for bed in beds:
-            bed_status, patient_ic, patient_id, patient_name = (
-                get_bed_status(bed, patients)
-            )
+            bed_status, patient_ic, patient_id, patient_name = (get_bed_status(bed, patients))
 
             # Count all beds before applying filters
             if bed_status == "Available":
@@ -399,20 +397,9 @@ def show_bed_management(root):
     ).pack(side="left", padx=5)
 
     # Update the table when searching or changing status
-    search_entry.bind(
-        "<KeyRelease>",
-        lambda event: display_beds()
-    )
-
-    status_box.bind(
-        "<<ComboboxSelected>>",
-        lambda event: display_beds()
-    )
-
-    room_type_box.bind(
-        "<<ComboboxSelected>>",
-        lambda event: display_beds()
-    )
+    search_entry.bind("<KeyRelease>",display_beds)
+    status_box.bind("<<ComboboxSelected>>",display_beds)
+    room_type_box.bind("<<ComboboxSelected>>",display_beds)
 
     # Show beds when the page opens
     display_beds()
