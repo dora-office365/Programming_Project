@@ -197,7 +197,6 @@ def update_patient_fields(data):
 
 # Add missing fields to existing bed records
 def update_bed_fields(data):
-
     for bed in data["beds"]:
         if "bed_id" not in bed:
             bed["bed_id"] = ""
@@ -209,7 +208,7 @@ def update_bed_fields(data):
             bed["patient_id"] = ""
         
         if "room_type" not in bed:
-        	bed["room_type"] = "Four-bedded"
+            bed["room_type"] = "Four-bedded"
 
 
 # Load data from the JSON file
