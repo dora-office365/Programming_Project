@@ -527,33 +527,38 @@ def show_dashboard(username=None):
         ):
             today_discharge_count += 1
 
-        # Calculate occupied beds
-        occupied_count = 0
+    # Calculate occupied beds
+    occupied_count = 0
 
-        for bed in beds:
-            bed_id = str(bed.get("bed_id", ""))
-            bed_patient_id = str(bed.get("patient_id", ""))
+    for bed in beds:
+        bed_id = str(bed.get("bed_id", ""))
+        bed_patient_id = str(bed.get("patient_id", ""))
 
-            # Find the patient using the bed ID
-                patient = find_patient(
-                bed_id,
-                patients,
-                "bed_id"
-            )
+        # Find the patient using the bed ID
+        patient = find_patient(
+            bed_id,
+            patients,
+            "bed_id"
+        )
 
-            # Check using the patient ID if necessary
-            if patient is None and bed_patient_id:
+        # Check using the patient ID if necessary
+        if (
+            patient is None
+            or patient.get("status") == "Discharged"
+        ):
+            if bed_patient_id:
                 patient = find_patient(
                     bed_patient_id,
                     patients
                 )
 
-            # Count the bed only if the patient is not discharged
-            if patient and patient.get("status") != "Discharged":
-                occupied_count += 1
+        # Count the bed only if the patient is not discharged
+        if patient and patient.get("status") != "Discharged":
+            occupied_count += 1
 
     # Calculate available beds
     available_count = len(beds) - occupied_count
+    
 
     # Attach navigation directly to the main window
     content = add_navigation(root, "Dashboard")
