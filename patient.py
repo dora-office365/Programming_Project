@@ -299,7 +299,7 @@ def show_patients(root):
     def update_beds():
         refresh_data()
 
-        available_beds= get_available-beds()
+        available_beds= get_available_beds()
         choices = sorted(
             [
                 bed.get("bed_id", "")
@@ -404,6 +404,7 @@ def show_patients(root):
                 "Duplicate registration is not allowed."
             )
 
+                
     # Display and search all patient admission records
     def display_patients(event=None):
         refresh_data()
@@ -414,111 +415,112 @@ def show_patients(root):
         # Clear the previous admission selection information
         admission_selection.clear()
 
-        keyword = search.get().strip().lower()
+        keyword = search.get().strip()
 
-        for patient in patients:
+        filtered_patients = search_records(
+            patients,
+            keyword,
+            ["patient_id", "name", "patient_ic"]
+        )
+
+        for patient in filtered_patients:
             patient_id = str(patient.get("patient_id", ""))
             patient_name = str(patient.get("name", ""))
             patient_ic = str(patient.get("patient_ic", ""))
 
-            # Check whether the patient matches the search
-            if (
-                keyword in patient_id.lower()
-                or keyword in patient_name.lower()
-                or keyword in patient_ic.lower()
-            ):
-                # Display previous admission records
-                history = patient.get("admission_history", [])
+            # Display previous admission records
+            history = patient.get("admission_history", [])
 
-                if not isinstance(history, list):
-                    history = []
+            if not isinstance(history, list):
+                history = []
 
-                for index, record in enumerate(history):
-                    if not isinstance(record, dict):
-                        continue
+            for index, record in enumerate(history):
+                if not isinstance(record, dict):
+                    continue
 
-                    # Give each previous admission its own row ID
-                    row_id = f"{patient_id}_history_{index}"
+                # Give each previous admission its own row ID
+                row_id = f"{patient_id}_history_{index}"
 
-                    # Discharged records should have a blank Bed ID
-                    if record.get("status", "Discharged") == "Discharged":
-                        record_bed = ""
-                    else:
-                        record_bed = record.get("bed_id", "") or "-"
+                # Discharged records should have a blank Bed ID
+                if record.get("status", "Discharged") == "Discharged":
+                    record_bed = ""
+                else:
+                    record_bed = record.get("bed_id", "") or "-"
 
-                    tree.insert(
-                        "",
-                        "end",
-                        iid=row_id,
-                        values=(
-                            patient_ic,
-                            patient_id,
-                            patient_name,
-                            patient.get("gender", ""),
-                            record_bed,
-                            record.get("status", "Discharged"),
-                            record.get("admission_date", ""),
-                            record.get("discharge_date", "") or "-"
-                        )
-                    )
-
-                    # Remember which historical admission this row represents
-                    admission_selection[row_id] = {
-                        "patient_id": patient_id,
-                        "history_index": index,
-                        "record_type": "history"
-                    }
-
-                # Check whether the current admission has already been archived
-                current_admission = (
-                    patient.get("admission_date", ""),
-                    patient.get("discharge_date", "")
-                )
-
-                already_archived = any(
-                    isinstance(record, dict)
-                    and (
+                tree.insert(
+                    "",
+                    "end",
+                    iid=row_id,
+                    values=(
+                        patient_ic,
+                        patient_id,
+                        patient_name,
+                        patient.get("gender", ""),
+                        record_bed,
+                        record.get("status", "Discharged"),
                         record.get("admission_date", ""),
-                        record.get("discharge_date", "")
-                    ) == current_admission
-                    for record in history
+                        record.get("discharge_date", "") or "-"
+                    )
                 )
 
-                # Display the current admission only if it is not already archived
-                if not already_archived:
-                    current_status = patient.get(
-                        "status", "Registered"
+                # Remember which historical admission this row represents
+                admission_selection[row_id] = {
+                    "patient_id": patient_id,
+                    "history_index": index,
+                    "record_type": "history"
+                }
+
+            # Check whether the current admission has already been archived
+            current_admission = (
+                patient.get("admission_date", ""),
+                patient.get("discharge_date", "")
+            )
+
+            already_archived = any(
+                isinstance(record, dict)
+                and (
+                    record.get("admission_date", ""),
+                    record.get("discharge_date", "")
+                ) == current_admission
+                for record in history
+            )
+
+            # Display the current admission only if it is not already archived
+            if not already_archived:
+                current_status = patient.get(
+                    "status", "Registered"
+                )
+
+                if current_status == "Discharged":
+                    current_bed = ""
+                else:
+                    current_bed = patient.get("bed_id", "") or "-"
+
+                row_id = f"{patient_id}_current"
+
+                tree.insert(
+                    "",
+                    "end",
+                    iid=row_id,
+                    values=(
+                        patient_ic,
+                        patient_id,
+                        patient_name,
+                        patient.get("gender", ""),
+                        current_bed,
+                        current_status,
+                        patient.get("admission_date", ""),
+                        patient.get("discharge_date", "") or "-"
                     )
+                )
 
-                    if current_status == "Discharged":
-                        current_bed = ""
-                    else:
-                        current_bed = patient.get("bed_id", "") or "-"
+                # Remember that this row represents the current admission
+                admission_selection[row_id] = {
+                    "patient_id": patient_id,
+                    "history_index": None,
+                    "record_type": "current"
+                }
 
-                    row_id = f"{patient_id}_current"
-
-                    tree.insert(
-                        "",
-                        "end",
-                        iid=row_id,
-                        values=(
-                            patient_ic,
-                            patient_id,
-                            patient_name,
-                            patient.get("gender", ""),
-                            current_bed,
-                            current_status,
-                            patient.get("admission_date", ""),
-                            patient.get("discharge_date", "") or "-"
-                        )
-                    )
-
-                    # Remember that this row represents the current admission
-                    admission_selection[row_id] = {
-                        "patient_id": patient_id,
-                        "history_index": None,
-                        "record_type": "current"
-                    }
 
     # Show the selected patient's information
     def view_patient(event=None):
