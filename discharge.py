@@ -2,7 +2,7 @@ import tkinter as tk
 from tkinter import ttk, messagebox
 from datetime import date
 import dashboard
-from data import load_database, save_database, find_patient
+from data import load_database, save_database, find_patient,search_records
 
 
 # Pink theme colours
@@ -117,34 +117,35 @@ def display_patients(table, search_entry):
     latest_data = load_database()
     latest_patients = latest_data["patients"]
 
-    keyword = search_entry.get().strip().lower()
+    keyword = search_entry.get().strip()
 
-    for patient in latest_patients:
+    # Search patients using the reusable function in data.py
+    filtered_patients = search_records(
+        latest_patients,
+        keyword,
+        ["patient_ic", "patient_id", "name"]
+    )
+
+    for patient in filtered_patients:
         patient_ic = str(patient.get("patient_ic", ""))
         patient_id = str(patient.get("patient_id", ""))
         patient_name = str(patient.get("name", ""))
         bed_id = str(patient.get("bed_id", ""))
         status = patient.get("status", "Registered")
 
+        # Display only patients who have not been discharged
         if status != "Discharged" and bed_id:
-            search_text = (
-                patient_ic + " "
-                + patient_id + " "
-                + patient_name
-            ).lower()
-
-            if keyword in search_text:
-                table.insert(
-                    "",
-                    "end",
-                    values=(
-                        patient_ic or "-",
-                        patient_id,
-                        patient_name,
-                        bed_id,
-                        status
-                    )
+            table.insert(
+                "",
+                "end",
+                values=(
+                    patient_ic or "-",
+                    patient_id,
+                    patient_name,
+                    bed_id,
+                    status
                 )
+            )
 
 
 # Clear the search box
@@ -321,7 +322,10 @@ def show_discharge(root):
         height=10
     )
     # Update the patient list while typing
-    search_entry.bind("<KeyRelease>",lambda event: display_patients(table, search_entry))
+    search_entry.bind(
+        "<KeyRelease>",
+        lambda event: display_patients(table, search_entry)
+    )
 
     # Table headings
     table.heading("patient_ic", text="Patient IC")
