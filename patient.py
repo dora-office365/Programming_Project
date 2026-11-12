@@ -521,6 +521,7 @@ def show_patients(root):
                 }
 
 
+    
     # Show the selected patient's information
     def view_patient(event=None):
         selected = tree.selection()
@@ -542,7 +543,9 @@ def show_patients(root):
 
         refresh_data()
 
+        # Find the selected patient using data.py
         patient = find_patient(patient_id, patients)
+
         if patient is None:
             messagebox.showerror(
                 "Record Error",
