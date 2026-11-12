@@ -495,37 +495,6 @@ def show_dashboard(username=None):
     patients = data["patients"]
     beds = data["beds"]
 
-    # Calculate dashboard statistics
-    registered_count = len(patients)
-    inpatient_count = 0
-    today = date.today().isoformat()
-    today_discharge_count = 0
-
-    for patient in patients:
-        # Count current inpatients
-        if (
-            patient.get("status") != "Discharged"
-            and patient.get("bed_id", "")
-        ):
-            inpatient_count += 1
-
-        # Count previous discharged admissions
-        history = patient.get("admission_history", [])
-
-        if isinstance(history, list):
-            for record in history:
-                if (
-                    isinstance(record, dict)
-                    and record.get("discharge_date") == today
-                ):
-                    today_discharge_count += 1
-
-        # Count the current admission if discharged today
-        if (
-            patient.get("status") == "Discharged"
-            and patient.get("discharge_date") == today
-        ):
-            today_discharge_count += 1
 
     # Calculate occupied beds
     occupied_count = 0
@@ -558,7 +527,6 @@ def show_dashboard(username=None):
 
     # Calculate available beds
     available_count = len(beds) - occupied_count
-    
 
     # Attach navigation directly to the main window
     content = add_navigation(root, "Dashboard")
@@ -686,7 +654,6 @@ def show_dashboard(username=None):
         patient_ic = patient.get("patient_ic", "")
         patient_id = patient.get("patient_id", "")
         patient_name = patient.get("name", "")
-        patient_gender = patient.get("gender", "")
 
         # Get previous admission records
         history = patient.get("admission_history", [])
