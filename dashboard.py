@@ -498,14 +498,27 @@ def show_dashboard(username=None):
     # Calculate dashboard statistics
     registered_count = len(patients)
     inpatient_count = 0
+    today = date.today().isoformat()
     today_discharge_count = 0
 
     for patient in patients:
+        # Count previous discharged admissions
+        history = patient.get("admission_history", [])
+
+        if isinstance(history, list):
+            for record in history:
+                if (
+                    isinstance(record, dict)
+                    and record.get("discharge_date") == today
+                ):
+                    today_discharge_count += 1
+
+        # Count the current admission if discharged
         if (
-            patient.get("bed_id", "")
-            and patient.get("status", "") != "Discharged"
+            patient.get("status") == "Discharged"
+            and patient.get("discharge_date") == today
         ):
-            inpatient_count += 1
+            today_discharge_count += 1
 
         if (
             patient.get("discharge_date", "")
