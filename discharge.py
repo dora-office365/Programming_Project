@@ -2,7 +2,7 @@ import tkinter as tk
 from tkinter import ttk, messagebox
 from datetime import date
 import dashboard
-from data import load_database, save_database, find_patient,search_records
+from data import load_database, save_database, find_patient, search_records
 
 
 # Pink theme colours
