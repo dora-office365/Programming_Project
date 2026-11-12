@@ -395,9 +395,9 @@ def show_bed_management(root):
     ).pack(side="left", padx=5)
 
     # Update the table when searching or changing status
-    search_entry.bind("<KeyRelease>",display_beds)
-    status_box.bind("<<ComboboxSelected>>",display_beds)
-    room_type_box.bind("<<ComboboxSelected>>",display_beds)
+    search_entry.bind("<KeyRelease>", lambda event:display_beds()
+    status_box.bind("<<ComboboxSelected>>",lambda event:display_beds()
+    room_type_box.bind("<<ComboboxSelected>>",lambda event:display_beds()
 
     # Show beds when the page opens
     display_beds()
