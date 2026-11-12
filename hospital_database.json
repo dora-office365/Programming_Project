@@ -89,7 +89,7 @@
             "emergency_contact": "0143333444",
             "diagnosis": "Hypertension",
             "gender": "Male",
-            "bed_id": "Bed 107",
+            "bed_id": "Bed 104",
             "admission_date": "2026-11-12",
             "status": "Registered",
             "discharge_date": "",
@@ -512,8 +512,8 @@
         {
             "bed_id": "Bed 104",
             "room_type": "Four-bedded",
-            "status": "Available",
-            "patient_id": ""
+            "status": "Occupied",
+            "patient_id": "P0004"
         },
         {
             "bed_id": "Bed 105",
@@ -530,8 +530,8 @@
         {
             "bed_id": "Bed 107",
             "room_type": "Four-bedded",
-            "status": "Occupied",
-            "patient_id": "P0004"
+            "status": "Available",
+            "patient_id": ""
         },
         {
             "bed_id": "Bed 108",
