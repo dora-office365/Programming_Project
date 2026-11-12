@@ -527,27 +527,30 @@ def show_dashboard(username=None):
         ):
             today_discharge_count += 1
 
-    # Calculate occupied beds using the same logic as Bed Management
-    occupied_count = 0
+        # Calculate occupied beds
+        occupied_count = 0
 
-    for bed in beds:
-        bed_id = str(bed.get("bed_id", ""))
-        bed_patient_id = str(bed.get("patient_id", ""))
+        for bed in beds:
+            bed_id = str(bed.get("bed_id", ""))
+            bed_patient_id = str(bed.get("patient_id", ""))
 
-        for patient in patients:
-            if patient.get("status", "") == "Discharged":
-                continue
+            # Find the patient using the bed ID
+                patient = find_patient(
+                bed_id,
+                patients,
+                "bed_id"
+            )
 
-            patient_bed_id = str(patient.get("bed_id", ""))
-            patient_id = str(patient.get("patient_id", ""))
+            # Check using the patient ID if necessary
+            if patient is None and bed_patient_id:
+                patient = find_patient(
+                    bed_patient_id,
+                    patients
+                )
 
-            if (
-                patient_bed_id == bed_id and patient_bed_id
-            ) or (
-                bed_patient_id and patient_id == bed_patient_id
-            ):
+            # Count the bed only if the patient is not discharged
+            if patient and patient.get("status") != "Discharged":
                 occupied_count += 1
-                break
 
     # Calculate available beds
     available_count = len(beds) - occupied_count
