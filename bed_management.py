@@ -1,7 +1,7 @@
 import tkinter as tk
 from tkinter import ttk, messagebox
 import dashboard
-from data import load_database
+from data import load_database, find_patient a
 
 # Pink theme colours
 PINK_DARK = "#7D3458"
