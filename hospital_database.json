@@ -89,17 +89,25 @@
             "emergency_contact": "0143333444",
             "diagnosis": "Hypertension",
             "gender": "Male",
-            "bed_id": "Bed 104",
+            "bed_id": "",
             "admission_date": "2026-11-12",
-            "status": "Registered",
-            "discharge_date": "",
-            "payment_confirmed": "",
+            "status": "Discharged",
+            "discharge_date": "2026-11-12",
+            "payment_confirmed": "Yes",
             "admission_history": [
                 {
                     "admission_date": "2026-11-01",
                     "discharge_date": "2026-11-11",
                     "bed_id": "",
                     "diagnosis": "Leg Fracture",
+                    "payment_confirmed": "Yes",
+                    "status": "Discharged"
+                },
+                {
+                    "admission_date": "2026-11-12",
+                    "discharge_date": "2026-11-12",
+                    "bed_id": "Bed 104",
+                    "diagnosis": "Hypertension",
                     "payment_confirmed": "Yes",
                     "status": "Discharged"
                 }
@@ -512,8 +520,8 @@
         {
             "bed_id": "Bed 104",
             "room_type": "Four-bedded",
-            "status": "Occupied",
-            "patient_id": "P0004"
+            "status": "Available",
+            "patient_id": ""
         },
         {
             "bed_id": "Bed 105",
