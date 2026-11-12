@@ -1,7 +1,7 @@
 import tkinter as tk
 from tkinter import ttk, messagebox
 import dashboard
-from data import load_database, find_patient a
+from data import load_database, find_patient
 
 # Pink theme colours
 PINK_DARK = "#7D3458"
@@ -206,32 +206,35 @@ def show_bed_management(root):
     scrollbar.pack(side="right", fill="y", pady=10)
 
     # Find the patient assigned to a bed
-    def find_patient(bed, patients):
-        bed_id = bed.get("bed_id", "")
-        bed_patient_id = bed.get("patient_id", "")
+    def search_patient(bed, patients):
+        bed_id = str(bed.get("bed_id", ""))
+        bed_patient_id = str(bed.get("patient_id", ""))
 
-        for patient in patients:
-            if patient.get("status", "") == "Discharged":
-                continue
+        # Find the patient using the bed ID
+        patient = find_patient(
+            bed_id,
+            patients,
+            "bed_id"
+        )
 
-            patient_bed_id = str(
-                patient.get("bed_id", "")
+        if patient and patient.get("status") != "Discharged":
+            return patient
+
+        # If not found, search using the patient ID stored in the bed
+        if bed_patient_id:
+            patient = find_patient(
+                bed_patient_id,
+                patients
             )
-            patient_id = str(
-                patient.get("patient_id", "")
-            )
 
-            if patient_bed_id == bed_id and patient_bed_id:
-                return patient
-
-            if bed_patient_id and patient_id == bed_patient_id:
+            if patient and patient.get("status") != "Discharged":
                 return patient
 
         return None
 
     # Get bed status and patient information
     def get_bed_status(bed, patients):
-        patient = find_patient(bed, patients)
+        patient = search_patient(bed, patients)
 
         if patient:
             bed_status = "Occupied"
@@ -268,9 +271,10 @@ def show_bed_management(root):
 
         keyword = search_entry.get().strip().lower()
         selected_status = status_box.get()
+        selected_room_type = room_type_box.get()
 
         for bed in beds:
-            bed_status, patient_ic, patient_id, patient_name = (get_bed_status(bed, patients))
+            bed_status, patient_ic, patient_id, patient_name = get_bed_status(bed, patients)
 
             # Count all beds before applying filters
             if bed_status == "Available":
@@ -297,8 +301,6 @@ def show_bed_management(root):
                 continue
 
             #Filter by Room Type
-            selected_room_type = room_type_box.get()
-
             if selected_room_type != "All Room Types":
                 if bed.get("room_type") != selected_room_type:
                     continue
