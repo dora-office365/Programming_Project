@@ -6,8 +6,7 @@ import dashboard
 from data import (
     PATIENT_FIELDS,
     load_database,
-    save_database,
-    get_available_beds
+    save_database
 )
 
 
@@ -297,12 +296,11 @@ def show_patients(root):
     def update_beds():
         refresh_data()
 
-        available_beds = get_available_beds()
         choices = sorted(
             [
                 bed.get("bed_id", "")
-                for bed in available_beds
-                if bed.get("bed_id", "")
+                for bed in beds
+                if bed.get("status")=="Available" and ("bed_id", "")
             ],
             key=lambda x: int(x.replace("Bed ", ""))
         )
