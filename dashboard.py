@@ -1,3 +1,4 @@
+
 import tkinter as tk
 from tkinter import ttk, messagebox, simpledialog
 from datetime import date
@@ -495,6 +496,37 @@ def show_dashboard(username=None):
     patients = data["patients"]
     beds = data["beds"]
 
+    # Calculate dashboard statistics
+    registered_count = len(patients)
+    inpatient_count = 0
+    today_discharge_count = 0
+    today = date.today().isoformat()
+
+    for patient in patients:
+        # Count current inpatients
+        if (
+            patient.get("bed_id", "")
+            and patient.get("status", "") != "Discharged"
+        ):
+            inpatient_count += 1
+
+        # Count previous discharged admissions
+        history = patient.get("admission_history", [])
+
+        if isinstance(history, list):
+            for record in history:
+                if (
+                    isinstance(record, dict)
+                    and record.get("discharge_date") == today
+                ):
+                    today_discharge_count += 1
+
+        # Count the current admission if discharged today
+        if (
+            patient.get("status") == "Discharged"
+            and patient.get("discharge_date") == today
+        ):
+            today_discharge_count += 1
 
     # Calculate occupied beds
     occupied_count = 0
