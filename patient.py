@@ -329,12 +329,11 @@ def show_patients(root):
         # Refresh the latest patient records
         refresh_data()
 
-        existing_patient = None
-
-        for patient in patients:
-            if str(patient.get("patient_ic", "")) == current_ic:
-                existing_patient = patient
-                break
+        existing_patient = find_patient(
+            current_ic,
+            patients,
+            "patient_ic"
+        )
 
         # If the IC number is not found
         if existing_patient is None:
@@ -697,12 +696,11 @@ def show_patients(root):
             return
 
         # Check whether the patient already exists
-        existing_patient = None
-
-        for record in patients:
-            if str(record.get("patient_ic", "")) == patient["patient_ic"]:
-                existing_patient = record
-                break
+        existing_patient = find_patient(
+            patient["patient_ic"],
+            patients,
+            "patient_ic"
+        )
 
         # Prevent duplicate registration of an active patient
         if existing_patient:
@@ -829,7 +827,7 @@ def show_patients(root):
             return
 
         # Find the selected patient
-        selected_patient = find_patient(patient_id,patients)
+        selected_patient = find_patient(patient_id, patients)
 
         if selected_patient is None:
             messagebox.showerror(
