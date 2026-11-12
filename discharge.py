@@ -49,7 +49,6 @@ def confirm_payment(root):
 
 
 # Release the patient's bed
-# Release the patient's bed
 def release_bed(bed_id, patient_id, beds):
     for bed in beds:
         if (
@@ -203,11 +202,19 @@ def discharge_patient(root, table, search_entry, data, patients, beds):
         )
         return
 
-    save_discharge_data(
+    # Save the discharge information
+    if not save_discharge_data(
         latest_data,
         selected_patient,
         latest_beds
-    )
+    ):
+        messagebox.showerror(
+            "Discharge Failed",
+            "Unable to complete the discharge. Please check the bed information.",
+            parent=root
+        )
+        display_patients(table, search_entry)
+        return
 
     # Update the local database references
     data.clear()
@@ -322,6 +329,8 @@ def show_discharge(root):
         show="headings",
         height=10
     )
+    # Update the patient list while typing
+    search_entry.bind("<KeyRelease>",lambda event: display_patients(table, search_entry))
 
     # Table headings
     table.heading("patient_ic", text="Patient IC")
