@@ -1,7 +1,7 @@
 import tkinter as tk
 from tkinter import ttk, messagebox, simpledialog
 from datetime import date
-from data import load_database, save_database
+from data import load_database, save_database, find_patient
 
 # Pink theme colours
 PINK_DARK = "#7D3458"
@@ -502,6 +502,13 @@ def show_dashboard(username=None):
     today_discharge_count = 0
 
     for patient in patients:
+        # Count current inpatients
+        if (
+            patient.get("status") != "Discharged"
+            and patient.get("bed_id", "")
+        ):
+            inpatient_count += 1
+
         # Count previous discharged admissions
         history = patient.get("admission_history", [])
 
@@ -513,16 +520,10 @@ def show_dashboard(username=None):
                 ):
                     today_discharge_count += 1
 
-        # Count the current admission if discharged
+        # Count the current admission if discharged today
         if (
             patient.get("status") == "Discharged"
             and patient.get("discharge_date") == today
-        ):
-            today_discharge_count += 1
-
-        if (
-            patient.get("discharge_date", "")
-            == date.today().isoformat()
         ):
             today_discharge_count += 1
 
