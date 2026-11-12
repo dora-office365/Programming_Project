@@ -2,7 +2,7 @@ import tkinter as tk
 from tkinter import ttk, messagebox
 from datetime import date
 import dashboard
-from data import load_database, save_database
+from data import load_database, save_database, find_patient
 
 
 # Pink theme colours
@@ -14,15 +14,6 @@ PINK_BORDER = "#EAC5D5"
 TEXT_DARK = "#49323D"
 TEXT_LIGHT = "#A45B7D"
 WHITE = "#FFFFFF"
-
-
-# Get patient information using patient ID
-def find_patient(patient_id, patients):
-    for patient in patients:
-        if str(patient.get("patient_id", "")) == patient_id:
-            return patient
-
-    return None
 
 
 # Check whether the patient can be discharged
