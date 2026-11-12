@@ -816,7 +816,7 @@ def show_patients(root):
             )
             return
 
-        # Prevent editing a previous admission through the current record
+        # Prevent editing a previous admission
         if selected_record_type[0] == "history":
             messagebox.showwarning(
                 "Previous Admission",
@@ -824,6 +824,7 @@ def show_patients(root):
             )
             return
 
+        # Find the selected patient
         selected_patient = None
 
         for patient in patients:
@@ -846,21 +847,69 @@ def show_patients(root):
             )
             return
 
-        # Check required information
-        if not entries["name"].get().strip():
+        # Collect the updated information
+        updated_patient = {}
+
+        for key, entry in entries.items():
+            updated_patient[key] = entry.get().strip()
+
+        updated_patient["gender"] = gender_box.get()
+
+        # Check all required fields
+        required_fields = [
+            "patient_ic",
+            "name",
+            "dob",
+            "phone",
+            "address",
+            "emergency_contact",
+            "diagnosis"
+        ]
+
+        for field in required_fields:
+            if not updated_patient[field]:
+                messagebox.showwarning(
+                    "Missing Information",
+                    "Please fill in all required fields."
+                )
+                return
+
+        if not updated_patient["gender"]:
             messagebox.showwarning(
                 "Missing Information",
-                "Full Name is required."
+                "Please select the patient's gender."
             )
             return
 
-        dob = entries["dob"].get().strip()
+        # Keep the patient's original IC unchanged
+        old_ic = str(selected_patient.get("patient_ic", ""))
 
-        if not valid_date(dob):
+        if updated_patient["patient_ic"] != old_ic:
+            messagebox.showwarning(
+                "IC Cannot Be Changed",
+                "The patient's IC number cannot be changed "
+                "during an update."
+            )
+            return
+
+        # Validate the patient's date of birth
+        if not valid_date(updated_patient["dob"]) or not updated_patient["dob"]:
             messagebox.showwarning(
                 "Invalid Date",
                 "Enter a valid date of birth in YYYY-MM-DD format. "
                 "The date cannot be in the future."
+            )
+            return
+
+        # Validate IC, name and contact numbers
+        is_valid, error_message = validate_patient_details(
+            updated_patient
+        )
+
+        if not is_valid:
+            messagebox.showwarning(
+                "Invalid Information",
+                error_message
             )
             return
 
@@ -890,13 +939,15 @@ def show_patients(root):
                 update_beds()
                 return
 
-        # Release old bed and occupy new bed
+        # Release the old bed and occupy the new bed
         if old_bed != new_bed:
             for bed in beds:
-                if bed.get("bed_id") == old_bed:
-                    if bed.get("patient_id") == patient_id:
-                        bed["status"] = "Available"
-                        bed["patient_id"] = ""
+                if (
+                    bed.get("bed_id") == old_bed
+                    and bed.get("patient_id") == patient_id
+                ):
+                    bed["status"] = "Available"
+                    bed["patient_id"] = ""
 
             for bed in beds:
                 if bed.get("bed_id") == new_bed:
@@ -905,11 +956,17 @@ def show_patients(root):
                     break
 
         # Update patient details without changing Patient ID
-        for key, entry in entries.items():
-            if key != "patient_id":
-                selected_patient[key] = entry.get().strip()
+        for key in [
+            "name",
+            "dob",
+            "phone",
+            "address",
+            "emergency_contact",
+            "diagnosis"
+        ]:
+            selected_patient[key] = updated_patient[key]
 
-        selected_patient["gender"] = gender_box.get()
+        selected_patient["gender"] = updated_patient["gender"]
         selected_patient["bed_id"] = new_bed
         selected_patient["status"] = "Registered"
 
