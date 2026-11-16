@@ -71,7 +71,13 @@
             "discharge_date": "",
             "payment_confirmed": "",
             "admission_history": [],
-            "bed_transfer_history": []
+            "bed_transfer_history": [
+                {
+                    "transfer_date": "2026-11-15",
+                    "from_bed": "Bed 101",
+                    "to_bed": "Bed 108"
+                }
+            ]
         },
         {
             "patient_ic": "770305130817",
@@ -89,7 +95,13 @@
             "discharge_date": "",
             "payment_confirmed": "",
             "admission_history": [],
-            "bed_transfer_history": []
+            "bed_transfer_history": [
+                {
+                    "transfer_date": "2026-11-13",
+                    "from_bed": "Bed 207",
+                    "to_bed": "Bed 208"
+                }
+            ]
         },
         {
             "patient_ic": "991005130005",
@@ -131,10 +143,16 @@
             "bed_id": "Bed 103",
             "admission_date": "2026-11-01",
             "status": "Registered",
-            "discharge_date": "2026-11-04",
+            "discharge_date": "",
             "payment_confirmed": "",
             "admission_history": [],
-            "bed_transfer_history": []
+            "bed_transfer_history": [
+                {
+                    "transfer_date": "2026-11-15",
+                    "from_bed": "Bed 102",
+                    "to_bed": "Bed 103"
+                }
+            ]
         },
         {
             "patient_ic": "",
@@ -185,10 +203,16 @@
             "bed_id": "Bed 210",
             "admission_date": "2026-11-06",
             "status": "Registered",
-            "discharge_date": "2026-11-08",
+            "discharge_date": "",
             "payment_confirmed": "",
             "admission_history": [],
-            "bed_transfer_history": []
+            "bed_transfer_history": [
+                {
+                    "transfer_date": "2026-11-13",
+                    "from_bed": "Bed 208",
+                    "to_bed": "Bed 210"
+                }
+            ]
         },
         {
             "patient_ic": "030922130345",
@@ -203,10 +227,16 @@
             "bed_id": "Bed 104",
             "admission_date": "2026-11-09",
             "status": "Registered",
-            "discharge_date": "2026-11-14",
+            "discharge_date": "",
             "payment_confirmed": "",
             "admission_history": [],
-            "bed_transfer_history": []
+            "bed_transfer_history": [
+                {
+                    "transfer_date": "2026-11-15",
+                    "from_bed": "Bed 103",
+                    "to_bed": "Bed 104"
+                }
+            ]
         },
         {
             "patient_ic": "970526130890",
@@ -224,7 +254,13 @@
             "discharge_date": "",
             "payment_confirmed": "",
             "admission_history": [],
-            "bed_transfer_history": []
+            "bed_transfer_history": [
+                {
+                    "transfer_date": "2026-11-15",
+                    "from_bed": "Bed 104",
+                    "to_bed": "Bed 105"
+                }
+            ]
         },
         {
             "patient_ic": "040729130456",
@@ -239,10 +275,16 @@
             "bed_id": "Bed 106",
             "admission_date": "2026-11-11",
             "status": "Registered",
-            "discharge_date": "2026-11-15",
+            "discharge_date": "",
             "payment_confirmed": "",
             "admission_history": [],
-            "bed_transfer_history": []
+            "bed_transfer_history": [
+                {
+                    "transfer_date": "2026-11-15",
+                    "from_bed": "Bed 105",
+                    "to_bed": "Bed 106"
+                }
+            ]
         },
         {
             "patient_ic": "780708130708",
@@ -271,7 +313,7 @@
                 {
                     "admission_date": "2026-11-12",
                     "discharge_date": "2026-11-12",
-                    "bed_id": "Bed 104",
+                    "bed_id": "Bed 106",
                     "diagnosis": "Hypertension",
                     "payment_confirmed": "Yes",
                     "status": "Discharged"
@@ -295,7 +337,13 @@
             "discharge_date": "",
             "payment_confirmed": "",
             "admission_history": [],
-            "bed_transfer_history": []
+            "bed_transfer_history": [
+                {
+                    "transfer_date": "2026-11-13",
+                    "from_bed": "Bed 209",
+                    "to_bed": "Bed 207"
+                }
+            ]
         },
         {
             "patient_ic": "790802130234",
@@ -313,7 +361,13 @@
             "discharge_date": "",
             "payment_confirmed": "",
             "admission_history": [],
-            "bed_transfer_history": []
+            "bed_transfer_history": [
+                {
+                    "transfer_date": "2026-11-13",
+                    "from_bed": "Bed 106",
+                    "to_bed": "Bed 109"
+                }
+            ]
         },
         {
             "patient_ic": "",
@@ -349,7 +403,13 @@
             "discharge_date": "",
             "payment_confirmed": "",
             "admission_history": [],
-            "bed_transfer_history": []
+            "bed_transfer_history": [
+                {
+                    "transfer_date": "2026-11-14",
+                    "from_bed": "Bed 106",
+                    "to_bed": "Bed 107"
+                }
+            ]
         },
         {
             "patient_ic": "010215131025",
