@@ -904,7 +904,7 @@ def generate_monthly_report(month, year):
 def show_month_selection():
     report_window = tk.Toplevel(root)
     report_window.title("Print Monthly Report")
-    report_window.geometry("350x270")
+    report_window.geometry("650x500")
     report_window.configure(bg=PINK_LIGHT)
     report_window.resizable(False, False)
     report_window.transient(root)
