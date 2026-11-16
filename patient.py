@@ -1,4 +1,3 @@
-
 import tkinter as tk
 from tkinter import ttk, messagebox
 from datetime import date
@@ -688,6 +687,151 @@ def show_patients(root):
                 room_type_box.set("")
                 bed_var.set("")
 
+    # Display the selected patient's bed transfer history
+    def show_transfer_history():
+        selected = tree.selection()
+
+        if not selected:
+            messagebox.showwarning(
+                "Select Patient",
+                "Please select a patient from the table first."
+            )
+            return
+
+        selection_info = admission_selection.get(selected[0])
+
+        if selection_info is None:
+            return
+
+        patient_id = selection_info["patient_id"]
+
+        refresh_data()
+        patient = find_patient(patient_id, patients)
+
+        if patient is None:
+            messagebox.showerror(
+                "Record Error",
+                "Patient record could not be found."
+            )
+            return
+
+        transfer_history = patient.get("bed_transfer_history", [])
+
+        if not isinstance(transfer_history, list):
+            transfer_history = []
+
+        history_window = tk.Toplevel(root)
+        history_window.title("Bed Transfer History")
+        history_window.geometry("850x420")
+        history_window.configure(bg=PINK_LIGHT)
+        history_window.transient(root)
+
+        tk.Label(
+            history_window,
+            text="Bed Transfer History",
+            font=("Arial", 20, "bold"),
+            bg=PINK_LIGHT,
+            fg=PINK_DARK
+        ).pack(anchor="w", padx=20, pady=(18, 5))
+
+        tk.Label(
+            history_window,
+            text=(
+                f"Patient ID: {patient.get('patient_id', '')}    "
+                f"Patient Name: {patient.get('name', '')}"
+            ),
+            font=("Arial", 11),
+            bg=PINK_LIGHT,
+            fg=TEXT_DARK
+        ).pack(anchor="w", padx=20, pady=(0, 12))
+
+        history_frame = tk.Frame(history_window, bg=WHITE)
+        history_frame.pack(
+            fill="both",
+            expand=True,
+            padx=20,
+            pady=(0, 12)
+        )
+
+        history_columns = (
+            "date",
+            "from_bed",
+            "from_room",
+            "to_bed",
+            "to_room"
+        )
+
+        history_tree = ttk.Treeview(
+            history_frame,
+            columns=history_columns,
+            show="headings"
+        )
+
+        history_tree.heading("date", text="Transfer Date")
+        history_tree.heading("from_bed", text="Previous Bed")
+        history_tree.heading("from_room", text="Previous Room Type")
+        history_tree.heading("to_bed", text="New Bed")
+        history_tree.heading("to_room", text="New Room Type")
+
+        history_tree.column("date", width=115, anchor="center")
+        history_tree.column("from_bed", width=110, anchor="center")
+        history_tree.column("from_room", width=155, anchor="center")
+        history_tree.column("to_bed", width=110, anchor="center")
+        history_tree.column("to_room", width=155, anchor="center")
+
+        history_scrollbar = ttk.Scrollbar(
+            history_frame,
+            orient="vertical",
+            command=history_tree.yview
+        )
+        history_tree.configure(
+            yscrollcommand=history_scrollbar.set
+        )
+
+        history_tree.pack(
+            side="left",
+            fill="both",
+            expand=True
+        )
+        history_scrollbar.pack(side="right", fill="y")
+
+        if transfer_history:
+            for record in transfer_history:
+                if not isinstance(record, dict):
+                    continue
+
+                history_tree.insert(
+                    "",
+                    "end",
+                    values=(
+                        record.get("transfer_date", ""),
+                        record.get("from_bed", ""),
+                        record.get("from_room_type", ""),
+                        record.get("to_bed", ""),
+                        record.get("to_room_type", "")
+                    )
+                )
+        else:
+            tk.Label(
+                history_window,
+                text="No bed transfers have been recorded for this patient.",
+                font=("Arial", 10),
+                bg=PINK_LIGHT,
+                fg=TEXT_LIGHT
+            ).pack(pady=(0, 12))
+
+        tk.Button(
+            history_window,
+            text="Close",
+            command=history_window.destroy,
+            bg=PINK_DARK,
+            fg=WHITE,
+            activebackground=PINK_ACTIVE,
+            activeforeground=WHITE,
+            width=12,
+            font=("Arial", 10, "bold")
+        ).pack(pady=(0, 15))
+
     # Validate patient information
     def valid_date(dob):
         if not dob:
@@ -842,9 +986,10 @@ def show_patients(root):
             if field not in patient:
                 patient[field] = ""
 
-        # Initialise admission history for a new patient
+        # Initialise both histories for a new patient
         if not existing_patient:
             patient["admission_history"] = []
+            patient["bed_transfer_history"] = []
 
         # Mark the bed as occupied
         for bed in beds:
@@ -856,19 +1001,26 @@ def show_patients(root):
         # Add a new patient or update an existing discharged patient
         if existing_patient:
 
-            # Preserve previous admission records
+            # Preserve previous admission and bed transfer records
             admission_history = existing_patient.get(
                 "admission_history", []
+            )
+            bed_transfer_history = existing_patient.get(
+                "bed_transfer_history", []
             )
 
             if not isinstance(admission_history, list):
                 admission_history = []
 
+            if not isinstance(bed_transfer_history, list):
+                bed_transfer_history = []
+
             # Update the existing patient record for readmission
             existing_patient.update(patient)
 
-            # Restore previous admission history
+            # Restore both histories
             existing_patient["admission_history"] = admission_history
+            existing_patient["bed_transfer_history"] = bed_transfer_history
 
             message = (
                 "Patient readmitted successfully.\n"
@@ -1032,6 +1184,41 @@ def show_patients(root):
                 bed_var.set("")
                 return
 
+        # Record the bed transfer before changing the bed assignment
+        if old_bed and old_bed != new_bed:
+            old_room_type = ""
+            new_room_type = selected_room
+
+            for bed in beds:
+                if bed.get("bed_id") == old_bed:
+                    old_room_type = bed.get("room_type", "")
+                    break
+
+            for bed in beds:
+                if bed.get("bed_id") == new_bed:
+                    new_room_type = bed.get("room_type", selected_room)
+                    break
+
+            transfer_history = selected_patient.get(
+                "bed_transfer_history", []
+            )
+
+            if not isinstance(transfer_history, list):
+                transfer_history = []
+
+            transfer_history.append({
+                "from_bed": old_bed,
+                "from_room_type": old_room_type,
+                "to_bed": new_bed,
+                "to_room_type": new_room_type,
+                "transfer_date": date.today().isoformat(),
+                "admission_date": selected_patient.get(
+                    "admission_date", ""
+                )
+            })
+
+            selected_patient["bed_transfer_history"] = transfer_history
+
         # Release the old bed and occupy the new bed
         if old_bed != new_bed:
             for bed in beds:
@@ -1143,6 +1330,22 @@ def show_patients(root):
         width=7,
         font=("Arial", 9)
     ).pack(side="left", padx=2)
+
+    tk.Button(
+        form,
+        text="View Bed Transfer History",
+        command=show_transfer_history,
+        bg=PINK_PALE,
+        fg=TEXT_DARK,
+        activebackground=PINK_BORDER,
+        width=28,
+        font=("Arial", 9)
+    ).grid(
+        row=12,
+        column=0,
+        columnspan=2,
+        pady=(0, 12)
+    )
 
     # Search and table selection
     search.bind("<KeyRelease>", display_patients)
