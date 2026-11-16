@@ -386,7 +386,26 @@ def show_patients(root):
         # Refresh the latest patient records
         refresh_data()
 
-        if not current_ic:
+        # Do not search or autofill when IC is empty or represented by "-".
+        # If a previously retrieved patient's IC was changed, clear the old
+        # personal details so they are not accidentally saved for another patient.
+        if current_ic in ("", "-"):
+            if lookup_ic[0]:
+                for key in [
+                    "name",
+                    "dob",
+                    "phone",
+                    "address",
+                    "emergency_contact"
+                ]:
+                    entries[key].delete(0, tk.END)
+
+                gender_box.set("")
+                room_type_box.set("")
+                bed_var.set("")
+                set_patient_id(generate_patient_id())
+                lookup_ic[0] = ""
+
             return
 
         existing_patient = find_patient(
@@ -914,12 +933,16 @@ def show_patients(root):
             )
             return
 
-        # Check whether the patient already exists
-        existing_patient = find_patient(
-            patient["patient_ic"],
-            patients,
-            "patient_ic"
-        )
+        # Check whether the patient already exists.
+        # "-" means the patient has no IC, so duplicate IC checking is skipped.
+        existing_patient = None
+
+        if patient["patient_ic"] != "-":
+            existing_patient = find_patient(
+                patient["patient_ic"],
+                patients,
+                "patient_ic"
+            )
 
         # Prevent duplicate registration of an active patient
         if existing_patient:
