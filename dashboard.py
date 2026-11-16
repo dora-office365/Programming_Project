@@ -256,14 +256,6 @@ def show_login():
         fg=TEXT_DARK
     ).pack(anchor="w")
 
-    tk.Label(
-        login_frame,
-        text="Password",
-        font=("Arial", 11, "bold"),
-        bg=WHITE,
-        fg=TEXT_DARK
-    ).pack(anchor="w")
-
     password_entry = tk.Entry(
         login_frame,
         font=("Arial", 12),
