@@ -46,7 +46,7 @@
             "emergency_contact": "01810654864",
             "diagnosis": "Pulmonary Fibrosis",
             "gender": "Male",
-            "bed_id": "Bed 201",
+            "bed_id": "Bed 312",
             "admission_date": "2026-10-30",
             "status": "Registered",
             "discharge_date": "",
@@ -112,32 +112,349 @@
                     "status": "Discharged"
                 }
             ]
+        },
+        {
+            "patient_ic": "010215131025",
+            "patient_id": "P0005",
+            "name": "Adam Lim Wei Hong",
+            "dob": "2001-02-15",
+            "phone": "0123456799",
+            "address": "12, Jalan Merdeka, Kuching, Sarawak",
+            "emergency_contact": "0134567890",
+            "diagnosis": "Diabetes Mellitus",
+            "gender": "Male",
+            "bed_id": "Bed 201",
+            "admission_date": "2026-11-16",
+            "status": "Registered",
+            "discharge_date": "",
+            "payment_confirmed": "",
+            "admission_history": []
+        },
+        {
+            "patient_ic": "850412130512",
+            "patient_id": "P0006",
+            "name": "Tan Wei Jian",
+            "dob": "1985-04-12",
+            "phone": "0123456781",
+            "address": "12, Jalan Green, Kuching, Sarawak",
+            "emergency_contact": "0134567891",
+            "diagnosis": "Uncontrolled Diabetes",
+            "gender": "Male",
+            "bed_id": "Bed 302",
+            "admission_date": "2026-11-16",
+            "status": "Registered",
+            "discharge_date": "",
+            "payment_confirmed": "",
+            "admission_history": [
+                {
+                    "admission_date": "2026-11-16",
+                    "discharge_date": "2026-11-16",
+                    "bed_id": "Bed 102",
+                    "diagnosis": "Diabetes",
+                    "payment_confirmed": "Yes",
+                    "status": "Discharged"
+                }
+            ]
+        },
+        {
+            "patient_ic": "920817130824",
+            "patient_id": "P0007",
+            "name": "Lim Mei Xin",
+            "dob": "1992-08-17",
+            "phone": "0123456782",
+            "address": "08, Taman Sentosa, Kuching, Sarawak",
+            "emergency_contact": "0134567892",
+            "diagnosis": "Acute Asthma Attack",
+            "gender": "Female",
+            "bed_id": "Bed 202",
+            "admission_date": "2026-11-16",
+            "status": "Registered",
+            "discharge_date": "",
+            "payment_confirmed": "",
+            "admission_history": [
+                {
+                    "admission_date": "2026-11-16",
+                    "discharge_date": "2026-11-16",
+                    "bed_id": "Bed 202",
+                    "diagnosis": "Asthma",
+                    "payment_confirmed": "Yes",
+                    "status": "Discharged"
+                }
+            ]
+        },
+        {
+            "patient_ic": "760223130456",
+            "patient_id": "P0008",
+            "name": "Ahmad Bin Rahman",
+            "dob": "1976-02-23",
+            "phone": "0123456783",
+            "address": "23, Jalan Nanas, Kuching, Sarawak",
+            "emergency_contact": "0134567893",
+            "diagnosis": "Hypertension",
+            "gender": "Male",
+            "bed_id": "Bed 108",
+            "admission_date": "2026-11-16",
+            "status": "Registered",
+            "discharge_date": "",
+            "payment_confirmed": "",
+            "admission_history": []
+        },
+        {
+            "patient_ic": "010615130678",
+            "patient_id": "P0009",
+            "name": "Ng Siew Ling",
+            "dob": "2001-06-15",
+            "phone": "0123456784",
+            "address": "15, Taman Desa, Kuching, Sarawak",
+            "emergency_contact": "0134567894",
+            "diagnosis": "Gastritis",
+            "gender": "Female",
+            "bed_id": "Bed 103",
+            "admission_date": "2026-11-16",
+            "status": "Registered",
+            "discharge_date": "",
+            "payment_confirmed": "",
+            "admission_history": []
+        },
+        {
+            "patient_ic": "880930130912",
+            "patient_id": "P0010",
+            "name": "Chong Kai en",
+            "dob": "1988-09-30",
+            "phone": "0123456785",
+            "address": "30, Jalan Song, Kuching, Sarawak",
+            "emergency_contact": "0134567895",
+            "diagnosis": "Pneumonia",
+            "gender": "Male",
+            "bed_id": "Bed 301",
+            "admission_date": "2026-11-16",
+            "status": "Registered",
+            "discharge_date": "",
+            "payment_confirmed": "",
+            "admission_history": []
+        },
+        {
+            "patient_ic": "950204130234",
+            "patient_id": "P0011",
+            "name": "Wong Jia Hui",
+            "dob": "1995-02-04",
+            "phone": "0123456786",
+            "address": "04, Taman Malihah, Kuching, Sarawak",
+            "emergency_contact": "0134567896",
+            "diagnosis": "Migraine",
+            "gender": "Female",
+            "bed_id": "Bed 210",
+            "admission_date": "2026-11-16",
+            "status": "Registered",
+            "discharge_date": "",
+            "payment_confirmed": "",
+            "admission_history": []
+        },
+        {
+            "patient_ic": "700711130789",
+            "patient_id": "P0012",
+            "name": "Mohammad Bin Ismail",
+            "dob": "1970-07-11",
+            "phone": "0123456787",
+            "address": "11, Jalan Satok, Kuching, Sarawak",
+            "emergency_contact": "0134567897",
+            "diagnosis": "Congestive Heart Failure",
+            "gender": "Male",
+            "bed_id": "Bed 303",
+            "admission_date": "2026-11-16",
+            "status": "Registered",
+            "discharge_date": "",
+            "payment_confirmed": "",
+            "admission_history": [
+                {
+                    "admission_date": "2026-11-16",
+                    "discharge_date": "2026-11-16",
+                    "bed_id": "Bed 209",
+                    "diagnosis": "Heart Disease",
+                    "payment_confirmed": "Yes",
+                    "status": "Discharged"
+                }
+            ]
+        },
+        {
+            "patient_ic": "030922130345",
+            "patient_id": "P0013",
+            "name": "Lee Xin Yi",
+            "dob": "2003-09-22",
+            "phone": "0123456788",
+            "address": "22, Taman Hui Sing, Kuching, Sarawak",
+            "emergency_contact": "0134567898",
+            "diagnosis": "Appendicitis",
+            "gender": "Female",
+            "bed_id": "Bed 104",
+            "admission_date": "2026-11-16",
+            "status": "Registered",
+            "discharge_date": "",
+            "payment_confirmed": "",
+            "admission_history": []
+        },
+        {
+            "patient_ic": "820108130567",
+            "patient_id": "P0014",
+            "name": "Kumar Anak Lelaki Rajan",
+            "dob": "1982-01-08",
+            "phone": "0123456789",
+            "address": "08, Jalan Tabuan, Kuching, Sarawak",
+            "emergency_contact": "0134567899",
+            "diagnosis": "Kidney Stones",
+            "gender": "Male",
+            "bed_id": "",
+            "admission_date": "2026-11-16",
+            "status": "Discharged",
+            "discharge_date": "2026-11-16",
+            "payment_confirmed": "Yes",
+            "admission_history": [
+                {
+                    "admission_date": "2026-11-16",
+                    "discharge_date": "2026-11-16",
+                    "bed_id": "Bed 208",
+                    "diagnosis": "Kidney Stones",
+                    "payment_confirmed": "Yes",
+                    "status": "Discharged"
+                }
+            ]
+        },
+        {
+            "patient_ic": "970526130890",
+            "patient_id": "P0015",
+            "name": "Chua Pei Shan",
+            "dob": "1997-05-26",
+            "phone": "0145678901",
+            "address": "26, Taman Stutong, Kuching, Sarawak",
+            "emergency_contact": "0145678902",
+            "diagnosis": "Anaemia",
+            "gender": "Female",
+            "bed_id": "Bed 105",
+            "admission_date": "2026-11-16",
+            "status": "Registered",
+            "discharge_date": "",
+            "payment_confirmed": "",
+            "admission_history": []
+        },
+        {
+            "patient_ic": "650314130123",
+            "patient_id": "P0016",
+            "name": "Abdul Hakim Bin Salleh",
+            "dob": "1965-03-14",
+            "phone": "0145678903",
+            "address": "14, Jalan Pending, Kuching, Sarawak",
+            "emergency_contact": "0145678904",
+            "diagnosis": "Acute Kidney Injury",
+            "gender": "Male",
+            "bed_id": "Bed 304",
+            "admission_date": "2026-11-16",
+            "status": "Registered",
+            "discharge_date": "",
+            "payment_confirmed": "",
+            "admission_history": [
+                {
+                    "admission_date": "2026-11-16",
+                    "discharge_date": "2026-11-16",
+                    "bed_id": "Bed 302",
+                    "diagnosis": "Chronic Kidney Disease",
+                    "payment_confirmed": "Yes",
+                    "status": "Discharged"
+                }
+            ]
+        },
+        {
+            "patient_ic": "040729130456",
+            "patient_id": "P0017",
+            "name": "Tan Hui Min",
+            "dob": "2004-07-29",
+            "phone": "0145678905",
+            "address": "29, Taman Samarindah, Kuching, Sarawak",
+            "emergency_contact": "0145678906",
+            "diagnosis": "Dengue Fever",
+            "gender": "Female",
+            "bed_id": "Bed 106",
+            "admission_date": "2026-11-16",
+            "status": "Registered",
+            "discharge_date": "",
+            "payment_confirmed": "",
+            "admission_history": []
+        },
+        {
+            "patient_ic": "900419130789",
+            "patient_id": "P0018",
+            "name": "Lau Chee Ming",
+            "dob": "1990-04-19",
+            "phone": "0145678907",
+            "address": "19, Jalan Bampfylde, Kuching, Sarawak",
+            "emergency_contact": "0145678908",
+            "diagnosis": "Gastroenteritis",
+            "gender": "Male",
+            "bed_id": "Bed 207",
+            "admission_date": "2026-11-16",
+            "status": "Registered",
+            "discharge_date": "",
+            "payment_confirmed": "",
+            "admission_history": []
+        },
+        {
+            "patient_ic": "790802130234",
+            "patient_id": "P0019",
+            "name": "Siti Nur Aisyah",
+            "dob": "1979-08-02",
+            "phone": "0145678909",
+            "address": "02, Taman Sukma, Kuching, Sarawak",
+            "emergency_contact": "0145678910",
+            "diagnosis": "Thyroid Disorder",
+            "gender": "Female",
+            "bed_id": "Bed 311",
+            "admission_date": "2026-11-16",
+            "status": "Registered",
+            "discharge_date": "",
+            "payment_confirmed": "",
+            "admission_history": []
+        },
+        {
+            "patient_ic": "860625130890",
+            "patient_id": "P0020",
+            "name": "Goh Mei Ling",
+            "dob": "1986-06-25",
+            "phone": "0145678913",
+            "address": "25, Taman Moyan, Kuching, Sarawak",
+            "emergency_contact": "0145678914",
+            "diagnosis": "Gallstones",
+            "gender": "Female",
+            "bed_id": "Bed 107",
+            "admission_date": "2026-11-16",
+            "status": "Registered",
+            "discharge_date": "",
+            "payment_confirmed": "",
+            "admission_history": []
         }
     ],
     "beds": [
         {
             "bed_id": "Bed 301",
             "room_type": "ICU",
-            "status": "Available",
-            "patient_id": ""
+            "status": "Occupied",
+            "patient_id": "P0010"
         },
         {
             "bed_id": "Bed 302",
             "room_type": "ICU",
-            "status": "Available",
-            "patient_id": ""
+            "status": "Occupied",
+            "patient_id": "P0006"
         },
         {
             "bed_id": "Bed 303",
             "room_type": "ICU",
-            "status": "Available",
-            "patient_id": ""
+            "status": "Occupied",
+            "patient_id": "P0012"
         },
         {
             "bed_id": "Bed 304",
             "room_type": "ICU",
-            "status": "Available",
-            "patient_id": ""
+            "status": "Occupied",
+            "patient_id": "P0016"
         },
         {
             "bed_id": "Bed 305",
@@ -178,14 +495,14 @@
         {
             "bed_id": "Bed 311",
             "room_type": "Nursery",
-            "status": "Available",
-            "patient_id": ""
+            "status": "Occupied",
+            "patient_id": "P0019"
         },
         {
             "bed_id": "Bed 312",
             "room_type": "Nursery",
-            "status": "Available",
-            "patient_id": ""
+            "status": "Occupied",
+            "patient_id": "P0002"
         },
         {
             "bed_id": "Bed 313",
@@ -299,13 +616,13 @@
             "bed_id": "Bed 201",
             "room_type": "Single-bedded",
             "status": "Occupied",
-            "patient_id": "P0002"
+            "patient_id": "P0005"
         },
         {
             "bed_id": "Bed 202",
             "room_type": "Single-bedded",
-            "status": "Available",
-            "patient_id": ""
+            "status": "Occupied",
+            "patient_id": "P0007"
         },
         {
             "bed_id": "Bed 203",
@@ -334,8 +651,8 @@
         {
             "bed_id": "Bed 207",
             "room_type": "Double-bedded",
-            "status": "Available",
-            "patient_id": ""
+            "status": "Occupied",
+            "patient_id": "P0018"
         },
         {
             "bed_id": "Bed 208",
@@ -352,8 +669,8 @@
         {
             "bed_id": "Bed 210",
             "room_type": "Double-bedded",
-            "status": "Available",
-            "patient_id": ""
+            "status": "Occupied",
+            "patient_id": "P0011"
         },
         {
             "bed_id": "Bed 211",
@@ -514,38 +831,38 @@
         {
             "bed_id": "Bed 103",
             "room_type": "Four-bedded",
-            "status": "Available",
-            "patient_id": ""
+            "status": "Occupied",
+            "patient_id": "P0009"
         },
         {
             "bed_id": "Bed 104",
             "room_type": "Four-bedded",
-            "status": "Available",
-            "patient_id": ""
+            "status": "Occupied",
+            "patient_id": "P0013"
         },
         {
             "bed_id": "Bed 105",
             "room_type": "Four-bedded",
-            "status": "Available",
-            "patient_id": ""
+            "status": "Occupied",
+            "patient_id": "P0015"
         },
         {
             "bed_id": "Bed 106",
             "room_type": "Four-bedded",
-            "status": "Available",
-            "patient_id": ""
+            "status": "Occupied",
+            "patient_id": "P0017"
         },
         {
             "bed_id": "Bed 107",
             "room_type": "Four-bedded",
-            "status": "Available",
-            "patient_id": ""
+            "status": "Occupied",
+            "patient_id": "P0020"
         },
         {
             "bed_id": "Bed 108",
             "room_type": "Four-bedded",
-            "status": "Available",
-            "patient_id": ""
+            "status": "Occupied",
+            "patient_id": "P0008"
         },
         {
             "bed_id": "Bed 109",
