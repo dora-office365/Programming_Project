@@ -20,10 +20,11 @@ PATIENT_FIELDS = [
     "status",
     "discharge_date",
     "payment_confirmed",
-    "admission_history"
+    "admission_history",
+    "bed_transfer_history"
 ]
 
-# # Default data
+# Default data
 DEFAULT_DATA = {
     "users": [
         {
@@ -100,6 +101,7 @@ def add_missing_sections(data):
     if "beds" not in data:
         data["beds"] = create_default_data()["beds"]
 
+
 # Add default beds that are missing
 def add_missing_beds(data):
 
@@ -121,7 +123,8 @@ def update_patient_fields(data):
     for patient in data["patients"]:
         for field in PATIENT_FIELDS:
             if field not in patient:
-                if field == "admission_history":
+
+                if field in ["admission_history", "bed_transfer_history"]:
                     patient[field] = []
                 else:
                     patient[field] = ""
@@ -133,6 +136,7 @@ def update_patient_fields(data):
 
 # Add missing fields to existing bed records
 def update_bed_fields(data):
+
     for bed in data["beds"]:
         if "bed_id" not in bed:
             bed["bed_id"] = ""
@@ -142,7 +146,7 @@ def update_bed_fields(data):
 
         if "patient_id" not in bed:
             bed["patient_id"] = ""
-        
+
         if "room_type" not in bed:
             bed["room_type"] = "Four-bedded"
 
@@ -199,16 +203,20 @@ def get_available_beds():
 
     return available_beds
 
+
 # Find a patient using a specific field
 def find_patient(value, patients, field="patient_id"):
+
     for patient in patients:
         if str(patient.get(field, "")).lower() == str(value).lower():
             return patient
 
     return None
 
+
 # Search records using a keyword
 def search_records(records, keyword, fields):
+
     results = []
     keyword = keyword.lower().strip()
 
@@ -219,5 +227,5 @@ def search_records(records, keyword, fields):
             if keyword in value:
                 results.append(record)
                 break
-                
+
     return results
