@@ -698,7 +698,7 @@ def show_dashboard(username=None):
 
                 # Discharged records should not display a Bed ID
                 if record_status == "Discharged":
-                    record_bed_id = ""
+                    record_bed_id = "-"
                 else:
                     record_bed_id = record.get("bed_id", "") or "-"
 
@@ -737,7 +737,7 @@ def show_dashboard(username=None):
 
             # Discharged patients should have a blank Bed ID
             if current_status == "Discharged":
-                current_bed_id = ""
+                current_bed_id = "-"
             else:
                 current_bed_id = patient.get("bed_id", "") or "-"
 
