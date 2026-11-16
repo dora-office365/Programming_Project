@@ -14,6 +14,14 @@ TEXT_DARK = "#49323D"
 TEXT_LIGHT = "#A45B7D"
 WHITE = "#FFFFFF"
 
+ROOM_TYPES = [
+    "ICU",
+    "Nursery",
+    "Single-bedded",
+    "Double-bedded",
+    "Four-bedded"
+]
+
 # Main application window
 root = None
 current_username = ""
@@ -239,6 +247,14 @@ def show_login():
         width=28
     )
     username_entry.pack(pady=(5, 15))
+
+    tk.Label(
+        login_frame,
+        text="Password",
+        font=("Arial", 11, "bold"),
+        bg=WHITE,
+        fg=TEXT_DARK
+    ).pack(anchor="w")
 
     tk.Label(
         login_frame,
@@ -507,7 +523,6 @@ def get_all_admission_records(patients):
             patient.get("discharge_date", "")
         )
 
-        # Avoid displaying the same admission twice
         already_archived = any(
             isinstance(record, dict)
             and (
@@ -531,6 +546,50 @@ def get_all_admission_records(patients):
     return records
 
 
+# Count patient transfers for each room type
+def get_room_transfer_summary(patients, start_date, end_date):
+    transfer_summary = {}
+
+    for room_type in ROOM_TYPES:
+        transfer_summary[room_type] = {
+            "in": 0,
+            "out": 0
+        }
+
+    for patient in patients:
+        transfer_history = patient.get("bed_transfer_history", [])
+
+        if not isinstance(transfer_history, list):
+            continue
+
+        for transfer in transfer_history:
+            if not isinstance(transfer, dict):
+                continue
+
+            transfer_date = transfer.get("transfer_date", "")
+
+            # Count only transfers within the reporting period
+            if not transfer_date:
+                continue
+
+            try:
+                date.fromisoformat(transfer_date)
+            except ValueError:
+                continue
+
+            if start_date <= transfer_date <= end_date:
+                from_room = transfer.get("from_room_type", "")
+                to_room = transfer.get("to_room_type", "")
+
+                if from_room in transfer_summary:
+                    transfer_summary[from_room]["out"] += 1
+
+                if to_room in transfer_summary:
+                    transfer_summary[to_room]["in"] += 1
+
+    return transfer_summary
+
+
 # Escape text for PDF format
 def pdf_escape(value):
     value = str(value)
@@ -541,29 +600,30 @@ def pdf_escape(value):
     return value
 
 
-# Create a PDF report using built-in Python functions
-def create_pdf_file(output_path, month_name, year, summary, records):
+# Create a PDF report
+def create_pdf_file(
+    output_path,
+    report_title,
+    period_label,
+    summary,
+    records,
+    transfer_summary
+):
     page_objects = []
 
-    # Use landscape A4 dimensions
     page_width = 842
     page_height = 595
 
-    # Split the records into pages
-    first_page_limit = 16
+    # Leave space on the first page for the transfer summary
+    first_page_limit = 10
     other_page_limit = 22
 
-    pages = []
-    pages.append(records[:first_page_limit])
-
+    pages = [records[:first_page_limit]]
     remaining_records = records[first_page_limit:]
 
     while remaining_records:
         pages.append(remaining_records[:other_page_limit])
         remaining_records = remaining_records[other_page_limit:]
-
-    if not pages:
-        pages = [[]]
 
     for page_number, page_records in enumerate(pages):
         content = []
@@ -573,7 +633,7 @@ def create_pdf_file(output_path, month_name, year, summary, records):
         content.append("/F1 19 Tf")
         content.append("50 550 Td")
         content.append(
-            "(" + pdf_escape("Careflow - Monthly Report") + ") Tj"
+            "(" + pdf_escape("Careflow - " + report_title) + ") Tj"
         )
         content.append("ET")
 
@@ -582,14 +642,12 @@ def create_pdf_file(output_path, month_name, year, summary, records):
         content.append("/F1 11 Tf")
         content.append("50 525 Td")
         content.append(
-            "(" + pdf_escape(
-                "Reporting Period: " + month_name + " " + str(year)
-            ) + ") Tj"
+            "(" + pdf_escape("Reporting Period: " + period_label) + ") Tj"
         )
         content.append("ET")
 
-        # Summary on the first page
         if page_number == 0:
+            # Report summary
             content.append("BT")
             content.append("/F1 10 Tf")
             content.append("50 495 Td")
@@ -607,17 +665,64 @@ def create_pdf_file(output_path, month_name, year, summary, records):
             content.append("0 -17 Td")
             content.append(
                 "(" + pdf_escape(
-                    "Inpatients at Month End: "
+                    "Inpatients at Period End: "
                     + str(summary["inpatients"])
                 ) + ") Tj"
             )
             content.append("ET")
 
-            table_y = 420
+            # Room transfer summary heading
+            content.append("BT")
+            content.append("/F1 11 Tf")
+            content.append("50 435 Td")
+            content.append(
+                "(" + pdf_escape("Patient Transfers by Room Type") + ") Tj"
+            )
+            content.append("ET")
+
+            # Transfer table headings
+            content.append("BT")
+            content.append("/F1 9 Tf")
+            content.append("50 415 Td")
+            content.append("(Room Type) Tj")
+            content.append("200 0 Td")
+            content.append("(Transfers In) Tj")
+            content.append("150 0 Td")
+            content.append("(Transfers Out) Tj")
+            content.append("ET")
+
+            content.append("0.5 w")
+            content.append("50 407 m 500 407 l S")
+
+            # Transfer table records
+            for index, room_type in enumerate(ROOM_TYPES):
+                y_position = 390 - (index * 16)
+
+                transfer_in = transfer_summary[room_type]["in"]
+                transfer_out = transfer_summary[room_type]["out"]
+
+                content.append("BT")
+                content.append("/F1 9 Tf")
+                content.append("50 " + str(y_position) + " Td")
+                content.append(
+                    "(" + pdf_escape(room_type) + ") Tj"
+                )
+                content.append("200 0 Td")
+                content.append(
+                    "(" + str(transfer_in) + ") Tj"
+                )
+                content.append("150 0 Td")
+                content.append(
+                    "(" + str(transfer_out) + ") Tj"
+                )
+                content.append("ET")
+
+            table_y = 290
+
         else:
             table_y = 495
 
-        # Table heading
+        # Patient record table heading
         content.append("BT")
         content.append("/F1 9 Tf")
         content.append("50 " + str(table_y) + " Td")
@@ -647,14 +752,13 @@ def create_pdf_file(output_path, month_name, year, summary, records):
 
         content.append("ET")
 
-        # Draw a line under the headings
         content.append("0.5 w")
         content.append(
             "50 " + str(table_y - 8) + " m 790 "
             + str(table_y - 8) + " l S"
         )
 
-        # Table records
+        # Patient records
         for row_index, record in enumerate(page_records):
             y_position = table_y - 25 - (row_index * 22)
 
@@ -698,18 +802,15 @@ def create_pdf_file(output_path, month_name, year, summary, records):
         content.append("ET")
 
         page_content = "\n".join(content).encode("latin-1")
-
         page_objects.append(page_content)
 
     # Build PDF objects
     objects = []
 
-    # Object 1: Catalog
     objects.append(
         b"<< /Type /Catalog /Pages 2 0 R >>"
     )
 
-    # Object 2: Pages
     page_references = []
 
     for index in range(len(page_objects)):
@@ -725,12 +826,10 @@ def create_pdf_file(output_path, month_name, year, summary, records):
         ).encode("ascii")
     )
 
-    # Object 3: Font
     objects.append(
         b"<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica >>"
     )
 
-    # Page and content objects
     for index, page_content in enumerate(page_objects):
         page_object_number = 4 + index * 2
         content_object_number = page_object_number + 1
@@ -794,68 +893,79 @@ def create_pdf_file(output_path, month_name, year, summary, records):
         pdf_file.write(b"\n%%EOF")
 
 
-# Generate the monthly report
-def generate_monthly_report(month, year):
+# Generate a report for a selected date range
+def generate_report(start_date, end_date, report_type, period_label):
     try:
         data = load_database()
         patients = data.get("patients", [])
 
         all_records = get_all_admission_records(patients)
 
-        month_prefix = str(year) + "-" + str(month).zfill(2)
-
-        # Get admissions and discharges during the selected month
-        monthly_records = []
-
         admission_count = 0
         discharge_count = 0
         inpatient_count = 0
-
-        last_day = calendar.monthrange(year, month)[1]
-        month_end = date(year, month, last_day).isoformat()
+        report_records = []
 
         for record in all_records:
             admission_date = record.get("admission_date", "")
             discharge_date = record.get("discharge_date", "")
 
-            admitted_this_month = admission_date.startswith(month_prefix)
-            discharged_this_month = discharge_date.startswith(month_prefix)
+            admitted_in_period = (
+                admission_date
+                and start_date <= admission_date <= end_date
+            )
 
-            if admitted_this_month:
+            discharged_in_period = (
+                discharge_date
+                and start_date <= discharge_date <= end_date
+            )
+
+            if admitted_in_period:
                 admission_count += 1
 
-            if discharged_this_month:
+            if discharged_in_period:
                 discharge_count += 1
 
-            # Include admissions or discharges during the selected month
-            if admitted_this_month or discharged_this_month:
-                monthly_records.append(record)
+            if admitted_in_period or discharged_in_period:
+                report_records.append(record)
 
-            # Count inpatients at the end of the selected month
+            # Count patients who were still admitted at the end date
             if (
                 admission_date
-                and admission_date <= month_end
+                and admission_date <= end_date
                 and (
                     not discharge_date
-                    or discharge_date > month_end
+                    or discharge_date > end_date
                 )
             ):
                 inpatient_count += 1
 
-        # Sort records by admission date
-        monthly_records.sort(
+        report_records.sort(
             key=lambda record: record.get("admission_date", "")
         )
 
-        month_name = calendar.month_name[month]
+        # Count transfers in and out for each room type
+        transfer_summary = get_room_transfer_summary(
+            patients,
+            start_date,
+            end_date
+        )
 
-        # Ask the user where to save the PDF
+        summary = {
+            "admissions": admission_count,
+            "discharges": discharge_count,
+            "inpatients": inpatient_count
+        }
+
+        safe_period = period_label.replace(" ", "_")
+        safe_period = safe_period.replace("/", "-")
+
         output_path = filedialog.asksaveasfilename(
             parent=root,
-            title="Save Monthly Report",
+            title="Save " + report_type + " Report",
             initialfile=(
-                "Careflow_Monthly_Report_"
-                + month_name + "_" + str(year) + ".pdf"
+                "Careflow_" + report_type.replace(" ", "_")
+                + "_Report_" + safe_period + ".pdf"
             ),
             defaultextension=".pdf",
             filetypes=[
@@ -866,45 +976,93 @@ def generate_monthly_report(month, year):
         if not output_path:
             return
 
-        summary = {
-            "admissions": admission_count,
-            "discharges": discharge_count,
-            "inpatients": inpatient_count
-        }
-
         create_pdf_file(
             output_path,
-            month_name,
-            year,
+            report_type + " Report",
+            period_label,
             summary,
-            monthly_records
+            report_records,
+            transfer_summary
         )
 
         messagebox.showinfo(
             "Report Generated",
-            "Monthly report generated successfully!\n\n"
-            "Reporting Period: " + month_name + " " + str(year)
+            report_type + " report generated successfully!\n\n"
+            + "Reporting Period: " + period_label
             + "\nTotal Admissions: " + str(admission_count)
             + "\nTotal Discharges: " + str(discharge_count)
-            + "\nInpatients at Month End: " + str(inpatient_count)
+            + "\nInpatients at Period End: " + str(inpatient_count)
             + "\n\nSaved to:\n" + output_path,
             parent=root
         )
 
-    except (OSError, ValueError, KeyError) as error:
+    except (OSError, ValueError, KeyError, TypeError) as error:
         messagebox.showerror(
             "Report Error",
-            "Unable to generate the monthly report.\n\n"
-            + str(error),
+            "Unable to generate the report.\n\n" + str(error),
             parent=root
         )
 
 
-# Display the month selection pop-up
-def show_month_selection():
+# Get the actual calendar weeks for a selected month
+def get_calendar_weeks(year, month):
+    month_calendar = calendar.Calendar(
+        firstweekday=calendar.MONDAY
+    )
+
+    weeks = month_calendar.monthdatescalendar(year, month)
+    week_options = []
+
+    today = date.today()
+
+    for index, week in enumerate(weeks, start=1):
+        week_start = week[0]
+        week_end = week[6]
+
+        # Do not include weeks that are entirely in the future
+        if week_start > today:
+            continue
+
+        # Limit the current week to today's date
+        if week_end > today:
+            week_end = today
+
+        start_text = week_start.strftime("%d %b")
+        end_text = week_end.strftime("%d %b")
+
+        week_label = (
+            str(index) + ordinal_suffix(index)
+            + " Week (" + start_text + " - " + end_text + ")"
+        )
+
+        week_options.append({
+            "label": week_label,
+            "start": week_start,
+            "end": week_end
+        })
+
+    return week_options
+
+
+# Get the correct ordinal suffix for a week number
+def ordinal_suffix(number):
+    if 10 <= number % 100 <= 20:
+        return "th"
+
+    suffixes = {
+        1: "st",
+        2: "nd",
+        3: "rd"
+    }
+
+    return suffixes.get(number % 10, "th")
+
+
+# Display the report selection pop-up
+def show_report_selection():
     report_window = tk.Toplevel(root)
-    report_window.title("Print Monthly Report")
-    report_window.geometry("350x270")
+    report_window.title("Print Report")
+    report_window.geometry("410x370")
     report_window.configure(bg=PINK_LIGHT)
     report_window.resizable(False, False)
     report_window.transient(root)
@@ -912,7 +1070,7 @@ def show_month_selection():
 
     tk.Label(
         report_window,
-        text="Print Monthly Report",
+        text="Print Report",
         font=("Arial", 16, "bold"),
         bg=PINK_LIGHT,
         fg=PINK_DARK
@@ -920,7 +1078,7 @@ def show_month_selection():
 
     tk.Label(
         report_window,
-        text="Select the reporting period.",
+        text="Select the type and reporting period.",
         font=("Arial", 10),
         bg=PINK_LIGHT,
         fg=TEXT_LIGHT
@@ -932,40 +1090,161 @@ def show_month_selection():
     )
     form_frame.pack()
 
+    # Report type
+    tk.Label(
+        form_frame,
+        text="Report Type:",
+        font=("Arial", 10, "bold"),
+        bg=PINK_LIGHT,
+        fg=TEXT_DARK
+    ).grid(row=0, column=0, sticky="w", pady=8)
+
+    report_type_box = ttk.Combobox(
+        form_frame,
+        values=["Monthly Report", "Weekly Report"],
+        state="readonly",
+        width=20
+    )
+    report_type_box.grid(row=0, column=1, padx=10, pady=8)
+    report_type_box.set("Monthly Report")
+
+    # Month selection
     tk.Label(
         form_frame,
         text="Month:",
         font=("Arial", 10, "bold"),
         bg=PINK_LIGHT,
         fg=TEXT_DARK
-    ).grid(row=0, column=0, sticky="w", pady=8)
+    ).grid(row=1, column=0, sticky="w", pady=8)
 
     month_box = ttk.Combobox(
         form_frame,
         values=list(calendar.month_name)[1:],
         state="readonly",
-        width=18
+        width=20
     )
-    month_box.grid(row=0, column=1, padx=10, pady=8)
-
+    month_box.grid(row=1, column=1, padx=10, pady=8)
     month_box.set(calendar.month_name[date.today().month])
 
+    # Year selection
     tk.Label(
         form_frame,
         text="Year:",
         font=("Arial", 10, "bold"),
         bg=PINK_LIGHT,
         fg=TEXT_DARK
-    ).grid(row=1, column=0, sticky="w", pady=8)
+    ).grid(row=2, column=0, sticky="w", pady=8)
 
     year_entry = ttk.Entry(
         form_frame,
-        width=21
+        width=23
     )
-    year_entry.grid(row=1, column=1, padx=10, pady=8)
+    year_entry.grid(row=2, column=1, padx=10, pady=8)
     year_entry.insert(0, str(date.today().year))
 
-    # Confirm the selected month and year
+    # Week selection
+    week_label = tk.Label(
+        form_frame,
+        text="Select Week:",
+        font=("Arial", 10, "bold"),
+        bg=PINK_LIGHT,
+        fg=TEXT_DARK
+    )
+
+    week_box = ttk.Combobox(
+        form_frame,
+        state="readonly",
+        width=25
+    )
+
+    week_options = []
+
+    # Update the available weeks automatically
+    def update_week_options(event=None):
+        nonlocal week_options
+
+        selected_month = month_box.current()
+        year_text = year_entry.get().strip()
+
+        if selected_month < 0 or not year_text.isdigit():
+            week_options = []
+            week_box["values"] = []
+            week_box.set("")
+            return
+
+        selected_year = int(year_text)
+        selected_month += 1
+
+        if selected_year < 2000 or selected_year > date.today().year:
+            week_options = []
+            week_box["values"] = []
+            week_box.set("")
+            return
+
+        if (
+            selected_year == date.today().year
+            and selected_month > date.today().month
+        ):
+            week_options = []
+            week_box["values"] = []
+            week_box.set("")
+            return
+
+        week_options = get_calendar_weeks(
+            selected_year,
+            selected_month
+        )
+
+        labels = [
+            week["label"] for week in week_options
+        ]
+
+        week_box["values"] = labels
+
+        if labels:
+            week_box.current(0)
+        else:
+            week_box.set("")
+
+    # Show or hide the week selection
+    def change_report_type(event=None):
+        if report_type_box.get() == "Weekly Report":
+            week_label.grid(
+                row=3,
+                column=0,
+                sticky="w",
+                pady=8
+            )
+
+            week_box.grid(
+                row=3,
+                column=1,
+                padx=10,
+                pady=8
+            )
+
+            update_week_options()
+
+        else:
+            week_label.grid_remove()
+            week_box.grid_remove()
+
+    month_box.bind(
+        "<<ComboboxSelected>>",
+        update_week_options
+    )
+
+    year_entry.bind(
+        "<KeyRelease>",
+        update_week_options
+    )
+
+    report_type_box.bind(
+        "<<ComboboxSelected>>",
+        change_report_type
+    )
+
+    # Confirm the selected report
     def confirm_report():
         selected_month = month_box.current() + 1
         year_text = year_entry.get().strip()
@@ -987,28 +1266,97 @@ def show_month_selection():
             return
 
         selected_year = int(year_text)
+        today = date.today()
 
-        if selected_year < 2000 or selected_year > date.today().year:
+        if selected_year < 2000 or selected_year > today.year:
             messagebox.showwarning(
                 "Invalid Year",
                 "Please enter a year between 2000 and "
-                + str(date.today().year) + ".",
+                + str(today.year) + ".",
                 parent=report_window
             )
             return
 
+        if (
+            selected_year == today.year
+            and selected_month > today.month
+        ):
+            messagebox.showwarning(
+                "Invalid Month",
+                "You cannot generate a report for a future month.",
+                parent=report_window
+            )
+            return
+
+        selected_type = report_type_box.get()
+
+        if selected_type == "Monthly Report":
+            start_date = date(
+                selected_year,
+                selected_month,
+                1
+            )
+
+            last_day = calendar.monthrange(
+                selected_year,
+                selected_month
+            )[1]
+
+            end_date = date(
+                selected_year,
+                selected_month,
+                last_day
+            )
+
+            # Do not include future dates in the current month
+            if end_date > today:
+                end_date = today
+
+            period_label = (
+                calendar.month_name[selected_month]
+                + " " + str(selected_year)
+                + " (" + start_date.strftime("%d %b")
+                + " - " + end_date.strftime("%d %b") + ")"
+            )
+
+        else:
+            # Refresh the weeks before using the selected week
+            update_week_options()
+
+            selected_week = week_box.current()
+
+            if selected_week < 0 or selected_week >= len(week_options):
+                messagebox.showwarning(
+                    "Missing Week",
+                    "Please select a valid week.",
+                    parent=report_window
+                )
+                return
+
+            selected_week_data = week_options[selected_week]
+
+            start_date = selected_week_data["start"]
+            end_date = selected_week_data["end"]
+
+            period_label = (
+                selected_week_data["label"]
+                + " - " + str(selected_year)
+            )
+
         report_window.destroy()
 
-        generate_monthly_report(
-            selected_month,
-            selected_year
+        generate_report(
+            start_date.isoformat(),
+            end_date.isoformat(),
+            selected_type,
+            period_label
         )
 
     button_frame = tk.Frame(
         report_window,
         bg=PINK_LIGHT
     )
-    button_frame.pack(pady=18)
+    button_frame.pack(pady=22)
 
     tk.Button(
         button_frame,
@@ -1033,6 +1381,8 @@ def show_month_selection():
         width=13,
         cursor="hand2"
     ).pack(side="left", padx=5)
+
+    change_report_type()
 
 
 # Display the main dashboard
@@ -1060,14 +1410,12 @@ def show_dashboard(username=None):
     today = date.today().isoformat()
 
     for patient in patients:
-        # Count current inpatients
         if (
             patient.get("bed_id", "")
             and patient.get("status", "") != "Discharged"
         ):
             inpatient_count += 1
 
-        # Count previous discharged admissions
         history = patient.get("admission_history", [])
 
         if isinstance(history, list):
@@ -1078,7 +1426,6 @@ def show_dashboard(username=None):
                 ):
                     today_discharge_count += 1
 
-        # Count the current admission if discharged today
         if (
             patient.get("status") == "Discharged"
             and patient.get("discharge_date") == today
@@ -1092,14 +1439,12 @@ def show_dashboard(username=None):
         bed_id = str(bed.get("bed_id", ""))
         bed_patient_id = str(bed.get("patient_id", ""))
 
-        # Find the patient using the bed ID
         patient = find_patient(
             bed_id,
             patients,
             "bed_id"
         )
 
-        # Check using the patient ID if necessary
         if (
             patient is None
             or patient.get("status") == "Discharged"
@@ -1110,14 +1455,11 @@ def show_dashboard(username=None):
                     patients
                 )
 
-        # Count the bed only if the patient is not discharged
         if patient and patient.get("status") != "Discharged":
             occupied_count += 1
 
-    # Calculate available beds
     available_count = len(beds) - occupied_count
 
-    # Attach navigation directly to the main window
     content = add_navigation(root, "Dashboard")
 
     header = tk.Frame(content, bg=PINK_LIGHT)
@@ -1203,7 +1545,6 @@ def show_dashboard(username=None):
         height=8
     )
 
-    # Table headings
     patient_table.heading("patient_ic", text="Patient IC")
     patient_table.heading("patient_id", text="Patient ID")
     patient_table.heading("name", text="Patient Name")
@@ -1212,7 +1553,6 @@ def show_dashboard(username=None):
     patient_table.heading("admission_date", text="Admission Date")
     patient_table.heading("discharge_date", text="Discharge Date")
 
-    # Table column widths
     patient_table.column("patient_ic", width=140, anchor="center")
     patient_table.column("patient_id", width=110, anchor="center")
     patient_table.column("name", width=180)
@@ -1243,7 +1583,6 @@ def show_dashboard(username=None):
         patient_id = patient.get("patient_id", "")
         patient_name = patient.get("name", "")
 
-        # Get previous admission records
         history = patient.get("admission_history", [])
 
         if isinstance(history, list):
@@ -1253,7 +1592,6 @@ def show_dashboard(username=None):
 
                 record_status = record.get("status", "Discharged")
 
-                # Discharged records should not display a Bed ID
                 if record_status == "Discharged":
                     record_bed_id = "-"
                 else:
@@ -1273,7 +1611,6 @@ def show_dashboard(username=None):
                     )
                 )
 
-        # Check whether the current admission has already been archived
         current_admission = (
             patient.get("admission_date", ""),
             patient.get("discharge_date", "")
@@ -1288,11 +1625,9 @@ def show_dashboard(username=None):
             for record in history
         ) if isinstance(history, list) else False
 
-        # Display the current admission only if it is not already archived
         if not already_archived:
             current_status = patient.get("status", "Registered")
 
-            # Discharged patients should have a blank Bed ID
             if current_status == "Discharged":
                 current_bed_id = "-"
             else:
@@ -1312,11 +1647,11 @@ def show_dashboard(username=None):
                 )
             )
 
-    # Print Monthly Report button
+    # Print Report button
     tk.Button(
         content,
-        text="Print Monthly Report",
-        command=show_month_selection,
+        text="Print Report",
+        command=show_report_selection,
         bg=PINK_DARK,
         fg=WHITE,
         activebackground=PINK_ACTIVE,
