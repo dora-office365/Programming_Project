@@ -40,7 +40,7 @@
             "room_type": ""
         },
         {
-            "patient_ic": "",
+            "patient_ic": "-",
             "patient_id": "P0002",
             "name": "Baby Aisyah",
             "dob": "2026-10-19",
@@ -183,7 +183,7 @@
             "room_type": "Four-bedded"
         },
         {
-            "patient_ic": "",
+            "patient_ic": "-",
             "patient_id": "P0007",
             "name": "Baby Adam",
             "dob": "2026-11-02",
@@ -421,7 +421,7 @@
             "room_type": "Four-bedded"
         },
         {
-            "patient_ic": "",
+            "patient_ic": "-",
             "patient_id": "P0016",
             "name": "Baby Mei Ling",
             "dob": "2026-11-12",
