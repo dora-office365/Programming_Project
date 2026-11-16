@@ -819,8 +819,8 @@
         {
             "bed_id": "Bed 101",
             "room_type": "Four-bedded",
-            "status": "Occupied",
-            "patient_id": "P0005"
+            "status": "Available",
+            "patient_id": ""
         },
         {
             "bed_id": "Bed 102",
