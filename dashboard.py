@@ -1502,6 +1502,21 @@ def show_dashboard(username=None):
         today_discharge_count, 1, 1
     )
 
+    # Print Report button
+    tk.Button(
+        content,
+        text="Print Report",
+        command=show_report_selection,
+        bg=PINK_DARK,
+        fg=WHITE,
+        activebackground=PINK_ACTIVE,
+        activeforeground=WHITE,
+        font=("Arial", 10, "bold"),
+        padx=20,
+        pady=8,
+        cursor="hand2"
+    ).pack(pady=(0, 12))
+    
     # Patient records heading
     tk.Label(
         content,
@@ -1638,21 +1653,6 @@ def show_dashboard(username=None):
                     patient.get("discharge_date", "") or "-"
                 )
             )
-
-    # Print Report button
-    tk.Button(
-        content,
-        text="Print Report",
-        command=show_report_selection,
-        bg=PINK_DARK,
-        fg=WHITE,
-        activebackground=PINK_ACTIVE,
-        activeforeground=WHITE,
-        font=("Arial", 10, "bold"),
-        padx=20,
-        pady=8,
-        cursor="hand2"
-    ).pack(pady=(0, 12))
 
     tk.Label(
         content,
