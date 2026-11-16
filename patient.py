@@ -1,3 +1,4 @@
+
 import tkinter as tk
 from tkinter import ttk, messagebox
 from datetime import date
@@ -179,22 +180,53 @@ def show_patients(root):
         pady=4
     )
 
-    # Bed selection
+    # Room type selection
     tk.Label(
         form,
-        text="Assign Bed",
+        text="Room Type",
         bg=WHITE,
         fg=TEXT_DARK,
         font=("Arial", 9)
     ).grid(row=9, column=0, sticky="w", pady=4)
 
-    bed_box = ttk.Combobox(
+    room_type_box = ttk.Combobox(
         form,
+        values=[
+            "Four-bedded",
+            "Double-bedded",
+            "Single-bedded",
+            "Nursery",
+            "ICU"
+        ],
         state="readonly",
         width=17
     )
-    bed_box.grid(
+    room_type_box.grid(
         row=9,
+        column=1,
+        padx=(6, 0),
+        pady=4
+    )
+
+    # Automatically assigned bed
+    tk.Label(
+        form,
+        text="Assigned Bed",
+        bg=WHITE,
+        fg=TEXT_DARK,
+        font=("Arial", 9)
+    ).grid(row=10, column=0, sticky="w", pady=4)
+
+    bed_var = tk.StringVar()
+
+    bed_entry = ttk.Entry(
+        form,
+        textvariable=bed_var,
+        state="readonly",
+        width=19
+    )
+    bed_entry.grid(
+        row=10,
         column=1,
         padx=(6, 0),
         pady=4
@@ -295,32 +327,58 @@ def show_patients(root):
         patients = data["patients"]
         beds = data["beds"]
 
-    # Update available bed choices using data.py
-    def update_beds():
+    # Automatically assign the first available bed
+    def auto_assign_bed(event=None):
+        selected_room = room_type_box.get()
+
+        # Clear the previous bed assignment
+        bed_var.set("")
+
+        if not selected_room:
+            return
+
         refresh_data()
 
-        available_beds= get_available_beds()
-        choices = sorted(
-            [
-                bed.get("bed_id", "")
-                for bed in available_beds
-                if bed.get("bed_id", "")
-            ],
-            key=lambda x: int(x.replace("Bed ", ""))
+        # Keep the current bed when updating a patient
+        if selected_id[0]:
+            current_patient = find_patient(
+                selected_id[0],
+                patients
+            )
+
+            if current_patient:
+                current_bed = current_patient.get("bed_id", "")
+
+                for bed in beds:
+                    if bed.get("bed_id") == current_bed:
+                        if bed.get("room_type") == selected_room:
+                            bed_var.set(current_bed)
+                            return
+
+        # Get available beds in the selected room type
+        available_beds = [
+            bed for bed in get_available_beds()
+            if bed.get("room_type") == selected_room
+        ]
+
+        # Sort beds by their numerical Bed ID
+        available_beds.sort(
+            key=lambda bed: int(
+                bed.get("bed_id", "Bed 0").replace("Bed ", "")
+            )
         )
 
-        # Keep the selected patient's current bed selectable
-        for patient in patients:
-            if patient.get("patient_id") == selected_id[0]:
-                current_bed = patient.get("bed_id", "")
-
-                if current_bed and current_bed not in choices:
-                    choices.append(current_bed)
-
-        bed_box["values"] = choices
-
-        if bed_box.get() not in choices:
-            bed_box.set("")
+        # Assign the first available bed
+        if available_beds:
+            bed_var.set(
+                available_beds[0].get("bed_id", "")
+            )
+        else:
+            messagebox.showwarning(
+                "No Available Beds",
+                "There are no available beds in the selected room type.",
+                parent=root
+            )
 
     # Automatically retrieve existing patient information using IC
     def find_existing_patient(event=None):
@@ -328,6 +386,9 @@ def show_patients(root):
 
         # Refresh the latest patient records
         refresh_data()
+
+        if not current_ic:
+            return
 
         existing_patient = find_patient(
             current_ic,
@@ -350,7 +411,8 @@ def show_patients(root):
                     entries[key].delete(0, tk.END)
 
                 gender_box.set("")
-                bed_box.set("")
+                room_type_box.set("")
+                bed_var.set("")
 
                 set_patient_id(generate_patient_id())
 
@@ -391,9 +453,8 @@ def show_patients(root):
 
         # Diagnosis and bed are for the new admission
         entries["diagnosis"].delete(0, tk.END)
-        bed_box.set("")
-
-        update_beds()
+        room_type_box.set("")
+        bed_var.set("")
 
         # Inform staff if the patient is already active
         if existing_patient.get("status") != "Discharged":
@@ -403,7 +464,6 @@ def show_patients(root):
                 "Duplicate registration is not allowed."
             )
 
-                
     # Display and search all patient admission records
     def display_patients(event=None):
         refresh_data()
@@ -520,8 +580,6 @@ def show_patients(root):
                     "record_type": "current"
                 }
 
-
-    
     # Show the selected patient's information
     def view_patient(event=None):
         selected = tree.selection()
@@ -577,8 +635,6 @@ def show_patients(root):
             patient.get("gender", "")
         )
 
-        update_beds()
-
         if record_type == "history":
             # Retrieve the exact previous admission
             history = patient.get("admission_history", [])
@@ -603,8 +659,9 @@ def show_patients(root):
                 str(previous_record.get("diagnosis", ""))
             )
 
-            # Previous discharged admissions cannot be edited
-            bed_box.set("")
+            # Previous admission records cannot be edited
+            room_type_box.set("")
+            bed_var.set("")
 
         else:
             # Display the diagnosis from the current admission
@@ -614,10 +671,22 @@ def show_patients(root):
                 str(patient.get("diagnosis", ""))
             )
 
-            if patient.get("bed_id", ""):
-                bed_box.set(patient["bed_id"])
+            current_bed = patient.get("bed_id", "")
+
+            if current_bed:
+                # Find the room type of the patient's current bed
+                for bed in beds:
+                    if bed.get("bed_id") == current_bed:
+                        room_type_box.set(
+                            bed.get("room_type", "")
+                        )
+                        break
+
+                bed_var.set(current_bed)
+
             else:
-                bed_box.set("")
+                room_type_box.set("")
+                bed_var.set("")
 
     # Validate patient information
     def valid_date(dob):
@@ -720,29 +789,45 @@ def show_patients(root):
             # Reuse the existing Patient ID
             patient["patient_id"] = existing_patient["patient_id"]
 
-        # Every new patient or readmission must have a bed
-        selected_bed = bed_box.get().strip()
+        # Get the selected room type
+        selected_room = room_type_box.get()
+
+        if not selected_room:
+            messagebox.showwarning(
+                "Room Type Required",
+                "Please select a room type."
+            )
+            return
+
+        # Automatically assign the first available bed
+        auto_assign_bed()
+
+        selected_bed = bed_var.get()
 
         if not selected_bed:
             messagebox.showwarning(
-                "Bed Required",
-                "Please select an available bed for this patient."
+                "No Available Beds",
+                "Please select a room type with available beds."
             )
             return
+
+        # Refresh the database before confirming bed availability
+        refresh_data()
 
         # Confirm that the selected bed is still available
         available_bed_ids = {
             bed.get("bed_id", "")
             for bed in get_available_beds()
+            if bed.get("room_type") == selected_room
         }
 
         if selected_bed not in available_bed_ids:
             messagebox.showwarning(
                 "Bed Unavailable",
-                "This bed is no longer available. "
-                "Please select another bed."
+                "The assigned bed is no longer available. "
+                "Please select the room type again."
             )
-            update_beds()
+            bed_var.set("")
             return
 
         # Set patient admission information
@@ -788,6 +873,7 @@ def show_patients(root):
             message = (
                 "Patient readmitted successfully.\n"
                 f"Patient ID: {patient['patient_id']}\n"
+                f"Assigned Bed: {selected_bed}\n"
                 "Previous admission records have been preserved."
             )
 
@@ -797,7 +883,8 @@ def show_patients(root):
 
             message = (
                 "Patient registered successfully.\n"
-                f"Patient ID: {patient['patient_id']}"
+                f"Patient ID: {patient['patient_id']}\n"
+                f"Assigned Bed: {selected_bed}"
             )
 
         # Save patient and bed information
@@ -917,13 +1004,14 @@ def show_patients(root):
             return
 
         old_bed = selected_patient.get("bed_id", "")
-        new_bed = bed_box.get().strip()
+        new_bed = bed_var.get().strip()
+        selected_room = room_type_box.get()
 
-        # A patient must always have a bed
-        if not new_bed:
+        # A patient must always have a room type and bed
+        if not selected_room or not new_bed:
             messagebox.showwarning(
                 "Bed Required",
-                "Please select a bed for this patient."
+                "Please select a room type with an available bed."
             )
             return
 
@@ -932,14 +1020,16 @@ def show_patients(root):
             available_bed_ids = {
                 bed.get("bed_id", "")
                 for bed in get_available_beds()
+                if bed.get("room_type") == selected_room
             }
 
             if new_bed not in available_bed_ids:
                 messagebox.showwarning(
                     "Bed Unavailable",
-                    "Please select an available bed."
+                    "The assigned bed is no longer available. "
+                    "Please select the room type again."
                 )
-                update_beds()
+                bed_var.set("")
                 return
 
         # Release the old bed and occupy the new bed
@@ -991,7 +1081,8 @@ def show_patients(root):
                 entry.delete(0, tk.END)
 
         gender_box.set("")
-        bed_box.set("")
+        room_type_box.set("")
+        bed_var.set("")
         selected_id[0] = ""
         selected_record_type[0] = ""
         lookup_ic[0] = ""
@@ -999,8 +1090,13 @@ def show_patients(root):
         for item in tree.selection():
             tree.selection_remove(item)
 
-        update_beds()
         set_patient_id(generate_patient_id())
+
+    # Automatically assign a bed when room type is selected
+    room_type_box.bind(
+        "<<ComboboxSelected>>",
+        auto_assign_bed
+    )
 
     # Buttons
     button_frame = tk.Frame(
@@ -1008,7 +1104,7 @@ def show_patients(root):
         bg=WHITE
     )
     button_frame.grid(
-        row=10,
+        row=11,
         column=0,
         columnspan=2,
         pady=12
@@ -1059,6 +1155,5 @@ def show_patients(root):
     )
 
     # Show initial data and next Patient ID
-    update_beds()
     display_patients()
     set_patient_id(generate_patient_id())
