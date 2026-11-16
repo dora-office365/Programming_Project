@@ -442,7 +442,7 @@ def show_patients(root):
 
                 # Discharged records should have a blank Bed ID
                 if record.get("status", "Discharged") == "Discharged":
-                    record_bed = ""
+                    record_bed = "-"
                 else:
                     record_bed = record.get("bed_id", "") or "-"
 
@@ -491,7 +491,7 @@ def show_patients(root):
                 )
 
                 if current_status == "Discharged":
-                    current_bed = ""
+                    current_bed = "-"
                 else:
                     current_bed = patient.get("bed_id", "") or "-"
 
