@@ -23,7 +23,7 @@ PATIENT_FIELDS = [
     "admission_history"
 ]
 
-# Default data used when the database does not exist
+# # Default data
 DEFAULT_DATA = {
     "users": [
         {
@@ -32,113 +32,49 @@ DEFAULT_DATA = {
         }
     ],
     "patients": [],
-    "beds": [
-        {"bed_id": "Bed 301", "room_type": "ICU", "status": "Available", "patient_id": ""},
-        {"bed_id": "Bed 302",  "room_type": "ICU", "status": "Available", "patient_id": ""},
-        {"bed_id": "Bed 303",  "room_type": "ICU", "status": "Available", "patient_id": ""},
-        {"bed_id": "Bed 304",  "room_type": "ICU", "status": "Available", "patient_id": ""},
-        {"bed_id": "Bed 305",  "room_type": "ICU", "status": "Available", "patient_id": ""},
-        {"bed_id": "Bed 306",  "room_type": "ICU", "status": "Available", "patient_id": ""},
-        {"bed_id": "Bed 307",  "room_type": "ICU", "status": "Available", "patient_id": ""},
-        {"bed_id": "Bed 308",  "room_type": "ICU", "status": "Available", "patient_id": ""},
-        {"bed_id": "Bed 309",  "room_type": "ICU", "status": "Available", "patient_id": ""},
-        {"bed_id": "Bed 310",  "room_type": "ICU", "status": "Available", "patient_id": ""},
-        {"bed_id": "Bed 311",  "room_type": "Nursery", "status": "Available", "patient_id": ""},
-        {"bed_id": "Bed 312",  "room_type": "Nursery", "status": "Available", "patient_id": ""},
-        {"bed_id": "Bed 313",  "room_type": "Nursery", "status": "Available", "patient_id": ""},
-        {"bed_id": "Bed 314",  "room_type": "Nursery", "status": "Available", "patient_id": ""},
-        {"bed_id": "Bed 315",  "room_type": "Nursery", "status": "Available", "patient_id": ""},
-        {"bed_id": "Bed 316",  "room_type": "Nursery", "status": "Available", "patient_id": ""},
-        {"bed_id": "Bed 317",  "room_type": "Nursery", "status": "Available", "patient_id": ""},
-        {"bed_id": "Bed 318",  "room_type": "Nursery", "status": "Available", "patient_id": ""},
-        {"bed_id": "Bed 319",  "room_type": "Nursery", "status": "Available", "patient_id": ""},
-        {"bed_id": "Bed 320",  "room_type": "Nursery", "status": "Available", "patient_id": ""},
-        {"bed_id": "Bed 321",  "room_type": "Nursery", "status": "Available", "patient_id": ""},
-        {"bed_id": "Bed 322",  "room_type": "Nursery", "status": "Available", "patient_id": ""},
-        {"bed_id": "Bed 323",  "room_type": "Nursery", "status": "Available", "patient_id": ""},
-        {"bed_id": "Bed 324",  "room_type": "Nursery", "status": "Available", "patient_id": ""},
-        {"bed_id": "Bed 325",  "room_type": "Nursery", "status": "Available", "patient_id": ""},
-        {"bed_id": "Bed 326",  "room_type": "Nursery", "status": "Available", "patient_id": ""},
-        {"bed_id": "Bed 327",  "room_type": "Nursery", "status": "Available", "patient_id": ""},
-        {"bed_id": "Bed 328",  "room_type": "Nursery", "status": "Available", "patient_id": ""},
-        {"bed_id": "Bed 329",  "room_type": "Nursery", "status": "Available", "patient_id": ""},
-        {"bed_id": "Bed 330",  "room_type": "Nursery", "status": "Available", "patient_id": ""},        
-        {"bed_id": "Bed 201", "room_type": "Single-bedded", "status": "Available", "patient_id": ""},
-        {"bed_id": "Bed 202",  "room_type": "Single-bedded", "status": "Available", "patient_id": ""},
-        {"bed_id": "Bed 203",  "room_type": "Single-bedded", "status": "Available", "patient_id": ""},
-        {"bed_id": "Bed 204",  "room_type": "Single-bedded", "status": "Available", "patient_id": ""},
-        {"bed_id": "Bed 205",  "room_type": "Single-bedded", "status": "Available", "patient_id": ""},
-        {"bed_id": "Bed 206",  "room_type": "Single-bedded", "status": "Available", "patient_id": ""},
-        {"bed_id": "Bed 207",  "room_type": "Double-bedded", "status": "Available", "patient_id": ""},
-        {"bed_id": "Bed 208",  "room_type": "Double-bedded", "status": "Available", "patient_id": ""},
-        {"bed_id": "Bed 209",  "room_type": "Double-bedded", "status": "Available", "patient_id": ""},
-        {"bed_id": "Bed 210", "room_type": "Double-bedded", "status": "Available", "patient_id": ""},
-        {"bed_id": "Bed 211", "room_type": "Double-bedded", "status": "Available", "patient_id": ""},
-        {"bed_id": "Bed 212", "room_type": "Double-bedded", "status": "Available", "patient_id": ""},
-        {"bed_id": "Bed 213", "room_type": "Double-bedded", "status": "Available", "patient_id": ""},
-        {"bed_id": "Bed 214", "room_type": "Double-bedded", "status": "Available", "patient_id": ""},
-        {"bed_id": "Bed 215", "room_type": "Double-bedded", "status": "Available", "patient_id": ""},
-        {"bed_id": "Bed 216", "room_type": "Double-bedded", "status": "Available", "patient_id": ""},
-        {"bed_id": "Bed 217", "room_type": "Double-bedded", "status": "Available", "patient_id": ""},
-        {"bed_id": "Bed 218", "room_type": "Double-bedded", "status": "Available", "patient_id": ""},
-        {"bed_id": "Bed 219", "room_type": "Double-bedded", "status": "Available", "patient_id": ""},
-        {"bed_id": "Bed 220", "room_type": "Double-bedded", "status": "Available", "patient_id": ""},
-        {"bed_id": "Bed 221", "room_type": "Double-bedded", "status": "Available", "patient_id": ""},
-        {"bed_id": "Bed 222", "room_type": "Double-bedded", "status": "Available", "patient_id": ""},
-        {"bed_id": "Bed 223", "room_type": "Double-bedded", "status": "Available", "patient_id": ""},
-        {"bed_id": "Bed 224", "room_type": "Double-bedded", "status": "Available", "patient_id": ""},
-        {"bed_id": "Bed 225", "room_type": "Double-bedded", "status": "Available", "patient_id": ""},
-        {"bed_id": "Bed 226", "room_type": "Double-bedded", "status": "Available", "patient_id": ""},
-        {"bed_id": "Bed 227", "room_type": "Double-bedded", "status": "Available", "patient_id": ""},
-        {"bed_id": "Bed 228", "room_type": "Double-bedded", "status": "Available", "patient_id": ""},
-        {"bed_id": "Bed 229", "room_type": "Double-bedded", "status": "Available", "patient_id": ""},
-        {"bed_id": "Bed 230", "room_type": "Double-bedded", "status": "Available", "patient_id": ""},
-        {"bed_id": "Bed 231", "room_type": "Double-bedded", "status": "Available", "patient_id": ""},
-        {"bed_id": "Bed 232", "room_type": "Double-bedded", "status": "Available", "patient_id": ""},
-        {"bed_id": "Bed 233", "room_type": "Double-bedded", "status": "Available", "patient_id": ""},
-        {"bed_id": "Bed 234", "room_type": "Double-bedded", "status": "Available", "patient_id": ""},
-        {"bed_id": "Bed 101", "room_type": "Four-bedded", "status": "Available", "patient_id": ""},
-        {"bed_id": "Bed 102", "room_type": "Four-bedded", "status": "Available", "patient_id": ""},
-        {"bed_id": "Bed 103", "room_type": "Four-bedded", "status": "Available", "patient_id": ""},
-        {"bed_id": "Bed 104", "room_type": "Four-bedded", "status": "Available", "patient_id": ""},
-        {"bed_id": "Bed 105", "room_type": "Four-bedded", "status": "Available", "patient_id": ""},
-        {"bed_id": "Bed 106", "room_type": "Four-bedded", "status": "Available", "patient_id": ""},
-        {"bed_id": "Bed 107", "room_type": "Four-bedded", "status": "Available", "patient_id": ""},
-        {"bed_id": "Bed 108", "room_type": "Four-bedded", "status": "Available", "patient_id": ""},
-        {"bed_id": "Bed 109", "room_type": "Four-bedded", "status": "Available", "patient_id": ""},
-        {"bed_id": "Bed 110", "room_type": "Four-bedded", "status": "Available", "patient_id": ""},
-        {"bed_id": "Bed 111", "room_type": "Four-bedded", "status": "Available", "patient_id": ""},
-        {"bed_id": "Bed 112", "room_type": "Four-bedded", "status": "Available", "patient_id": ""},
-        {"bed_id": "Bed 113", "room_type": "Four-bedded", "status": "Available", "patient_id": ""},
-        {"bed_id": "Bed 114", "room_type": "Four-bedded", "status": "Available", "patient_id": ""},
-        {"bed_id": "Bed 115", "room_type": "Four-bedded", "status": "Available", "patient_id": ""},
-        {"bed_id": "Bed 116", "room_type": "Four-bedded", "status": "Available", "patient_id": ""},
-        {"bed_id": "Bed 117", "room_type": "Four-bedded", "status": "Available", "patient_id": ""},
-        {"bed_id": "Bed 118", "room_type": "Four-bedded", "status": "Available", "patient_id": ""},
-        {"bed_id": "Bed 119", "room_type": "Four-bedded", "status": "Available", "patient_id": ""},
-        {"bed_id": "Bed 120", "room_type": "Four-bedded", "status": "Available", "patient_id": ""},
-        {"bed_id": "Bed 121", "room_type": "Four-bedded", "status": "Available", "patient_id": ""},
-        {"bed_id": "Bed 122", "room_type": "Four-bedded", "status": "Available", "patient_id": ""},
-        {"bed_id": "Bed 123", "room_type": "Four-bedded", "status": "Available", "patient_id": ""},
-        {"bed_id": "Bed 124", "room_type": "Four-bedded", "status": "Available", "patient_id": ""},
-        {"bed_id": "Bed 125", "room_type": "Four-bedded", "status": "Available", "patient_id": ""},
-        {"bed_id": "Bed 126", "room_type": "Four-bedded", "status": "Available", "patient_id": ""},
-        {"bed_id": "Bed 127", "room_type": "Four-bedded", "status": "Available", "patient_id": ""},
-        {"bed_id": "Bed 128", "room_type": "Four-bedded", "status": "Available", "patient_id": ""},
-        {"bed_id": "Bed 129", "room_type": "Four-bedded", "status": "Available", "patient_id": ""},
-        {"bed_id": "Bed 130", "room_type": "Four-bedded", "status": "Available", "patient_id": ""},
-        {"bed_id": "Bed 131", "room_type": "Four-bedded", "status": "Available", "patient_id": ""},
-        {"bed_id": "Bed 132", "room_type": "Four-bedded", "status": "Available", "patient_id": ""},
-        {"bed_id": "Bed 133", "room_type": "Four-bedded", "status": "Available", "patient_id": ""},
-        {"bed_id": "Bed 134", "room_type": "Four-bedded", "status": "Available", "patient_id": ""},
-        {"bed_id": "Bed 135", "room_type": "Four-bedded", "status": "Available", "patient_id": ""},
-        {"bed_id": "Bed 136", "room_type": "Four-bedded", "status": "Available", "patient_id": ""},
-        {"bed_id": "Bed 137", "room_type": "Four-bedded", "status": "Available", "patient_id": ""},
-        {"bed_id": "Bed 138", "room_type": "Four-bedded", "status": "Available", "patient_id": ""},
-        {"bed_id": "Bed 139", "room_type": "Four-bedded", "status": "Available", "patient_id": ""},
-        {"bed_id": "Bed 140", "room_type": "Four-bedded", "status": "Available", "patient_id": ""}
-    ]
+    "beds": []
 }
+
+# Generate default bed records
+for number in range(301, 311):
+    DEFAULT_DATA["beds"].append({
+        "bed_id": f"Bed {number}",
+        "room_type": "ICU",
+        "status": "Available",
+        "patient_id": ""
+    })
+
+for number in range(311, 331):
+    DEFAULT_DATA["beds"].append({
+        "bed_id": f"Bed {number}",
+        "room_type": "Nursery",
+        "status": "Available",
+        "patient_id": ""
+    })
+
+for number in range(201, 207):
+    DEFAULT_DATA["beds"].append({
+        "bed_id": f"Bed {number}",
+        "room_type": "Single-bedded",
+        "status": "Available",
+        "patient_id": ""
+    })
+
+for number in range(207, 235):
+    DEFAULT_DATA["beds"].append({
+        "bed_id": f"Bed {number}",
+        "room_type": "Double-bedded",
+        "status": "Available",
+        "patient_id": ""
+    })
+
+for number in range(101, 141):
+    DEFAULT_DATA["beds"].append({
+        "bed_id": f"Bed {number}",
+        "room_type": "Four-bedded",
+        "status": "Available",
+        "patient_id": ""
+    })
 
 
 # Create a separate copy of the default data
