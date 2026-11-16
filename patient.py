@@ -844,7 +844,7 @@ def show_patients(root):
             return False
 
     def validate_patient_details(patient):
-        if not patient["patient_ic"].isdigit():
+        if patient["patient_ic"] != "-" and not patient["patient_ic"].isdigit():
             return False, "Patient IC must contain numbers only."
 
         if not patient["name"].replace(" ", "").isalpha():
