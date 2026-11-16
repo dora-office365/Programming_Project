@@ -440,7 +440,7 @@ def show_patients(root):
                 # Give each previous admission its own row ID
                 row_id = f"{patient_id}_history_{index}"
 
-                # Discharged records should have a blank Bed ID
+                # Discharged records should show a dash
                 if record.get("status", "Discharged") == "Discharged":
                     record_bed = "-"
                 else:
