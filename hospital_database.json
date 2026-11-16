@@ -32,10 +32,12 @@
                     "bed_id": "",
                     "diagnosis": "Diarhea",
                     "payment_confirmed": "Yes",
-                    "status": "Discharged"
+                    "status": "Discharged",
+                    "room_type": ""
                 }
             ],
-            "bed_transfer_history": []
+            "bed_transfer_history": [],
+            "room_type": ""
         },
         {
             "patient_ic": "",
@@ -53,7 +55,8 @@
             "discharge_date": "",
             "payment_confirmed": "",
             "admission_history": [],
-            "bed_transfer_history": []
+            "bed_transfer_history": [],
+            "room_type": "Nursery"
         },
         {
             "patient_ic": "760223130456",
@@ -75,9 +78,13 @@
                 {
                     "transfer_date": "2026-11-15",
                     "from_bed": "Bed 101",
-                    "to_bed": "Bed 108"
+                    "to_bed": "Bed 108",
+                    "from_room_type": "Four-bedded",
+                    "to_room_type": "Four-bedded",
+                    "room_type": "Four-bedded"
                 }
-            ]
+            ],
+            "room_type": "Four-bedded"
         },
         {
             "patient_ic": "770305130817",
@@ -99,9 +106,13 @@
                 {
                     "transfer_date": "2026-11-13",
                     "from_bed": "Bed 207",
-                    "to_bed": "Bed 208"
+                    "to_bed": "Bed 208",
+                    "from_room_type": "Double-bedded",
+                    "to_room_type": "Double-bedded",
+                    "room_type": "Double-bedded"
                 }
-            ]
+            ],
+            "room_type": "Double-bedded"
         },
         {
             "patient_ic": "991005130005",
@@ -125,10 +136,12 @@
                     "bed_id": "",
                     "diagnosis": "Mild Traumatic Brain Injury",
                     "payment_confirmed": "Yes",
-                    "status": "Discharged"
+                    "status": "Discharged",
+                    "room_type": ""
                 }
             ],
-            "bed_transfer_history": []
+            "bed_transfer_history": [],
+            "room_type": ""
         },
         {
             "patient_ic": "010615130678",
@@ -150,9 +163,13 @@
                 {
                     "transfer_date": "2026-11-15",
                     "from_bed": "Bed 102",
-                    "to_bed": "Bed 103"
+                    "to_bed": "Bed 103",
+                    "from_room_type": "Four-bedded",
+                    "to_room_type": "Four-bedded",
+                    "room_type": "Four-bedded"
                 }
-            ]
+            ],
+            "room_type": "Four-bedded"
         },
         {
             "patient_ic": "",
@@ -170,7 +187,8 @@
             "discharge_date": "",
             "payment_confirmed": "",
             "admission_history": [],
-            "bed_transfer_history": []
+            "bed_transfer_history": [],
+            "room_type": "Nursery"
         },
         {
             "patient_ic": "880930130912",
@@ -188,7 +206,8 @@
             "discharge_date": "",
             "payment_confirmed": "",
             "admission_history": [],
-            "bed_transfer_history": []
+            "bed_transfer_history": [],
+            "room_type": "ICU"
         },
         {
             "patient_ic": "950204130234",
@@ -210,9 +229,13 @@
                 {
                     "transfer_date": "2026-11-13",
                     "from_bed": "Bed 208",
-                    "to_bed": "Bed 210"
+                    "to_bed": "Bed 210",
+                    "from_room_type": "Double-bedded",
+                    "to_room_type": "Double-bedded",
+                    "room_type": "Double-bedded"
                 }
-            ]
+            ],
+            "room_type": "Double-bedded"
         },
         {
             "patient_ic": "030922130345",
@@ -234,9 +257,13 @@
                 {
                     "transfer_date": "2026-11-15",
                     "from_bed": "Bed 103",
-                    "to_bed": "Bed 104"
+                    "to_bed": "Bed 104",
+                    "from_room_type": "Four-bedded",
+                    "to_room_type": "Four-bedded",
+                    "room_type": "Four-bedded"
                 }
-            ]
+            ],
+            "room_type": "Four-bedded"
         },
         {
             "patient_ic": "970526130890",
@@ -258,9 +285,13 @@
                 {
                     "transfer_date": "2026-11-15",
                     "from_bed": "Bed 104",
-                    "to_bed": "Bed 105"
+                    "to_bed": "Bed 105",
+                    "from_room_type": "Four-bedded",
+                    "to_room_type": "Four-bedded",
+                    "room_type": "Four-bedded"
                 }
-            ]
+            ],
+            "room_type": "Four-bedded"
         },
         {
             "patient_ic": "040729130456",
@@ -282,9 +313,13 @@
                 {
                     "transfer_date": "2026-11-15",
                     "from_bed": "Bed 105",
-                    "to_bed": "Bed 106"
+                    "to_bed": "Bed 106",
+                    "from_room_type": "Four-bedded",
+                    "to_room_type": "Four-bedded",
+                    "room_type": "Four-bedded"
                 }
-            ]
+            ],
+            "room_type": "Four-bedded"
         },
         {
             "patient_ic": "780708130708",
@@ -308,7 +343,8 @@
                     "bed_id": "",
                     "diagnosis": "Leg Fracture",
                     "payment_confirmed": "Yes",
-                    "status": "Discharged"
+                    "status": "Discharged",
+                    "room_type": ""
                 },
                 {
                     "admission_date": "2026-11-12",
@@ -316,10 +352,12 @@
                     "bed_id": "Bed 106",
                     "diagnosis": "Hypertension",
                     "payment_confirmed": "Yes",
-                    "status": "Discharged"
+                    "status": "Discharged",
+                    "room_type": "Four-bedded"
                 }
             ],
-            "bed_transfer_history": []
+            "bed_transfer_history": [],
+            "room_type": ""
         },
         {
             "patient_ic": "900419130789",
@@ -341,9 +379,13 @@
                 {
                     "transfer_date": "2026-11-13",
                     "from_bed": "Bed 209",
-                    "to_bed": "Bed 207"
+                    "to_bed": "Bed 207",
+                    "from_room_type": "Double-bedded",
+                    "to_room_type": "Double-bedded",
+                    "room_type": "Double-bedded"
                 }
-            ]
+            ],
+            "room_type": "Double-bedded"
         },
         {
             "patient_ic": "790802130234",
@@ -365,9 +407,13 @@
                 {
                     "transfer_date": "2026-11-13",
                     "from_bed": "Bed 106",
-                    "to_bed": "Bed 109"
+                    "to_bed": "Bed 109",
+                    "from_room_type": "Four-bedded",
+                    "to_room_type": "Four-bedded",
+                    "room_type": "Four-bedded"
                 }
-            ]
+            ],
+            "room_type": "Four-bedded"
         },
         {
             "patient_ic": "",
@@ -385,7 +431,8 @@
             "discharge_date": "",
             "payment_confirmed": "",
             "admission_history": [],
-            "bed_transfer_history": []
+            "bed_transfer_history": [],
+            "room_type": "Nursery"
         },
         {
             "patient_ic": "860625130890",
@@ -407,9 +454,13 @@
                 {
                     "transfer_date": "2026-11-14",
                     "from_bed": "Bed 106",
-                    "to_bed": "Bed 107"
+                    "to_bed": "Bed 107",
+                    "from_room_type": "Four-bedded",
+                    "to_room_type": "Four-bedded",
+                    "room_type": "Four-bedded"
                 }
-            ]
+            ],
+            "room_type": "Four-bedded"
         },
         {
             "patient_ic": "010215131025",
@@ -427,7 +478,8 @@
             "discharge_date": "",
             "payment_confirmed": "",
             "admission_history": [],
-            "bed_transfer_history": []
+            "bed_transfer_history": [],
+            "room_type": "Single-bedded"
         },
         {
             "patient_ic": "850412130512",
@@ -451,10 +503,12 @@
                     "bed_id": "Bed 102",
                     "diagnosis": "Diabetes",
                     "payment_confirmed": "Yes",
-                    "status": "Discharged"
+                    "status": "Discharged",
+                    "room_type": "Four-bedded"
                 }
             ],
-            "bed_transfer_history": []
+            "bed_transfer_history": [],
+            "room_type": "ICU"
         },
         {
             "patient_ic": "920817130824",
@@ -478,10 +532,12 @@
                     "bed_id": "Bed 202",
                     "diagnosis": "Asthma",
                     "payment_confirmed": "Yes",
-                    "status": "Discharged"
+                    "status": "Discharged",
+                    "room_type": "Single-bedded"
                 }
             ],
-            "bed_transfer_history": []
+            "bed_transfer_history": [],
+            "room_type": "Single-bedded"
         },
         {
             "patient_ic": "700711130789",
@@ -505,10 +561,12 @@
                     "bed_id": "Bed 209",
                     "diagnosis": "Heart Disease",
                     "payment_confirmed": "Yes",
-                    "status": "Discharged"
+                    "status": "Discharged",
+                    "room_type": "Double-bedded"
                 }
             ],
-            "bed_transfer_history": []
+            "bed_transfer_history": [],
+            "room_type": "ICU"
         },
         {
             "patient_ic": "820108130567",
@@ -532,10 +590,12 @@
                     "bed_id": "Bed 208",
                     "diagnosis": "Kidney Stones",
                     "payment_confirmed": "Yes",
-                    "status": "Discharged"
+                    "status": "Discharged",
+                    "room_type": "Double-bedded"
                 }
             ],
-            "bed_transfer_history": []
+            "bed_transfer_history": [],
+            "room_type": ""
         },
         {
             "patient_ic": "650314130123",
@@ -559,10 +619,12 @@
                     "bed_id": "Bed 302",
                     "diagnosis": "Chronic Kidney Disease",
                     "payment_confirmed": "Yes",
-                    "status": "Discharged"
+                    "status": "Discharged",
+                    "room_type": "ICU"
                 }
             ],
-            "bed_transfer_history": []
+            "bed_transfer_history": [],
+            "room_type": "ICU"
         }
     ],
     "beds": [
